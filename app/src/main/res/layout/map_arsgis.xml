@@ -10,8 +10,6 @@
         android:id="@+id/map"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        mapoptions.MapType="GRAY"
-        mapoptions.center="-1.058688, -80.460375"
-        mapoptions.ZoomLevel="16" />
+        />
 
 </LinearLayout>
