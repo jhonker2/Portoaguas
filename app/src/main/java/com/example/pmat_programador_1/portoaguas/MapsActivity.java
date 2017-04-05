@@ -73,7 +73,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         item.add(new Models.Puntos("S","17","A",9877022,565142,27623,15));
 
         mMap = googleMap;
-        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         UiSettings uiSettings= mMap.getUiSettings();
         uiSettings.setZoomControlsEnabled(true);
         LatLng sydney;

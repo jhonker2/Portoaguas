@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
     <!-- MapView layout, including basemap layer, initial center point, and zoom level -->
-    <com.esri.android.map.MapView
-        android:id="@+id/map"
+    <com.esri.arcgisruntime.mapping.view.MapView
+        android:id="@+id/mapView"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        />
+        android:layout_height="fill_parent" >
+    </com.esri.arcgisruntime.mapping.view.MapView>
 
-</LinearLayout>
+</RelativeLayout>
