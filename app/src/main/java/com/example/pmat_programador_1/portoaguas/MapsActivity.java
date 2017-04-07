@@ -13,6 +13,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -53,6 +54,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ImageView img;
     public ArrayList<Puntos> item = new ArrayList<Puntos>();
     CoordinateConversion obj = new CoordinateConversion();
+    static final int REQUEST_IMAGE_CAPTURE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +93,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         item.add(new Models.Puntos("S", "17", "T", 9883116.134, 559896.4432, 29277, 20));
         item.add(new Models.Puntos("S", "17", "A", 9885569.601, 556952.9026, 40140, 15));
         item.add(new Models.Puntos("S", "17", "A", 9877022, 565142, 27623, 15));
-
         mMap = googleMap;
         mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
         mMap.setIndoorEnabled(true);
@@ -109,21 +110,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             double longLat=item.get(i).getLongitud();
             double[] ltn =  obj.utm2LatLon("17 M "+longLat+" "+lati);
              sydney = new LatLng(ltn[0],ltn[1]);
-
-            mMap.addMarker(new MarkerOptions()
-                    .position(sydney)
-                    .title(String.valueOf(item.get(i).getCodigomedidor()))
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.blank)));
-
+            if(item.get(i).getEstado().equals("T")){
+                mMap.addMarker(new MarkerOptions()
+                        .position(sydney)
+                        .title(String.valueOf(item.get(i).getCodigomedidor()))
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.houses)));
+            }else {
+                mMap.addMarker(new MarkerOptions()
+                        .position(sydney)
+                        .title(String.valueOf(item.get(i).getCodigomedidor()))
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.blank)));
+            }
             float zoomlevel=19;
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney,zoomlevel));
         }
-
-        // Add a marker in Sydney and move the camera
-       /* mMap.addMarker(new MarkerOptions()
-                .position(sydney)
-                .title("Mi Casa")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.blank)));*/
 
         final String ruta_fotos = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/misfotos/";
 
@@ -144,33 +144,75 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 ced.setText(marker.getPosition().toString());
                 nomb.setText(marker.getTitle());
                 //final File file = new File(ruta_fotos);
+
                 btnC.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                       final String file = ruta_fotos + getCode() + ".jpg";
-                        File mi_foto = new File( file );
-                            try {
-                                   mi_foto.createNewFile();
-                                } catch (IOException ex) {
-                                          Log.e("ERROR ", "Error:" + ex);
-                                  }
-                                      Uri uri = Uri.fromFile( mi_foto );
+
+                                    dispatchTakePictureIntent();
                                      //Abre la camara para tomar la foto
-                                     Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                    // Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                       //Guarda imagen
-                                     cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-                                      //Retorna a la actividad
-                                        if(cameraIntent.resolveActivity(getPackageManager())!=null){
+                                     //cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                        //Retorna a la actividad
+                                       /* if(cameraIntent.resolveActivity(getPackageManager())!=null){
                                             startActivityForResult( cameraIntent,   1);
-                                        }
+                                        }*/
 
                            }
 
                 });
+
+                btnSaveCliente.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                });
                 return false;
             }
 
-        });}
+        });
+
+    }
+
+    String mCurrentPhotoPath;
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this,"com.example.android.fileprovider",photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
+        }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -200,4 +242,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                return photoCode;
           }
     }
+
+
 
