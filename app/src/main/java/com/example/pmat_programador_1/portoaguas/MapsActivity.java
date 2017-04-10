@@ -250,10 +250,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         String idmedidor=nomb.getText().toString();
         String estado="S";
         Movimiento movimiento = new Movimiento(imagen,idmedidor,estado);
-
         new AddMovimientoTarea().execute(movimiento);
     }
-
 
     private class AddMovimientoTarea extends AsyncTask<Movimiento, Void, Boolean>{
 

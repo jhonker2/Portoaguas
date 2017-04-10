@@ -13,8 +13,8 @@
         <menu>
             <item android:id="@+id/nav_manage" android:icon="@drawable/ic_menu_manage"
                 android:title="Configurar" />
-            <item android:id="@+id/nav_share" android:icon="@drawable/autorenew"
-                android:title="Sincronizar" />
+            <item android:id="@+id/nav_share" android:icon="@drawable/database"
+                android:title="Datos no Enviados" />
             <item android:id="@+id/nav_send" android:icon="@drawable/exit_to_app"
                 android:title="Salir" />
         </menu>
