@@ -1,12 +1,14 @@
 package com.example.pmat_programador_1.portoaguas;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
@@ -36,6 +38,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -43,7 +47,11 @@ import java.util.Date;
 import java.util.List;
 
 import Models.Puntos;
+import sqlit.Movimiento;
+import sqlit.MovimientoHelper;
 import utils.CoordinateConversion;
+
+import static android.os.Environment.getExternalStoragePublicDirectory;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -52,6 +60,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Button btnSaveCliente;
     private ImageButton btnC;
     private ImageView img;
+    private MovimientoHelper movimientoHelper = new MovimientoHelper(this);
     public ArrayList<Puntos> item = new ArrayList<Puntos>();
     CoordinateConversion obj = new CoordinateConversion();
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -125,12 +134,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney,zoomlevel));
         }
 
-        final String ruta_fotos = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/misfotos/";
+        //final String ruta_fotos = getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/misfotos/";
 
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                Toast.makeText(MapsActivity.this, "Punto Precionado! "+marker.getPosition(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MapsActivity.this, "Punto Precionado! "+marker.getPosition(), Toast.LENGTH_SHORT).show();
                 AlertDialog.Builder buil = new AlertDialog.Builder(MapsActivity.this);
                 View mView = getLayoutInflater().inflate(R.layout.storepunto,null);
                 ced = (EditText) mView.findViewById(R.id.textCedulaCliente);
@@ -148,25 +157,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 btnC.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
-                                    dispatchTakePictureIntent();
-                                     //Abre la camara para tomar la foto
-                                    // Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                      //Guarda imagen
-                                     //cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-                        //Retorna a la actividad
-                                       /* if(cameraIntent.resolveActivity(getPackageManager())!=null){
-                                            startActivityForResult( cameraIntent,   1);
-                                        }*/
-
-                           }
+                        dispatchTakePictureIntent2();
+                        dispatchTakePictureIntent();
+                    }
 
                 });
 
                 btnSaveCliente.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
+                        GuardarSql();
                     }
                 });
                 return false;
@@ -181,8 +181,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        String imageFileName = "PORTOAGUAS_" + timeStamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -192,6 +192,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = image.getAbsolutePath();
         return image;
+    }
+    private void dispatchTakePictureIntent2() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        }
     }
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -207,9 +213,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this,"com.example.android.fileprovider",photoFile);
+                Uri photoURI = Uri.fromFile(photoFile);
+                //Uri photoURI = FileProvider.getUriForFile(this,"com.example.android.fileprovider",photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                //setResult(RESULT_OK, getIntent().putExtra(MediaStore.EXTRA_OUTPUT, photoURI ));
             }
         }
     }
@@ -218,30 +226,92 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //Comprovamos que la foto se a realizado
         super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == 1 && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
+            if(data==null){
 
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
+            }else{
 
-            img.setImageBitmap(imageBitmap);
-            //Creamos un bitmap con la imagen recientemente
-            //almacenada en la memoria
-         //   Bitmap bMap = BitmapFactory.decodeFile(data.getData()+"foto.jpg");
-            //Añadimos el bitmap al imageView para
-            //mostrarlo por pantalla
-           // img.setImageBitmap(bMap);
+                Bundle extras = data.getExtras();
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                img.setImageBitmap(imageBitmap);
+            }
+        }
+
+
+    }
+
+
+
+    //Funcion para almacenar
+
+    private void GuardarSql(){
+        String imagen="Ruta de la imagen";
+        String idmedidor=nomb.getText().toString();
+        String estado="S";
+        Movimiento movimiento = new Movimiento(imagen,idmedidor,estado);
+
+        new AddMovimientoTarea().execute(movimiento);
+    }
+
+
+    private class AddMovimientoTarea extends AsyncTask<Movimiento, Void, Boolean>{
+
+        @Override
+        protected Boolean doInBackground(Movimiento... movimientos) {
+            return movimientoHelper.saveMovimiento(movimientos[0])>0;
+        }
+        @Override
+        protected void onPostExecute(Boolean result) {
+            Toast.makeText(MapsActivity.this,"Datos Almacenado",Toast.LENGTH_SHORT).show();
         }
 
     }
+   /* @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 1){
+            if (resultCode == Activity.RESULT_OK) {
 
-    private String getCode()
-          {
-               SimpleDateFormat dateFormat = new SimpleDateFormat("yyyymmddhhmmss");
-              String date = dateFormat.format(new Date() );
-               String photoCode = "pic_" + date;
-               return photoCode;
-          }
-    }
+                datosUsuarios.image = BitmapFactory.decodeFile(datosUsuarios.path + File.separator + datosUsuarios.nombrefoto);
+                FileOutputStream out;
+
+                try {
+                    out = new FileOutputStream(datosUsuarios.path + File.separator + datosUsuarios.nombrefoto);
+                    datosUsuarios.image.compress(Bitmap.CompressFormat.JPEG, 60, out);
+                    //ImageView imagen = (ImageView)findViewById(R.id.imagenFondoIncidencia);
+                    img.setImageBitmap(datosUsuarios.image);
+                } catch (FileNotFoundException e) {
+
+                    Log.e("MyLog", e.toString());
+                }
+            }
+        }
+        if(requestCode == 2){
+            if (resultCode == Activity.RESULT_OK) {
+                if(data!=null){
+
+                    selectedImageUri = data.getData();
+                    // OI FILE Manager
+                    filemanagerstring = selectedImageUri.getPath();
+                    // MEDIA GALLERY
+                    selectedImagePath = getPath(selectedImageUri);
+                    imagePath.getBytes();
+
+
+                    copyFile(imagePath, datosUsuarios.path + "/", datosUsuarios.nombrefoto);
+
+                    //ImageView imagen = (ImageView)findViewById(R.id.imagen);
+                    img.setImageURI(selectedImageUri);
+                }
+            }
+        }
+
+
+
+    }*/
+}
+
 
 
 
