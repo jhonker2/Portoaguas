@@ -15,6 +15,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.pmat_programador_1.portoaguas.Activitys.MovimientosActivity;
+
 import utils.CoordinateConversion;
 
 public class MainActivity extends AppCompatActivity
@@ -116,7 +118,8 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_manage) {
 
         } else if (id == R.id.nav_share) {
-
+           Intent inte =  new Intent(MainActivity.this,MovimientosActivity.class);
+           startActivity(inte);
         } else if (id == R.id.nav_send) {
            Intent inte =  new Intent(MainActivity.this,loginActivity.class);
            startActivity(inte);

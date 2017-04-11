@@ -1,6 +1,7 @@
 package sqlit;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 
 import java.util.UUID;
 
@@ -9,17 +10,32 @@ import java.util.UUID;
  */
 
 public class Movimiento {
-    public String id;
-    public String imagen;
-    public String idmedidor;
-    public String estado;
+    private String id;
+    private String imagen;
+    private String idmedidor;
+    private String estado;
 
     public Movimiento( String imagen, String idmedidor, String estado) {
-        this.id = UUID.randomUUID().toString();
+        this.id =  UUID.randomUUID().toString();
         this.imagen = imagen;
         this.idmedidor = idmedidor;
         this.estado = estado;
     }
+
+    public Movimiento( String id,String imagen, String idmedidor, String estado) {
+        this.id =  id;
+        this.imagen = imagen;
+        this.idmedidor = idmedidor;
+        this.estado = estado;
+    }
+
+    public Movimiento(Cursor cursor){
+        id          =   cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry.ID));
+        imagen      =   cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry.IMAGEN));
+        idmedidor   =   cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry.IDMEDIDOR));
+        estado      =   cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry.ESTADO));
+    }
+
     public ContentValues toContentValues() {
         ContentValues values = new ContentValues();
         values.put(MovimientoContrac.MovimientoEntry.ID, id);

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
@@ -60,7 +61,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Button btnSaveCliente;
     private ImageButton btnC;
     private ImageView img;
-    private MovimientoHelper movimientoHelper = new MovimientoHelper(this);
+    private MovimientoHelper movimientoHelper;
     public ArrayList<Puntos> item = new ArrayList<Puntos>();
     CoordinateConversion obj = new CoordinateConversion();
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -71,7 +72,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
-
         if (status == ConnectionResult.SUCCESS) {
             SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.map);
@@ -83,6 +83,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+          movimientoHelper = new MovimientoHelper(MapsActivity.this);
+
     }
 
 
@@ -102,6 +104,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         item.add(new Models.Puntos("S", "17", "T", 9883116.134, 559896.4432, 29277, 20));
         item.add(new Models.Puntos("S", "17", "A", 9885569.601, 556952.9026, 40140, 15));
         item.add(new Models.Puntos("S", "17", "A", 9877022, 565142, 27623, 15));
+        item.add(new Models.Puntos("S", "17", "A", 9882302.123	, 559041.9727, 36787, 15));
+        item.add(new Models.Puntos("S", "17", "T", 9880899.475, 561051.763, 474, 10));
+        item.add(new Models.Puntos("S", "17", "A", 9883245.421, 557237.1052, 44764, 10));
+        item.add(new Models.Puntos("S", "17", "A", 9881619.369, 562991.1102, 32295, 10));
+        item.add(new Models.Puntos("S", "17", "A", 9882924.052, 559344.512, 20875, 15));
+        item.add(new Models.Puntos("S", "17", "A", 9881418.519, 563088.8361, 25557, 10));
         mMap = googleMap;
         mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
         mMap.setIndoorEnabled(true);
@@ -166,7 +174,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 btnSaveCliente.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        GuardarSql();
+                        //GuardarSql();
+                        MovimientoHelper usdbh =
+                                new MovimientoHelper(getApplicationContext());
+
+                        boolean var =usdbh.insertarMovimiento("Ruta de la Imagen",nomb.getText().toString(),"A");
+
+                        if(var){
+                            Toast.makeText(getApplicationContext(),"Transaccion realizada con exito!",Toast.LENGTH_SHORT).show();
+                        }else{
+                            Toast.makeText(getApplicationContext(),"Error al realizar la transacción!",Toast.LENGTH_SHORT).show();
+                        }
+                        alertDialog.dismiss();
+/* MiBaseDatos MDB = new MiBaseDatos(getApplicationContext());
+                        SQLiteDatabase db = usdbh.getWritableDatabase();
+                        db.execSQL("INSERT INTO movimientos (id,imagen,idmedidor,estado) " +
+                                "VALUES (1,'ruta de la imagen','" +nomb.getText()+"','A')");
+
+                        db.close();*/
                     }
                 });
                 return false;
@@ -257,11 +282,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         @Override
         protected Boolean doInBackground(Movimiento... movimientos) {
-            return movimientoHelper.saveMovimiento(movimientos[0])>0;
+            movimientoHelper.saveMovimiento(movimientos[0]);
+
+            return true;
         }
         @Override
         protected void onPostExecute(Boolean result) {
+
+            showLawyersScreen(result);
+        }
+
+    }
+
+
+    public void showLawyersScreen(Boolean result){
+        if(result){
             Toast.makeText(MapsActivity.this,"Datos Almacenado",Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(MapsActivity.this,
+                    "Error al agregar nueva información", Toast.LENGTH_SHORT).show();
         }
 
     }
