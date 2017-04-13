@@ -1,9 +1,13 @@
 package com.example.pmat_programador_1.portoaguas;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -28,6 +32,11 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
+
+        if ( !manager.isProviderEnabled(  LocationManager.GPS_PROVIDER ) ) {
+            AlertNoGps();
+        }
 
         /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -68,6 +77,24 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
     }
+    AlertDialog alert = null;
+    private void AlertNoGps() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("El sistema GPS esta desactivado, ¿Es necesario activarlo?")
+                .setCancelable(false)
+                .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                    public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+
+                    }
+                });
+        alert = builder.create();
+        alert.show();
+    }
 
     @Override
     public void onBackPressed() {
@@ -97,6 +124,26 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_settings) {
             return true;
         }
+        if (id == R.id.action_exit) {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Esta seguro de salir del sistema?")
+                    .setCancelable(false)
+                    .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                        public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                            Intent inte =  new Intent(MainActivity.this,loginActivity.class);
+                            startActivity(inte);
+                            finish();
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+
+                        }
+                    });
+            alert = builder.create();
+            alert.show();
+
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -116,6 +163,8 @@ public class MainActivity extends AppCompatActivity
             startActivity(inte);
 
         } else if (id == R.id.nav_manage) {
+           Intent inte =  new Intent(MainActivity.this, com.example.pmat_programador_1.portoaguas.Activitys.MainActivity.class);
+           startActivity(inte);
 
         } else if (id == R.id.nav_share) {
            Intent inte =  new Intent(MainActivity.this,MovimientosActivity.class);
@@ -123,7 +172,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_send) {
            Intent inte =  new Intent(MainActivity.this,loginActivity.class);
            startActivity(inte);
-        }
+           finish();
+
+       }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

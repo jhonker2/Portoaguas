@@ -43,7 +43,8 @@
 
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps" />
+            android:label="@string/title_activity_maps"
+            android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".ArsGisActivity"
             android:label="@string/title_activity_maps" />
@@ -56,6 +57,10 @@
 
         <activity
             android:name=".Activitys.MovimientosActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".Activitys.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity

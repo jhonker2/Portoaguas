@@ -1,0 +1,8 @@
+<!-- drawable/1492025900_search_binoculars_find.xml -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="24dp"
+    android:width="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path android:fillColor="#fff" android:pathData="M502.09375,407.510742c0,17.798828-38.211914,32.217773-85.356445,32.217773    s-85.356445-14.418945-85.356445-32.217773s38.211914-32.217773,85.356445-32.217773S502.09375,389.711914,502.09375,407.510742z" />
+</vector>

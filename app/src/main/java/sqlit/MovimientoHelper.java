@@ -21,7 +21,7 @@ public class MovimientoHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "Portobd.db";
 
     private static final String TABLA_MOVIMIENTOS = "CREATE TABLE movimientos" +
-            "(_id INTEGER PRIMARY KEY AUTOINCREMENT,id TEXT, imagen TEXT, idmedidor TEXT, estado TEXT)";
+            "(id INTEGER PRIMARY KEY AUTOINCREMENT, imagen TEXT, idmedidor TEXT, estado TEXT)";
     public MovimientoHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -32,17 +32,15 @@ public class MovimientoHelper extends SQLiteOpenHelper {
         //mockData(db);
     }
 
-    public List<Movimiento> recuperarCONTACTOS() {
+    public ArrayList<Movimiento> recuperarCONTACTOS() {
         SQLiteDatabase db = getReadableDatabase();
-        List<Movimiento> lista_contactos = new ArrayList<Movimiento>();
+        ArrayList<Movimiento> lista_contactos = new ArrayList<Movimiento>();
         String[] valores_recuperar = {"id", "imagen", "idmedidor", "estado"};
         Cursor c = db.query("movimientos", valores_recuperar,
                 null, null, null, null, null, null);
         c.moveToFirst();
         do {
-            //Movimiento contactos = new Movimiento(c.getString(0), c.getString(1),
-                   // c.getString(2));
-            lista_contactos.add(new Movimiento(c.getString(0), c.getString(1),
+            lista_contactos.add(new Movimiento(c.getLong(0), c.getString(1),
                     c.getString(2),c.getString(3)));
         } while (c.moveToNext());
         db.close();
@@ -50,19 +48,14 @@ public class MovimientoHelper extends SQLiteOpenHelper {
         return lista_contactos;
     }
 
-    private void mockData(SQLiteDatabase sqLiteDatabase) {
-        mockLawyer(sqLiteDatabase, new Movimiento("Ruta de la imagen", "012","A"));
-        mockLawyer(sqLiteDatabase, new Movimiento("Ruta de la imagen2", "0142","A"));
 
-    }
 
     public boolean insertarMovimiento(String imagen, String idmedidor, String estado ){
         boolean res=false;
         SQLiteDatabase db = getWritableDatabase();
-        String id_= UUID.randomUUID().toString();
+       // String id_= UUID.randomUUID().toString();
         if(db != null){
             ContentValues valores = new ContentValues();
-            valores.put("id",id_);
             valores.put("imagen", imagen);
             valores.put("idmedidor", idmedidor);
             valores.put("estado", estado);

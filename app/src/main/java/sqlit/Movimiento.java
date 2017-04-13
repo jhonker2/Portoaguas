@@ -10,19 +10,18 @@ import java.util.UUID;
  */
 
 public class Movimiento {
-    private String id;
+    private long id;
     private String imagen;
     private String idmedidor;
     private String estado;
 
     public Movimiento( String imagen, String idmedidor, String estado) {
-        this.id =  UUID.randomUUID().toString();
         this.imagen = imagen;
         this.idmedidor = idmedidor;
         this.estado = estado;
     }
 
-    public Movimiento( String id,String imagen, String idmedidor, String estado) {
+    public Movimiento( Long id,String imagen, String idmedidor, String estado) {
         this.id =  id;
         this.imagen = imagen;
         this.idmedidor = idmedidor;
@@ -30,7 +29,7 @@ public class Movimiento {
     }
 
     public Movimiento(Cursor cursor){
-        id          =   cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry.ID));
+        id          =   Long.parseLong(cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry.ID)));
         imagen      =   cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry.IMAGEN));
         idmedidor   =   cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry.IDMEDIDOR));
         estado      =   cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry.ESTADO));
@@ -45,11 +44,11 @@ public class Movimiento {
         return values;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

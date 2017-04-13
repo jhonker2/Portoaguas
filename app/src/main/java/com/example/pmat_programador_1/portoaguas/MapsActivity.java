@@ -2,6 +2,8 @@ package com.example.pmat_programador_1.portoaguas;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
@@ -11,14 +13,22 @@ import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.PersistableBundle;
 import android.provider.MediaStore;
+import android.support.annotation.StyleableRes;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -37,6 +47,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.muddzdev.styleabletoastlibrary.StyleableToast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -47,22 +58,32 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import Adapter.RecycleViewAdapter;
 import Models.Puntos;
+import Models.Rubros;
 import sqlit.Movimiento;
 import sqlit.MovimientoHelper;
 import utils.CoordinateConversion;
 
 import static android.os.Environment.getExternalStoragePublicDirectory;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private EditText ced, nomb, dir, tel;
+    private EditText ced, nomb, comentario;
     private Button btnSaveCliente;
     private ImageButton btnC;
     private ImageView img;
     private MovimientoHelper movimientoHelper;
     public ArrayList<Puntos> item = new ArrayList<Puntos>();
+
+    /*
+    *Declarar instancias globales
+    */
+    private RecyclerView recycler;
+    private RecyclerView.Adapter adapter;
+    private RecyclerView.LayoutManager lManager;
+
     CoordinateConversion obj = new CoordinateConversion();
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
@@ -70,6 +91,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
         if (status == ConnectionResult.SUCCESS) {
@@ -87,7 +111,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_map, menu);
+        return true;
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_map) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+        }
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -128,70 +168,100 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             double[] ltn =  obj.utm2LatLon("17 M "+longLat+" "+lati);
              sydney = new LatLng(ltn[0],ltn[1]);
             if(item.get(i).getEstado().equals("T")){
-                mMap.addMarker(new MarkerOptions()
+                Marker melbourne = mMap.addMarker(new MarkerOptions()
                         .position(sydney)
                         .title(String.valueOf(item.get(i).getCodigomedidor()))
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.houses)));
+                melbourne.showInfoWindow();
+
             }else {
-                mMap.addMarker(new MarkerOptions()
+                Marker melbourne = mMap.addMarker(new MarkerOptions()
                         .position(sydney)
                         .title(String.valueOf(item.get(i).getCodigomedidor()))
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.blank)));
+                melbourne.showInfoWindow();
             }
             float zoomlevel=19;
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney,zoomlevel));
-        }
 
-        //final String ruta_fotos = getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/misfotos/";
+        }
 
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
+
+                ArrayList rubros = new ArrayList();
+                rubros.add(new Rubros("CORTE CON LLAVE DE ACERO","1"));
+                rubros.add(new Rubros("CORTE CON LLAVE DE ESFERA","2.50"));
+                rubros.add(new Rubros("CORTE CON EXCAVACION DE TIERRA","6"));
+
+
                 //Toast.makeText(MapsActivity.this, "Punto Precionado! "+marker.getPosition(), Toast.LENGTH_SHORT).show();
                 AlertDialog.Builder buil = new AlertDialog.Builder(MapsActivity.this);
                 View mView = getLayoutInflater().inflate(R.layout.storepunto,null);
-                ced = (EditText) mView.findViewById(R.id.textCedulaCliente);
-                nomb = (EditText) mView.findViewById(R.id.textNombreCliente);
+
+                ced         = (EditText) mView.findViewById(R.id.textCedulaCliente);
+                nomb        = (EditText) mView.findViewById(R.id.textNombreCliente);
+                comentario  = (EditText) mView.findViewById(R.id.t_comentario);
                 btnSaveCliente = (Button) mView.findViewById(R.id.buttonNewC);
-                btnC = (ImageButton) mView.findViewById(R.id.btn_camera);
-                img = (ImageView) mView.findViewById(R.id.img1);
+                btnC        = (ImageButton) mView.findViewById(R.id.btn_camera);
+                img         = (ImageView) mView.findViewById(R.id.img1);
+                recycler = (RecyclerView) mView.findViewById(R.id.my_recycler_view);
+                lManager = new LinearLayoutManager(MapsActivity.this, LinearLayoutManager.HORIZONTAL,false);
+                recycler.setHasFixedSize(true);
+                recycler.setLayoutManager(lManager);
+
+                adapter = new RecycleViewAdapter(MapsActivity.this, rubros);
+
+                recycler.setAdapter(adapter);
+                recycler.setNestedScrollingEnabled(false);
+
                 buil.setView(mView);
                 final AlertDialog alertDialog = buil.create();
                 alertDialog.show();
+
                 ced.setText(marker.getPosition().toString());
                 nomb.setText(marker.getTitle());
-                //final File file = new File(ruta_fotos);
+                //separarCordenada();
+                //String cortado=(String.valueOf(marker.getPosition().toString())).substring(10,1);
 
+
+                //Boton de la Camara
                 btnC.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        dispatchTakePictureIntent2();
-                        dispatchTakePictureIntent();
+                      //  dispatchTakePictureIntent2();
+                        dispatchTakePictureIntent3();
                     }
 
                 });
 
+
+                //Boton para almacenar punto
                 btnSaveCliente.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         //GuardarSql();
+                      /*  String cortado= ced.getText().toString().substring(10,1);
+                        String[] utm = cortado.split(",");
+                        String latZone = utm[0];
+                        String lonZone = utm[1];*/
+                        //Toast.makeText(MapsActivity.this,"Imagen: "+img.getContext(),Toast.LENGTH_SHORT).show();
+                        //Log.e("Ruta", img.getContext().toString());
                         MovimientoHelper usdbh =
                                 new MovimientoHelper(getApplicationContext());
 
                         boolean var =usdbh.insertarMovimiento("Ruta de la Imagen",nomb.getText().toString(),"A");
 
                         if(var){
-                            Toast.makeText(getApplicationContext(),"Transaccion realizada con exito!",Toast.LENGTH_SHORT).show();
+                            StyleableToast.makeText(MapsActivity.this, "Transaccion realizada con exito!!" , Toast.LENGTH_SHORT, R.style.StyledToast).show();
+
                         }else{
-                            Toast.makeText(getApplicationContext(),"Error al realizar la transacción!",Toast.LENGTH_SHORT).show();
+                            StyleableToast.makeText(MapsActivity.this, "Error al realizar la transacción!" , Toast.LENGTH_SHORT, R.style.StyledToastError).show();
+
                         }
                         alertDialog.dismiss();
-/* MiBaseDatos MDB = new MiBaseDatos(getApplicationContext());
-                        SQLiteDatabase db = usdbh.getWritableDatabase();
-                        db.execSQL("INSERT INTO movimientos (id,imagen,idmedidor,estado) " +
-                                "VALUES (1,'ruta de la imagen','" +nomb.getText()+"','A')");
 
-                        db.close();*/
                     }
                 });
                 return false;
@@ -201,22 +271,56 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    public void separarCordenada(String market){
+        String cortado=market.substring(10,1);
+
+        String[] utm = cortado.split(",");
+        String latZone = utm[0];
+        String lonZone = utm[1];
+    }
+
     String mCurrentPhotoPath;
+
+    private File getTempFile(Context context){
+        //it will return /sdcard/image.tmp
+        final File path = new File( Environment.getExternalStorageDirectory(), context.getPackageName() );
+        if(!path.exists()){
+            path.mkdir();
+        }
+        return new File(path, "image.tmp");
+    }
 
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "PORTOAGUAS_" + timeStamp + "_";
-        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File storageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"Portoaguas");
+
+        if (! storageDir.exists()){
+            if (! storageDir.mkdirs()){
+                Log.d("Portoaguas", "failed to create directory");
+                return null;
+            }
+        }
+
+     /*
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
+                //".jpg",         /* suffix */
+              //  storageDir      /* directory */
+        //);
+
+        File image3 = File.createTempFile(imageFileName,".jpg",storageDir);
 
         // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = image.getAbsolutePath();
-        return image;
+        mCurrentPhotoPath = image3.getAbsolutePath();
+        return image3;
+    }
+
+    private void dispatchTakePictureIntent3(){
+        final Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(getTempFile(this)) );
+        startActivityForResult(intent, 1);
     }
     private void dispatchTakePictureIntent2() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -249,6 +353,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            switch(requestCode){
+                case 1:
+                    final File file = getTempFile(this);
+                    try {
+                        Bitmap captureBmp = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.fromFile(file) );
+                        // do whatever you want with the bitmap (Resize, Rename, Add To Gallery, etc)
+                        img.setImageBitmap(captureBmp);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+            }
+        }
+    }
+
+   /* @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //Comprovamos que la foto se a realizado
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -259,12 +383,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 Bundle extras = data.getExtras();
                 Bitmap imageBitmap = (Bitmap) extras.get("data");
+                Log.e("Ruta2",imageBitmap.toString());
                 img.setImageBitmap(imageBitmap);
             }
         }
 
 
-    }
+    }*/
 
 
 
