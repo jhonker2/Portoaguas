@@ -2,6 +2,7 @@ package com.example.pmat_programador_1.portoaguas;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,6 +10,8 @@ import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -34,6 +37,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -71,6 +76,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private GoogleMap mMap;
     private EditText ced, nomb, comentario;
+    public static TextView total;
     private Button btnSaveCliente;
     private ImageButton btnC;
     private ImageView img;
@@ -84,6 +90,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager lManager;
 
+
+    public String foto="";
+    public Uri output;
+    public  File storageDir;
     CoordinateConversion obj = new CoordinateConversion();
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
@@ -191,9 +201,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public boolean onMarkerClick(Marker marker) {
 
                 ArrayList rubros = new ArrayList();
-                rubros.add(new Rubros("CORTE CON LLAVE DE ACERO","1"));
-                rubros.add(new Rubros("CORTE CON LLAVE DE ESFERA","2.50"));
-                rubros.add(new Rubros("CORTE CON EXCAVACION DE TIERRA","6"));
+                rubros.add(new Rubros("54","CORTE CON LLAVE DE ACERO","1"));
+                rubros.add(new Rubros("55","CORTE CON LLAVE DE ESFERA","2.50"));
+                rubros.add(new Rubros("56","CORTE CON EXCAVACION DE TIERRA","6"));
 
 
                 //Toast.makeText(MapsActivity.this, "Punto Precionado! "+marker.getPosition(), Toast.LENGTH_SHORT).show();
@@ -207,6 +217,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 btnC        = (ImageButton) mView.findViewById(R.id.btn_camera);
                 img         = (ImageView) mView.findViewById(R.id.img1);
                 recycler = (RecyclerView) mView.findViewById(R.id.my_recycler_view);
+                total       = (TextView) mView.findViewById(R.id.txt_total);
+
+
                 lManager = new LinearLayoutManager(MapsActivity.this, LinearLayoutManager.HORIZONTAL,false);
                 recycler.setHasFixedSize(true);
                 recycler.setLayoutManager(lManager);
@@ -231,7 +244,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     @Override
                     public void onClick(View v) {
                       //  dispatchTakePictureIntent2();
-                        dispatchTakePictureIntent3();
+                        //dispatchTakePictureIntent3();
+                        try {
+                            createImageFile();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
 
                 });
@@ -290,31 +308,59 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return new File(path, "image.tmp");
     }
 
-    private File createImageFile() throws IOException {
+    private void createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "PORTOAGUAS_" + timeStamp + "_";
-        File storageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"Portoaguas");
-
-        if (! storageDir.exists()){
-            if (! storageDir.mkdirs()){
+        foto= Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)+"/Portoaguas/"+imageFileName+".jpg";
+        File storageDir2 = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"Portoaguas");
+        storageDir= new File(foto);
+        if (! storageDir2.exists()){
+            if (! storageDir2.mkdirs()){
                 Log.d("Portoaguas", "failed to create directory");
-                return null;
             }
         }
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        output = Uri.fromFile(storageDir);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, output);
+        startActivityForResult(intent,1);
 
-     /*
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                //".jpg",         /* suffix */
-              //  storageDir      /* directory */
-        //);
+    
+    }
 
-        File image3 = File.createTempFile(imageFileName,".jpg",storageDir);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+       // super.onActivityResult(requestCode, resultCode, data);
+        ContentResolver cr = this.getContentResolver();
+        Bitmap bit =null;
 
-        // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = image3.getAbsolutePath();
-        return image3;
+        try {
+            bit = android.provider.MediaStore.Images.Media.getBitmap(cr, output);
+            int rotate = 0;
+            ExifInterface exif = new ExifInterface(
+                    storageDir.getAbsolutePath());
+            int orientation = exif.getAttributeInt(
+                    ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_NORMAL);
+
+            switch(orientation){
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                        rotate=270;
+                        break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                        rotate=180;
+                        break;
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                        rotate=90;
+                        break;
+            }
+            Matrix matrix = new Matrix();
+            matrix.postRotate(rotate);
+            bit = Bitmap.createBitmap(bit, 0, 0, bit.getWidth(), bit.getHeight(), matrix, true);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        img.setImageBitmap(bit);
     }
 
     private void dispatchTakePictureIntent3(){
@@ -322,6 +368,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(getTempFile(this)) );
         startActivityForResult(intent, 1);
     }
+
     private void dispatchTakePictureIntent2() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -334,12 +381,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             // Create the File where the photo should go
             File photoFile = null;
-            try {
-                photoFile = createImageFile();
+           /* try {
+              //  photoFile = createImageFile();
             } catch (IOException ex) {
                 // Error occurred while creating the File
 
-            }
+            }*/
             // Continue only if the File was successfully created
             if (photoFile != null) {
                 Uri photoURI = Uri.fromFile(photoFile);
@@ -350,7 +397,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
     }
-
+/*
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
@@ -370,7 +417,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
     }
-
+*/
    /* @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //Comprovamos que la foto se a realizado

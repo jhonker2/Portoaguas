@@ -5,12 +5,21 @@ package Models;
  */
 
 public class Rubros {
+
+    private String codigo;
     private String titulos;
     private String precio;
 
-    public Rubros(String titulos, String precio) {
+    public Rubros(String codigo,String titulos, String precio) {
+        this.codigo = codigo;
         this.titulos = titulos;
         this.precio = precio;
+    }
+
+    public Rubros(String codigo,String precio){
+        this.codigo = codigo;
+        this.precio = precio;
+
     }
 
     public String getTitulos() {
@@ -27,6 +36,14 @@ public class Rubros {
 
     public void setPrecio(String precio) {
         this.precio = precio;
+    }
+
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
     }
 }
 
