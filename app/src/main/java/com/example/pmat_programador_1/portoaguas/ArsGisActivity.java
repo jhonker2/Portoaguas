@@ -1,6 +1,7 @@
 package com.example.pmat_programador_1.portoaguas;
 
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Environment;
@@ -16,14 +17,18 @@ import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
 import com.esri.arcgisruntime.mapping.MobileMapPackage;
 import com.esri.arcgisruntime.mapping.view.MapView;*/
-import com.esri.arcgisruntime.geometry.Point;
-import com.esri.arcgisruntime.mapping.ArcGISMap;
-import com.esri.arcgisruntime.mapping.Basemap;
-import com.esri.arcgisruntime.mapping.view.MapView;
+
 /*import com.esri.core.geometry.*;
 import com.esri.core.map.*;
 import com.esri.core.symbol.PictureMarkerSymbol;
 import com.esri.core.symbol.SimpleMarkerSymbol;*/
+
+import com.esri.android.map.GraphicsLayer;
+import com.esri.android.map.MapOptions;
+import com.esri.android.map.MapView;
+import com.esri.android.runtime.ArcGISRuntime;
+import com.esri.core.map.Graphic;
+import com.esri.core.symbol.SimpleMarkerSymbol;
 
 import java.io.File;
 
@@ -33,24 +38,35 @@ import java.io.File;
  */
 
 public class ArsGisActivity extends AppCompatActivity {
-    private MapView mMapView;
+   MapView mMapView=null;
     //GraphicsLayer mGraphicsOverlay = new GraphicsLayer();
     Point point;
 
     String mArcGISTempFolderPath;
     String mPinBlankOrangeFilePath;
+    GraphicsLayer graphicsLayer;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //ArcGISRuntime.setClientId("gn1VHfaow2NXi0H0");
+        ArcGISRuntime.setClientId("gn1VHfaow2NXi0H0");
        // ArcGISRuntimeEnvironment.setLicense("gn1VHfaow2NXi0H0");
 
 
         setContentView(R.layout.map_arsgis);
         //mMapView = (MapView) findViewById(R.id.map);
-        mMapView = (MapView) findViewById(R.id.mapView);
-        ArcGISMap map = new ArcGISMap(Basemap.Type.TOPOGRAPHIC, -1.058688, -80.460375, 16);
-        mMapView.setMap(map);
+        mMapView = (MapView) findViewById(R.id.map);
+
+        SimpleMarkerSymbol simpleMarker = new SimpleMarkerSymbol(Color.RED,10, SimpleMarkerSymbol.STYLE.CIRCLE);
+        Point pointGeometry  = new Point(-1059221, -80455582);
+        Graphic pointGraphic = new Graphic(pointGeometry, simpleMarker);
+
+        // add the graphic to the graphics layer
+        graphicsLayer.addGraphic(pointGraphic);
+
+        mMapView.addLayer(graphicsLayer);
+
+
+
        /*GraphicsLayer graphicsLayer
 
        SimpleMarkerSymbol simpleMarker = new SimpleMarkerSymbol(Color.RED, 10, SimpleMarkerSymbol.STYLE.CIRCLE);
@@ -98,11 +114,6 @@ public class ArsGisActivity extends AppCompatActivity {
         super.onPause();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mMapView.resume();
-    }
 
     /*private void setupMobileMap() {
         if (mMapView != null) {

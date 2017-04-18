@@ -6,10 +6,13 @@
     android:layout_height="fill_parent">
 
     <!-- MapView layout, including basemap layer, initial center point, and zoom level -->
-    <com.esri.arcgisruntime.mapping.view.MapView
-        android:id="@+id/mapView"
+    <com.esri.android.map.MapView
+        android:id="@+id/map"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
-    </com.esri.arcgisruntime.mapping.view.MapView>
+        android:layout_height="fill_parent"
+        mapoptions.MapType="OSM"
+        mapoptions.center="-1.055389, -80.456773"
+        mapoptions.ZoomLevel="19">
+    </com.esri.android.map.MapView>
 
 </RelativeLayout>

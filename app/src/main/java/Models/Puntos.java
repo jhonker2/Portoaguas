@@ -5,10 +5,9 @@ package Models;
  */
 
 public class Puntos {
-
     public  String Hemisferio,zona,estado;
     public double latitud,longitud;
-    public long codigomedidor,consumoE;
+    public long codigomedidor,codigo;
 
     public String getHemisferio() {
         return Hemisferio;
@@ -58,22 +57,22 @@ public class Puntos {
         this.codigomedidor = codigomedidor;
     }
 
-    public long getConsumoE() {
-        return consumoE;
+    public long getCodigo() {
+        return codigo;
     }
 
-    public void setConsumoE(long consumoE) {
-        this.consumoE = consumoE;
+    public void setCodigo(long codigo) {
+        this.codigo = codigo;
     }
 
-
-    public Puntos(String hemisferio, String zona, String estado, double latitud, double longitud, long codigomedidor, long consumoE) {
-        Hemisferio = hemisferio;
+    public Puntos(Long codigo,String hemisferio, String zona, String estado, double latitud, double longitud, long codigomedidor) {
+        this.codigo = codigo;
+        this.Hemisferio = hemisferio;
         this.zona = zona;
         this.estado = estado;
         this.latitud = latitud;
         this.longitud = longitud;
         this.codigomedidor = codigomedidor;
-        this.consumoE = consumoE;
+
     }
 }
