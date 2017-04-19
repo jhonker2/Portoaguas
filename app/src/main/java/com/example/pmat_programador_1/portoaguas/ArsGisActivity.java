@@ -1,36 +1,41 @@
 package com.example.pmat_programador_1.portoaguas;
 
-import android.graphics.Color;
-import android.graphics.Point;
+import android.Manifest;
+import android.app.ProgressDialog;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
-/*import com.esri.android.runtime.ArcGISRuntime;
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
-import com.esri.arcgisruntime.geometry.Point;
-import com.esri.arcgisruntime.loadable.LoadStatus;
+import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
-import com.esri.arcgisruntime.mapping.MobileMapPackage;
-import com.esri.arcgisruntime.mapping.view.MapView;*/
+import com.esri.arcgisruntime.mapping.view.Graphic;
+import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
+import com.esri.arcgisruntime.mapping.view.MapView;
+import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
 
-/*import com.esri.core.geometry.*;
-import com.esri.core.map.*;
-import com.esri.core.symbol.PictureMarkerSymbol;
-import com.esri.core.symbol.SimpleMarkerSymbol;*/
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import com.esri.android.map.GraphicsLayer;
-import com.esri.android.map.MapOptions;
-import com.esri.android.map.MapView;
-import com.esri.android.runtime.ArcGISRuntime;
-import com.esri.core.map.Graphic;
-import com.esri.core.symbol.SimpleMarkerSymbol;
+import java.io.IOException;
+import java.util.ArrayList;
 
-import java.io.File;
+import Models.Puntos;
+import utils.CoordinateConversion;
 
 
 /**
@@ -38,84 +43,165 @@ import java.io.File;
  */
 
 public class ArsGisActivity extends AppCompatActivity {
-   MapView mMapView=null;
-    //GraphicsLayer mGraphicsOverlay = new GraphicsLayer();
-    Point point;
 
-    String mArcGISTempFolderPath;
-    String mPinBlankOrangeFilePath;
-    GraphicsLayer graphicsLayer;
+    //GraphicsLayer mGraphicsOverlay = new GraphicsLayer();
+    public ArrayList<Puntos> item = new ArrayList<Puntos>();
+    CoordinateConversion obj = new CoordinateConversion();
+    MapView mMapView;
+    GraphicsOverlay mGraphicsOverlay;
+    //GraphicsLayer graphicsLayer;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ArcGISRuntime.setClientId("gn1VHfaow2NXi0H0");
-       // ArcGISRuntimeEnvironment.setLicense("gn1VHfaow2NXi0H0");
-
-
+       // ArcGISRuntime.setClientId("gn1VHfaow2NXi0H0");
+        ArcGISRuntimeEnvironment.setLicense("runtimelite,1000,rud4711010970,none,5H80TK8ELBC0A1GJH168");
         setContentView(R.layout.map_arsgis);
         //mMapView = (MapView) findViewById(R.id.map);
-        mMapView = (MapView) findViewById(R.id.map);
+        mMapView = (MapView) findViewById(R.id.mapView);
 
-        SimpleMarkerSymbol simpleMarker = new SimpleMarkerSymbol(Color.RED,10, SimpleMarkerSymbol.STYLE.CIRCLE);
-        Point pointGeometry  = new Point(-1059221, -80455582);
-        Graphic pointGraphic = new Graphic(pointGeometry, simpleMarker);
+        ArcGISMap map = new ArcGISMap(Basemap.Type.TOPOGRAPHIC, -1.055389, -80.456773, 15);
 
-        // add the graphic to the graphics layer
-        graphicsLayer.addGraphic(pointGraphic);
+        mMapView.setMap(map);
 
-        mMapView.addLayer(graphicsLayer);
+        new LoadPuntos().execute();
+        // create an initial viewpoint using an envelope (of two points, bottom left and top right)
+       /* Envelope envelope = new Envelope(new com.esri.arcgisruntime.geometry.Point(-228835, 6550763, SpatialReferences.getWebMercator()),
+                new com.esri.arcgisruntime.geometry.Point(-223560, 6552021, SpatialReferences.getWebMercator()));*/
+        //set viewpoint on mapview
+        //mMapView.setViewpointGeometryAsync(map, 100.0);
 
-
-
-       /*GraphicsLayer graphicsLayer
-
-       SimpleMarkerSymbol simpleMarker = new SimpleMarkerSymbol(Color.RED, 10, SimpleMarkerSymbol.STYLE.CIRCLE);
-       Point pointG = new Point(-1.058688, -80.460375);
-       Graphic pointGraphi = new Graphic(pointG,simpleMarker);
-       //int i = mMapView.addLayer();
-        graphicsLayer.addGraphic(pointGraphi);
-
-        mMapView.addLayer(new GraphicsLayer());*/
-
-
-        //setupMobileMap();
-        //ArcGISMap map = new ArcGISMap(Basemap.createTopographic());
-
-       // ArcGISMap map = new ArcGISMap();
-       // Point punto1 = new Point(-1.058688, -80.460375);
-        //SimpleMarkerSymbol boueyMarker = new SimpleMarkerSymbol( Color.RED, 10, SimpleMarkerSymbol.STYLE.CIRCLE);
-
-       // Graphic buoyGraphic1 = new Graphic(punto1, boueyMarker);
-        //     mapoptions.MapType="OSM"
-        //mapoptions.center="-1.058688, -80.460375"
-        //mapoptions.ZoomLevel="25"
-        //create a simple marker symbol
-        //SimpleMarkerSymbol symbol = new SimpleMarkerSymbol(Color.RED, 10, SimpleMarkerSymbol.STYLE.CIRCLE); //size 12, style of circle
-        //Point punto1= new Point(-1.058688, -80.460375);
-       // BitmapDrawable pinStarBlueDrawable = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.blank);
-        //final PictureMarkerSymbol pinStarBlueSymbol = new PictureMarkerSymbol(pinStarBlueDrawable);
-//Optionally set the size, if not set the image will be auto sized based on its size in pixels,
-//its appearance would then differ across devices with different resolutions.
-        //pinStarBlueSymbol.setHeight(20);
-       // pinStarBlueSymbol.setWidth(20);
-//Optionally set the offset, to align the base of the symbol aligns with the point geometry
-       // pinStarBlueSymbol.setOffsetY(11); //The image used for the symbol has a transparent buffer around it, so the offset is not simply height/2
+        // create a new graphics overlay and add it to the mapview
 
 
 
-//add a new graphic with a new point geometry
-        //Point graphicPoint = new Point(-226773, 6550477, SpatialReferences.getWebMercator());
-        //Graphic graphic = new Graphic(graphicPoint, symbol);
-        //graphicsOverlay.getGraphics().add(graphic);
+
+
+
     }
     @Override
     protected void onPause() {
         mMapView.pause();
         super.onPause();
     }
+    public class LoadPuntos extends AsyncTask<String, String, String> {
+        private ProgressDialog pDialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(ArsGisActivity.this);
+            pDialog.setMessage("Cargando Puntos...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+            try {
+                item.clear();
+                item = getPuntos();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            pDialog.dismiss();
+
+            for (int i = 0; i < item.size(); i++) {
+                double lati = item.get(i).getLatitud();
+                double longLat = item.get(i).getLongitud();
+                final double[] ltn = obj.utm2LatLon("17 M " + longLat + " " + lati);
 
 
-    /*private void setupMobileMap() {
+
+
+
+                mGraphicsOverlay = new GraphicsOverlay();
+                mMapView.getGraphicsOverlays().add(mGraphicsOverlay);
+                //ArcGISMap map = new ArcGISMap(Basemap.Type.STREETS_NIGHT_VECTOR, -1.055389, -80.456773, 11);
+                BitmapDrawable pinStarBlueDrawable = (BitmapDrawable) ContextCompat.getDrawable(getApplicationContext(), R.drawable.blank);
+                final PictureMarkerSymbol pinStarBlueSymbol = new PictureMarkerSymbol(pinStarBlueDrawable);
+                //Optionally set the size, if not set the image will be auto sized based on its size in pixels,
+                //its appearance would then differ across devices with different resolutions.
+                pinStarBlueSymbol.setHeight(15);
+                pinStarBlueSymbol.setWidth(15);
+                //Optionally set the offset, to align the base of the symbol aligns with the point geometry
+                pinStarBlueSymbol.setOffsetY(
+                        11); //The image used for the symbol has a transparent buffer around it, so the offset is not simply height/2
+                pinStarBlueSymbol.loadAsync();
+                //[DocRef: END]
+                pinStarBlueSymbol.addDoneLoadingListener(new Runnable() {
+                    @Override
+                    public void run() {
+                        //add a new graphic with the same location as the initial viewpoint
+                        com.esri.arcgisruntime.geometry.Point oldFaithfullPoint = new com.esri.arcgisruntime.geometry.Point(ltn[1], ltn[0], SpatialReferences.getWgs84());
+                        Graphic pinStarBlueGraphic = new Graphic(oldFaithfullPoint, pinStarBlueSymbol);
+                        mGraphicsOverlay.getGraphics().add(pinStarBlueGraphic);
+                    }
+                });
+
+
+            }
+
+
+        }
+
+
+    }
+
+    public ArrayList<Puntos> getPuntos() throws ParseException {
+        String values;
+        DefaultHttpClient client = new DefaultHttpClient();
+        HttpGet request = new HttpGet("http://192.168.137.1:8090/portal-portoaguas/public/puntos");//
+        try {
+            HttpResponse response = null;
+            try {
+                response = client.execute(request);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            HttpEntity entity = response.getEntity();
+            values = EntityUtils.toString(entity);
+
+            Log.e("Puntos en el Mapa", values);
+
+            JSONArray obj = null;
+            try {
+                obj = new JSONArray(values);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            for (int index = 0; index < obj.length(); index++) {
+                JSONObject jsonObject = obj.getJSONObject(index);
+                Long codigojson = jsonObject.getLong("id");
+                String hemisferiojson = jsonObject.getString("hemisferio");
+                String zonajson = jsonObject.getString("zona");
+                String estadojson = jsonObject.getString("estado");
+                Double latitudjson = jsonObject.getDouble("latitud");
+                Double longitudjson = jsonObject.getDouble("longitud");
+                Long codigoMedidorjson = jsonObject.getLong("codigoMedidor");
+                Long numeroCuentajson   = jsonObject.getLong("numeroCuenta");
+                item.add(new Puntos(codigojson, hemisferiojson, zonajson, estadojson, latitudjson, longitudjson, codigoMedidorjson,numeroCuentajson));
+            }
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ClientProtocolException e1) {
+            e1.printStackTrace();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+
+        return item;
+
+    }
+
+
+/*private void setupMobileMap() {
         if (mMapView != null) {
             File mmpkFile = new File(Environment.getExternalStorageDirectory(), "devlabs-package.mmpk");
             final MobileMapPackage mapPackage = new MobileMapPackage(mmpkFile.getAbsolutePath());

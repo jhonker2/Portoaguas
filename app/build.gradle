@@ -29,7 +29,7 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    //compile 'com.esri.arcgisruntime:arcgis-android:100.0.0'
+    compile 'com.esri.arcgisruntime:arcgis-android:100.0.0'
     //noinspection GradleCompatible
     compile 'com.android.support:appcompat-v7:25.3.1'
     testCompile 'junit:junit:4.12'
@@ -43,7 +43,7 @@ dependencies {
 
     compile 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
 
-    compile 'com.esri.arcgis.android:arcgis-android:10.2.9'
+    //compile 'com.esri.arcgis.android:arcgis-android:10.2.9'
 
     compile 'com.squareup.okhttp3:okhttp:3.7.0'
 }

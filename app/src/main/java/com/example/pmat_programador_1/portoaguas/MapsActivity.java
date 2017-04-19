@@ -71,7 +71,7 @@ import utils.CoordinateConversion;
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
     public GoogleMap mMap;
     private EditText ced, nomb;
-    public static TextView total;
+    public static TextView total, cuenta;
     private Button btnSaveCliente;
     private ImageButton btnC;
     private ImageView img;
@@ -84,7 +84,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private RecyclerView recycler;
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager lManager;
-
+    int cont = 0;
+    private long mlas = 0;
+    private long mTim = 1500;
 
     public String foto = "";
     public Uri output;
@@ -243,7 +245,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         protected void onPostExecute(String s) {
             pDialog.dismiss();
-            mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+            mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
             mMap.setIndoorEnabled(true);
             if (ContextCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
@@ -269,7 +271,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 } else {
                     Marker melbourne = mMap.addMarker(new MarkerOptions()
                             .position(sydney)
-                            .title(String.valueOf(item.get(i).getCodigomedidor()))
+                            .title("Numero de Cuenta: " + String.valueOf(item.get(i).getNumeroCuenta()))
+                            .snippet("Texto secundario")
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.blank)));
                     melbourne.showInfoWindow();
 
@@ -278,95 +281,109 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, zoomlevel));
             }
 
+
             mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                 @Override
                 public boolean onMarkerClick(Marker marker) {
 
-                    ArrayList rubros = new ArrayList();
-                    rubros.add(new Rubros("54", "CORTE CON LLAVE DE ACERO", "1"));
-                    rubros.add(new Rubros("55", "CORTE CON LLAVE DE ESFERA", "2.50"));
-                    rubros.add(new Rubros("56", "CORTE CON EXCAVACION DE TIERRA", "6"));
+                    long Cur = System.currentTimeMillis();
+
+                    if (Cur - mlas > mTim) {
+
+                        // ds.show();
+                        mlas = Cur;
+
+                    } else {
+
+                        ArrayList rubros = new ArrayList();
+                        rubros.add(new Rubros("54", "CORTE CON LLAVE DE ACERO", "1"));
+                        rubros.add(new Rubros("55", "CORTE CON LLAVE DE ESFERA", "2.50"));
+                        rubros.add(new Rubros("56", "CORTE CON EXCAVACION DE TIERRA", "6"));
 
 
-                    //Toast.makeText(MapsActivity.this, "Punto Precionado! "+marker.getPosition(), Toast.LENGTH_SHORT).show();
-                    AlertDialog.Builder buil = new AlertDialog.Builder(MapsActivity.this);
-                    View mView = getLayoutInflater().inflate(R.layout.storepunto, null);
+                        //Toast.makeText(MapsActivity.this, "Punto Precionado! "+marker.getPosition(), Toast.LENGTH_SHORT).show();
+                        AlertDialog.Builder buil = new AlertDialog.Builder(MapsActivity.this);
+                        View mView = getLayoutInflater().inflate(R.layout.storepunto, null);
 
-                    ced = (EditText) mView.findViewById(R.id.textCedulaCliente);
-                    nomb = (EditText) mView.findViewById(R.id.textNombreCliente);
-                    btnSaveCliente = (Button) mView.findViewById(R.id.buttonNewC);
-                    btnC = (ImageButton) mView.findViewById(R.id.btn_camera);
-                    img = (ImageView) mView.findViewById(R.id.img1);
-                    recycler = (RecyclerView) mView.findViewById(R.id.my_recycler_view);
-                    total = (TextView) mView.findViewById(R.id.txt_total);
+                        ced = (EditText) mView.findViewById(R.id.textCedulaCliente);
+                        nomb = (EditText) mView.findViewById(R.id.textNombreCliente);
+
+                        btnSaveCliente = (Button) mView.findViewById(R.id.buttonNewC);
+                        btnC = (ImageButton) mView.findViewById(R.id.btn_camera);
+                        img = (ImageView) mView.findViewById(R.id.img1);
+                        recycler = (RecyclerView) mView.findViewById(R.id.my_recycler_view);
+                        total = (TextView) mView.findViewById(R.id.txt_total);
+                        cuenta = (TextView) mView.findViewById(R.id.txt_cuenta);
+
+                        lManager = new LinearLayoutManager(MapsActivity.this, LinearLayoutManager.HORIZONTAL, false);
+                        recycler.setHasFixedSize(true);
+                        recycler.setLayoutManager(lManager);
+
+                        adapter = new RecycleViewAdapter(MapsActivity.this, rubros);
+
+                        recycler.setAdapter(adapter);
+                        recycler.setNestedScrollingEnabled(false);
+
+                        buil.setView(mView);
+                        final AlertDialog alertDialog = buil.create();
+                        alertDialog.show();
+                        cont = 0;
+                        ced.setText(marker.getPosition().toString());
+                        //nomb.setText(marker.getTitle());
+                        cuenta.setText(marker.getTitle());
 
 
-                    lManager = new LinearLayoutManager(MapsActivity.this, LinearLayoutManager.HORIZONTAL, false);
-                    recycler.setHasFixedSize(true);
-                    recycler.setLayoutManager(lManager);
-
-                    adapter = new RecycleViewAdapter(MapsActivity.this, rubros);
-
-                    recycler.setAdapter(adapter);
-                    recycler.setNestedScrollingEnabled(false);
-
-                    buil.setView(mView);
-                    final AlertDialog alertDialog = buil.create();
-                    alertDialog.show();
-
-                    ced.setText(marker.getPosition().toString());
-                    nomb.setText(marker.getTitle());
-
-
-                    //Boton de la Camara
-                    btnC.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            try {
-                                createImageFile();
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                        //Boton de la Camara
+                        btnC.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                try {
+                                    createImageFile();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                             }
-                        }
 
-                    });
+                        });
 
 
-                    //Boton para almacenar punto
-                    btnSaveCliente.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            //GuardarSql();
+                        //Boton para almacenar punto
+                        btnSaveCliente.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                //GuardarSql();
                       /*  String cortado= ced.getText().toString().substring(10,1);
                         String[] utm = cortado.split(",");
                         String latZone = utm[0];
                         String lonZone = utm[1];*/
-                            Toast.makeText(MapsActivity.this,"Imagen se encuentra: "+foto,Toast.LENGTH_LONG).show();
-                            Log.e("Ruta", foto.toString());
-                            MovimientoHelper usdbh =
-                                    new MovimientoHelper(getApplicationContext());
+                                Toast.makeText(MapsActivity.this, "Imagen se encuentra: " + foto, Toast.LENGTH_LONG).show();
+                                Log.e("Ruta", foto.toString());
+                                MovimientoHelper usdbh =
+                                        new MovimientoHelper(getApplicationContext());
 
-                            boolean var = usdbh.insertarMovimiento("Ruta de la Imagen", nomb.getText().toString(), "A");
+                                boolean var = usdbh.insertarMovimiento("Ruta de la Imagen", nomb.getText().toString(), "A");
 
-                            if (var) {
-                                StyleableToast.makeText(MapsActivity.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
+                                if (var) {
+                                    StyleableToast.makeText(MapsActivity.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
 
-                            } else {
-                                StyleableToast.makeText(MapsActivity.this, "Error al realizar la transacción!", Toast.LENGTH_SHORT, R.style.StyledToastError).show();
+                                } else {
+                                    StyleableToast.makeText(MapsActivity.this, "Error al realizar la transacción!", Toast.LENGTH_SHORT, R.style.StyledToastError).show();
+
+                                }
+                                alertDialog.dismiss();
 
                             }
-                            alertDialog.dismiss();
+                        });
 
-                        }
-                    });
+                    }
                     return false;
                 }
-
             });
         }
 
 
     }
+
 
     public ArrayList<Puntos> getPuntos() throws ParseException {
         String values;
@@ -389,7 +406,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Double latitudjson = jsonObject.getDouble("latitud");
                 Double longitudjson = jsonObject.getDouble("longitud");
                 Long codigoMedidorjson = jsonObject.getLong("codigoMedidor");
-                item.add(new Puntos(codigojson, hemisferiojson, zonajson, estadojson, latitudjson, longitudjson, codigoMedidorjson));
+                Long numeroCuentajson = jsonObject.getLong("numeroCuenta");
+                item.add(new Puntos(codigojson, hemisferiojson, zonajson, estadojson, latitudjson, longitudjson, codigoMedidorjson, numeroCuentajson));
             }
         } catch (JSONException e) {
             // TODO Auto-generated catch block
@@ -403,8 +421,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return item;
 
     }
-
-
     //Funcion para almacenar
     private void GuardarSql() {
         String imagen = "Ruta de la imagen";

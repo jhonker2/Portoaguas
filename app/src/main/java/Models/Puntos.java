@@ -7,7 +7,16 @@ package Models;
 public class Puntos {
     public  String Hemisferio,zona,estado;
     public double latitud,longitud;
-    public long codigomedidor,codigo;
+    public long codigomedidor,codigo,numeroCuenta;
+
+
+    public long getNumeroCuenta() {
+        return numeroCuenta;
+    }
+
+    public void setNumeroCuenta(long numeroCuenta) {
+        this.numeroCuenta = numeroCuenta;
+    }
 
     public String getHemisferio() {
         return Hemisferio;
@@ -65,7 +74,7 @@ public class Puntos {
         this.codigo = codigo;
     }
 
-    public Puntos(Long codigo,String hemisferio, String zona, String estado, double latitud, double longitud, long codigomedidor) {
+    public Puntos(Long codigo,String hemisferio, String zona, String estado, double latitud, double longitud, long codigomedidor, long numeroCuenta) {
         this.codigo = codigo;
         this.Hemisferio = hemisferio;
         this.zona = zona;
@@ -73,6 +82,7 @@ public class Puntos {
         this.latitud = latitud;
         this.longitud = longitud;
         this.codigomedidor = codigomedidor;
+        this.numeroCuenta =numeroCuenta;
 
     }
 }
