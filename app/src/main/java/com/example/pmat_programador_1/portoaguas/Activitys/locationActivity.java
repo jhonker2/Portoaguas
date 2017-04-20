@@ -1,36 +1,24 @@
-package com.example.pmat_programador_1.portoaguas;
+package com.example.pmat_programador_1.portoaguas.Activitys;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AlertDialog;
-import android.util.Log;
-import android.view.View;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.pmat_programador_1.portoaguas.Activitys.MovimientosActivity;
-import com.example.pmat_programador_1.portoaguas.Activitys.locationActivity;
+import com.example.pmat_programador_1.portoaguas.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -44,15 +32,11 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
-import okhttp3.OkHttpClient;
 import utils.Constants;
-import utils.CoordinateConversion;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks,
+public class locationActivity extends AppCompatActivity implements
+        GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status> {
-
-    //VARIABLES PARA LOCALIZAR DISPOSITIVOS
     private static final String TAG = locationActivity.class.getSimpleName();
     private static final String LOCATION_KEY = "location-key";
     // Location API
@@ -70,28 +54,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_location);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        OkHttpClient client = new OkHttpClient();
-        final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            AlertNoGps();
-        }
-
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        */
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        mLatitude = (TextView) findViewById(R.id.tv_latitude);
+        mLongitude = (TextView) findViewById(R.id.tv_longitude);
 
 
         // Establecer punto de entrada para la API de ubicación
@@ -106,129 +74,13 @@ public class MainActivity extends AppCompatActivity
         // Verificar ajustes de ubicación actuales
         checkLocationSettings();
 
+
     }
-
-    AlertDialog alert = null;
-
-    private void AlertNoGps() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("El sistema GPS esta desactivado, ¿Es necesario activarlo?")
-                .setCancelable(false)
-                .setPositiveButton("Si", new DialogInterface.OnClickListener() {
-                    public void onClick(@SuppressWarnings("unused")
-                                        final DialogInterface dialog, @SuppressWarnings("unused")
-                                        final int id) {
-                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                    }
-                })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    public void onClick(final DialogInterface dialog, @SuppressWarnings("unused")
-                    final int id) {
-
-                    }
-                });
-        alert = builder.create();
-        alert.show();
-    }
-
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        if (id == R.id.action_exit) {
-            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Esta seguro de salir del sistema?")
-                    .setCancelable(false)
-                    .setPositiveButton("Si", new DialogInterface.OnClickListener() {
-                        public void onClick(@SuppressWarnings("unused")
-                                            final DialogInterface dialog, @SuppressWarnings("unused")
-                                            final int id) {
-                            Intent inte = new Intent(MainActivity.this, loginActivity.class);
-                            startActivity(inte);
-                            finish();
-                        }
-                    })
-                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                        public void onClick(final DialogInterface dialog, @SuppressWarnings("unused")
-                        final int id) {
-
-                        }
-                    });
-            alert = builder.create();
-            alert.show();
-
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_gallery) {
-            Intent inte = new Intent(MainActivity.this, MapsActivity.class);
-            startActivity(inte);
-
-        } else if (id == R.id.nav_slideshow) {
-            Intent inte = new Intent(MainActivity.this, ArsGisActivity.class);
-            startActivity(inte);
-
-        } else if (id == R.id.nav_manage) {
-            Intent inte = new Intent(MainActivity.this, com.example.pmat_programador_1.portoaguas.Activitys.MainActivity.class);
-            startActivity(inte);
-
-        } else if (id == R.id.nav_share) {
-            Intent inte = new Intent(MainActivity.this, MovimientosActivity.class);
-            startActivity(inte);
-        } else if (id == R.id.Position) {
-            Intent inte = new Intent(MainActivity.this, locationActivity.class);
-            startActivity(inte);
-        } else if (id == R.id.nav_send) {
-            Intent inte = new Intent(MainActivity.this, loginActivity.class);
-            startActivity(inte);
-            finish();
-
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
-
-    // FUNCIONES PARA LOCALIZAR DISPOSTIVO
 
     private void updateLocationUI() {
 
-        //mLatitude.setText(String.valueOf(mLastLocation.getLatitude()));
-        //mLongitude.setText(String.valueOf(mLastLocation.getLongitude()));
+        mLatitude.setText(String.valueOf(mLastLocation.getLatitude()));
+        mLongitude.setText(String.valueOf(mLastLocation.getLongitude()));
     }
 
     private void processLastLocation() {
@@ -307,7 +159,6 @@ public class MainActivity extends AppCompatActivity
         return permission == PackageManager.PERMISSION_GRANTED;
     }
 
-    @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
         if (isLocationPermissionGranted()) {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
@@ -356,7 +207,7 @@ public class MainActivity extends AppCompatActivity
                             Log.d(TAG, "Los ajustes de ubicación no satisfacen la configuración. " +
                                     "Se mostrará un diálogo de ayuda.");
                             status.startResolutionForResult(
-                                    MainActivity.this,
+                                    locationActivity.this,
                                     REQUEST_CHECK_SETTINGS);
                         } catch (IntentSender.SendIntentException e) {
                             Log.d(TAG, "El Intent del diálogo no funcionó.");

@@ -38,12 +38,13 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:25.1.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.google.android.gms:play-services-maps:10.2.1'
+    compile 'com.google.android.gms:play-services-location:10.2.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.1'
     compile 'com.muddzdev:styleabletoast:1.0.6'
 
     compile 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
 
-    //compile 'com.esri.arcgis.android:arcgis-android:10.2.9'
-
     compile 'com.squareup.okhttp3:okhttp:3.7.0'
+
+
 }

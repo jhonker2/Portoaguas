@@ -70,7 +70,7 @@ import utils.CoordinateConversion;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
     public GoogleMap mMap;
-    private EditText ced, nomb;
+    private EditText ced, lect;
     public static TextView total, cuenta;
     private Button btnSaveCliente;
     private ImageButton btnC;
@@ -289,8 +289,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     long Cur = System.currentTimeMillis();
 
                     if (Cur - mlas > mTim) {
-
-                        // ds.show();
                         mlas = Cur;
 
                     } else {
@@ -306,7 +304,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         View mView = getLayoutInflater().inflate(R.layout.storepunto, null);
 
                         ced = (EditText) mView.findViewById(R.id.textCedulaCliente);
-                        nomb = (EditText) mView.findViewById(R.id.textNombreCliente);
+                        lect = (EditText) mView.findViewById(R.id.textLectura);
 
                         btnSaveCliente = (Button) mView.findViewById(R.id.buttonNewC);
                         btnC = (ImageButton) mView.findViewById(R.id.btn_camera);
@@ -361,7 +359,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 MovimientoHelper usdbh =
                                         new MovimientoHelper(getApplicationContext());
 
-                                boolean var = usdbh.insertarMovimiento("Ruta de la Imagen", nomb.getText().toString(), "A");
+                                boolean var = usdbh.insertarMovimiento("Ruta de la Imagen", lect.getText().toString(), "A");
 
                                 if (var) {
                                     StyleableToast.makeText(MapsActivity.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
@@ -421,12 +419,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return item;
 
     }
+
+
     //Funcion para almacenar
     private void GuardarSql() {
         String imagen = "Ruta de la imagen";
-        String idmedidor = nomb.getText().toString();
+        String lectura = lect.getText().toString();
         String estado = "S";
-        Movimiento movimiento = new Movimiento(imagen, idmedidor, estado);
+        Movimiento movimiento = new Movimiento(imagen, lectura, estado);
         new AddMovimientoTarea().execute(movimiento);
     }
 

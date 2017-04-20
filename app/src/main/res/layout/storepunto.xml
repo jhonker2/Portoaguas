@@ -85,18 +85,18 @@
 
 
                 <android.support.design.widget.TextInputLayout
-                    android:id="@+id/til_nombre"
+                    android:id="@+id/til_lectura"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp">
 
                     <EditText
-                        android:id="@+id/textNombreCliente"
+                        android:id="@+id/textLectura"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:ems="10"
-                        android:hint="Codigo Medidor"
-                        android:inputType="textCapCharacters"
+                        android:hint="Lectura"
+                        android:inputType="number"
                         android:singleLine="true" />
                 </android.support.design.widget.TextInputLayout>
             </LinearLayout>

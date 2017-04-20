@@ -11,4 +11,5 @@
     <string name="title_activity_geo">GeoActivity</string>
     <string name="title_activity_login">PortoAguas EP.</string>
     <string name="action_map">Filtar</string>
+    <string name="title_activity_location">locationActivity</string>
 </resources>

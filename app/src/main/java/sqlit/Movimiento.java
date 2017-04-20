@@ -12,26 +12,26 @@ import java.util.UUID;
 public class Movimiento {
     private long id;
     private String imagen;
-    private String idmedidor;
+    private String lectura;
     private String estado;
 
-    public Movimiento( String imagen, String idmedidor, String estado) {
+    public Movimiento( String imagen, String lectura, String estado) {
         this.imagen = imagen;
-        this.idmedidor = idmedidor;
+        this.lectura = lectura;
         this.estado = estado;
     }
 
-    public Movimiento( Long id,String imagen, String idmedidor, String estado) {
+    public Movimiento( Long id,String imagen, String lectura, String estado) {
         this.id =  id;
         this.imagen = imagen;
-        this.idmedidor = idmedidor;
+        this.lectura = lectura;
         this.estado = estado;
     }
 
     public Movimiento(Cursor cursor){
         id          =   Long.parseLong(cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry.ID)));
         imagen      =   cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry.IMAGEN));
-        idmedidor   =   cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry.IDMEDIDOR));
+        lectura   =   cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry.IDMEDIDOR));
         estado      =   cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry.ESTADO));
     }
 
@@ -39,7 +39,7 @@ public class Movimiento {
         ContentValues values = new ContentValues();
         values.put(MovimientoContrac.MovimientoEntry.ID, id);
         values.put(MovimientoContrac.MovimientoEntry.IMAGEN, imagen);
-        values.put(MovimientoContrac.MovimientoEntry.IDMEDIDOR, idmedidor);
+        values.put(MovimientoContrac.MovimientoEntry.IDMEDIDOR, lectura);
         values.put(MovimientoContrac.MovimientoEntry.ESTADO, estado);
         return values;
     }
@@ -61,11 +61,11 @@ public class Movimiento {
     }
 
     public String getIdmedidor() {
-        return idmedidor;
+        return lectura;
     }
 
     public void setIdmedidor(String idmedidor) {
-        this.idmedidor = idmedidor;
+        this.lectura  = idmedidor;
     }
 
     public String getEstado() {
