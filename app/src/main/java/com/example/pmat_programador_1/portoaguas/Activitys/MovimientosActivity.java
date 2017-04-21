@@ -36,7 +36,6 @@ import sqlit.MovimientoHelper;
 public class MovimientosActivity extends AppCompatActivity {
     public ListView lista;
     public ImageView img;
-    private MovimientoHelper mLawyersDbHelper;
     ArrayList<Movimiento> items=new ArrayList<Movimiento>();
     public MovimientsAdapter2 Ma;
     MovimientoHelper MDB = new MovimientoHelper(MovimientosActivity.this);
@@ -52,14 +51,11 @@ public class MovimientosActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 //        Log.e("TOTAL  DE REGISTROS ", Integer.toString(MDB.recuperarCONTACTOS().size()));
 
-        if(items.size()==0){
+        /*if(items.size()==0){
             StyleableToast.makeText(MovimientosActivity.this, "Todas sus cortes y Reconeccion han sido enviado!" , Toast.LENGTH_SHORT, R.style.StyledToast).show();
-            lista.setVisibility(View.INVISIBLE);
-            img.setVisibility(View.VISIBLE);
-
-        }else {
+        }else {*/
             new LoadMovimientos().execute();
-        }
+       // }
 
     }
 
@@ -119,7 +115,7 @@ public class MovimientosActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(String... voids) {
-        items.clear();
+            items.clear();
             items = MDB.recuperarCONTACTOS();
             if(items.size()==0){
                 return "0";

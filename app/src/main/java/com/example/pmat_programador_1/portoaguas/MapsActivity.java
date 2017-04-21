@@ -3,7 +3,9 @@ package com.example.pmat_programador_1.portoaguas;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -45,9 +47,15 @@ import com.muddzdev.styleabletoastlibrary.StyleableToast;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -70,14 +78,14 @@ import utils.CoordinateConversion;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
     public GoogleMap mMap;
-    private EditText ced, lect;
+    private EditText ced, lect,comentario;
     public static TextView total, cuenta;
     private Button btnSaveCliente;
     private ImageButton btnC;
     private ImageView img;
     private MovimientoHelper movimientoHelper;
     public ArrayList<Puntos> item = new ArrayList<Puntos>();
-
+    AlertDialog alertDialog ;
     /*
     *Declarar instancias globales
     */
@@ -87,6 +95,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     int cont = 0;
     private long mlas = 0;
     private long mTim = 1500;
+    public static String data;
+    public boolean resul;
 
     public String foto = "";
     public Uri output;
@@ -305,7 +315,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                         ced = (EditText) mView.findViewById(R.id.textCedulaCliente);
                         lect = (EditText) mView.findViewById(R.id.textLectura);
-
+                        comentario=(EditText)mView.findViewById(R.id.t_comentario);
                         btnSaveCliente = (Button) mView.findViewById(R.id.buttonNewC);
                         btnC = (ImageButton) mView.findViewById(R.id.btn_camera);
                         img = (ImageView) mView.findViewById(R.id.img1);
@@ -323,7 +333,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         recycler.setNestedScrollingEnabled(false);
 
                         buil.setView(mView);
-                        final AlertDialog alertDialog = buil.create();
+                        alertDialog = buil.create();
                         alertDialog.show();
                         cont = 0;
                         ced.setText(marker.getPosition().toString());
@@ -349,26 +359,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         btnSaveCliente.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
+                                //Metogo para almacenar el movimiento en el mapa
+
+                                new RegistrarMovimiento().execute();
+
+
                                 //GuardarSql();
                       /*  String cortado= ced.getText().toString().substring(10,1);
                         String[] utm = cortado.split(",");
                         String latZone = utm[0];
                         String lonZone = utm[1];*/
-                                Toast.makeText(MapsActivity.this, "Imagen se encuentra: " + foto, Toast.LENGTH_LONG).show();
-                                Log.e("Ruta", foto.toString());
-                                MovimientoHelper usdbh =
-                                        new MovimientoHelper(getApplicationContext());
+                               /* Toast.makeText(MapsActivity.this, "Imagen se encuentra: " + foto, Toast.LENGTH_LONG).show();
+                                Log.e("Ruta", foto.toString());*/
 
-                                boolean var = usdbh.insertarMovimiento("Ruta de la Imagen", lect.getText().toString(), "A");
 
-                                if (var) {
-                                    StyleableToast.makeText(MapsActivity.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
+                               // boolean var = usdbh.insertarMovimiento("Ruta de la Imagen", lect.getText().toString(), "A");
 
-                                } else {
-                                    StyleableToast.makeText(MapsActivity.this, "Error al realizar la transacción!", Toast.LENGTH_SHORT, R.style.StyledToastError).show();
 
-                                }
-                                alertDialog.dismiss();
 
                             }
                         });
@@ -382,7 +389,67 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+    class RegistrarMovimiento extends AsyncTask<String, Void, Boolean>{
+        private ProgressDialog pDialog;
 
+        @Override
+        protected Boolean doInBackground(String... strings) {
+            ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+            nameValuePairs.add(new BasicNameValuePair("lectura", lect.getText().toString()));
+            nameValuePairs.add(new BasicNameValuePair("comentario",comentario.getText().toString()));
+            nameValuePairs.add(new BasicNameValuePair("cuenta", cuenta.getText().toString()));
+
+            try {
+                HttpClient httpclient = new DefaultHttpClient();
+                HttpPost httppost = new HttpPost("http://192.168.137.1:8090/portal-portoaguas/public/movimiento");
+                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs,HTTP.UTF_8));
+                HttpResponse response = httpclient.execute(httppost);
+                HttpEntity entity = response.getEntity();
+                //is = entity.getContent();
+                data = EntityUtils.toString(entity);
+                JSONObject obj= new JSONObject(data);
+                String  codigojson=obj.getString("registro");
+                 Log.e("ULTIMO ID MOVIMIENTO", data);
+                data=codigojson;
+
+                resul=true;
+            } catch (Exception e) {
+                Log.e("log_tag", "Error in http connection " + e.toString());
+                resul=false;
+            }
+           return resul;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(MapsActivity.this);
+            pDialog.setMessage("Enviando Datos a la Central...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            pDialog.dismiss();
+
+            if (aBoolean) {
+                StyleableToast.makeText(MapsActivity.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
+                alertDialog.dismiss();
+                GuardarSql(foto,lect.getText().toString(),"S",data);
+            } else {
+                StyleableToast.makeText(MapsActivity.this, "Error al realizar la transacción!", Toast.LENGTH_SHORT, R.style.StyledToastError).show();
+
+            }
+        }
+    }
+
+    public void StoreCliente2(){
+
+        // http post
+
+    }
     public ArrayList<Puntos> getPuntos() throws ParseException {
         String values;
         DefaultHttpClient client = new DefaultHttpClient();
@@ -422,11 +489,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     //Funcion para almacenar
-    private void GuardarSql() {
-        String imagen = "Ruta de la imagen";
-        String lectura = lect.getText().toString();
-        String estado = "S";
-        Movimiento movimiento = new Movimiento(imagen, lectura, estado);
+    private void GuardarSql(String imagens,String lecturas,String estados,String id_Movimiento) {
+        String imagen = imagens;
+        String lectura = lecturas;
+        String estado = estados;
+        String idM = id_Movimiento;
+        Movimiento movimiento = new Movimiento(idM,imagen, lectura, estado);
         new AddMovimientoTarea().execute(movimiento);
     }
 

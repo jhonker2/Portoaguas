@@ -1,15 +1,23 @@
 package Adapter;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.pmat_programador_1.portoaguas.R;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import sqlit.Movimiento;
@@ -21,8 +29,11 @@ import sqlit.Movimiento;
 public class MovimientsAdapter2 extends BaseAdapter {
     protected Activity activity;
     protected ArrayList<Movimiento> items;
-    public TextView codigo,imagen,idmedidor,estado;
+    public TextView codigo,idmedidor,estado;
+    public ImageView img;
     public Movimiento item;
+    public File storageDir;
+    public Uri output;
 
     public MovimientsAdapter2(Activity activity, ArrayList<Movimiento> items) {
         this.activity = activity;
@@ -53,18 +64,24 @@ public class MovimientsAdapter2 extends BaseAdapter {
             LayoutInflater inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             vi = inflater.inflate(R.layout.bd_items, null);
 
-        }else{
-
         }
 
         item= items.get(position);
-        codigo         = (TextView) vi.findViewById(R.id.t_id);
-        idmedidor   = (TextView) vi.findViewById(R.id.t_idmedidor);
-        estado      = (TextView) vi.findViewById(R.id.t_estado);
-
-        codigo.setText(String.valueOf(item.getId()));
-        idmedidor.setText(item.getIdmedidor());
+        codigo          = (TextView) vi.findViewById(R.id.t_id);
+        idmedidor       = (TextView) vi.findViewById(R.id.t_idmedidor);
+        estado          = (TextView) vi.findViewById(R.id.t_estado);
+        img             = (ImageView) vi.findViewById(R.id.imgF);
+        codigo.setText(String.valueOf(item.getId_movimiento()));
+        idmedidor.setText(item.getLectura());
         estado.setText(item.getEstado());
+        storageDir= new File(item.getImage());
+        ContentResolver cr = activity.getContentResolver();
+
+        try {
+            img.setImageBitmap(android.provider.MediaStore.Images.Media.getBitmap(cr, Uri.fromFile(storageDir)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         return vi;
     }

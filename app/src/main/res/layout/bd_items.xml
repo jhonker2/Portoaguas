@@ -1,27 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <TextView
         android:id="@+id/t_id"
-        android:layout_width="100dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="14dp"
-        android:layout_marginTop="15dp"
-        android:text="Text" />
+        android:layout_marginStart="19dp"
+        android:text="Text"
+        android:layout_alignBaseline="@+id/t_idmedidor"
+        android:layout_alignBottom="@+id/t_idmedidor"
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:id="@+id/t_idmedidor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/t_id"
-        android:layout_alignBottom="@+id/t_id"
-        android:layout_marginStart="46dp"
-        android:layout_toEndOf="@+id/t_id"
-        android:text="TextView" />
+        android:layout_marginStart="37dp"
+        android:text="TextView"
+        android:layout_alignBottom="@+id/imgF"
+        android:layout_toEndOf="@+id/imgF"
+        android:layout_marginBottom="13dp" />
 
     <TextView
         android:id="@+id/t_estado"
@@ -32,4 +33,14 @@
         android:layout_marginStart="51dp"
         android:layout_toEndOf="@+id/t_idmedidor"
         android:text="TextView" />
+
+    <ImageView
+        android:id="@+id/imgF"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="22dp"
+        android:layout_toEndOf="@+id/t_id"
+        app:srcCompat="@mipmap/ic_launcher" />
 </RelativeLayout>

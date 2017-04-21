@@ -21,7 +21,7 @@ public class MovimientoHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "Portobd.db";
 
     private static final String TABLA_MOVIMIENTOS = "CREATE TABLE movimientos" +
-            "(id INTEGER PRIMARY KEY AUTOINCREMENT, imagen TEXT, idmedidor TEXT, estado TEXT)";
+            "(id INTEGER PRIMARY KEY AUTOINCREMENT, id_movimiento TEXT, imagen TEXT, lectura TEXT, estado TEXT)";
     public MovimientoHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -35,12 +35,12 @@ public class MovimientoHelper extends SQLiteOpenHelper {
     public ArrayList<Movimiento> recuperarCONTACTOS() {
         SQLiteDatabase db = getReadableDatabase();
         ArrayList<Movimiento> lista_contactos = new ArrayList<Movimiento>();
-        String[] valores_recuperar = {"id", "imagen", "idmedidor", "estado"};
+        String[] valores_recuperar = {"id_movimiento", "imagen", "lectura", "estado"};
         Cursor c = db.query("movimientos", valores_recuperar,
                 null, null, null, null, null, null);
         c.moveToFirst();
         do {
-            lista_contactos.add(new Movimiento(c.getLong(0), c.getString(1),
+            lista_contactos.add(new Movimiento(c.getString(0), c.getString(1),
                     c.getString(2),c.getString(3)));
         } while (c.moveToNext());
         db.close();
@@ -49,29 +49,6 @@ public class MovimientoHelper extends SQLiteOpenHelper {
     }
 
 
-
-    public boolean insertarMovimiento(String imagen, String idmedidor, String estado ){
-        boolean res=false;
-        SQLiteDatabase db = getWritableDatabase();
-       // String id_= UUID.randomUUID().toString();
-        if(db != null){
-            ContentValues valores = new ContentValues();
-            valores.put("imagen", imagen);
-            valores.put("idmedidor", idmedidor);
-            valores.put("estado", estado);
-            db.insert("movimientos", null, valores);
-            db.close();
-            res=true;
-        }
-        return res;
-    }
-
-    public long mockLawyer(SQLiteDatabase db, Movimiento movimiento) {
-        return db.insert(
-                MovimientoContrac.MovimientoEntry.TABLE_NAME,
-                null,
-                movimiento.toContentValues());
-    }
     public long saveMovimiento( Movimiento movimiento) {
 
        return getWritableDatabase().insert(

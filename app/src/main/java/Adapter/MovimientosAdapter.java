@@ -42,8 +42,8 @@ public class MovimientosAdapter extends CursorAdapter {
         estado      = (TextView) view.findViewById(R.id.t_estado);
 
 
-        _id.setText(cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry._ID)));
-        idmedidor.setText(cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry.IDMEDIDOR)));
+        _id.setText(cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry.ID_MOVIMIENTO)));
+        idmedidor.setText(cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry.LECTURA)));
         estado.setText(cursor.getString(cursor.getColumnIndex(MovimientoContrac.MovimientoEntry.ESTADO)));
     }
 
