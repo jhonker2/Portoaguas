@@ -159,18 +159,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
         mMap = googleMap;
-        /*item.add(new Models.Puntos("S", "17", "A", 9884565.458, 557833.827, 40995, 20));
-        item.add(new Models.Puntos("S", "17", "T", 9883116.134, 559896.4432, 29277, 20));
-        item.add(new Models.Puntos("S", "17", "A", 9885569.601, 556952.9026, 40140, 15));
-        item.add(new Models.Puntos("S", "17", "A", 9877022, 565142, 27623, 15));
-        item.add(new Models.Puntos("S", "17", "A", 9882302.123	, 559041.9727, 36787, 15));
-        item.add(new Models.Puntos("S", "17", "T", 9880899.475, 561051.763, 474, 10));
-        item.add(new Models.Puntos("S", "17", "A", 9883245.421, 557237.1052, 44764, 10));
-        item.add(new Models.Puntos("S", "17", "A", 9881619.369, 562991.1102, 32295, 10));
-        item.add(new Models.Puntos("S", "17", "A", 9882924.052, 559344.512, 20875, 15));
-        item.add(new Models.Puntos("S", "17", "A", 9881418.519, 563088.8361, 25557, 10));*/
     }
 
 
@@ -405,13 +394,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs,HTTP.UTF_8));
                 HttpResponse response = httpclient.execute(httppost);
                 HttpEntity entity = response.getEntity();
-                //is = entity.getContent();
                 data = EntityUtils.toString(entity);
                 JSONObject obj= new JSONObject(data);
                 String  codigojson=obj.getString("registro");
                  Log.e("ULTIMO ID MOVIMIENTO", data);
                 data=codigojson;
-
                 resul=true;
             } catch (Exception e) {
                 Log.e("log_tag", "Error in http connection " + e.toString());

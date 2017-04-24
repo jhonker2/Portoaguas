@@ -9,7 +9,9 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -44,6 +46,20 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+
 import okhttp3.OkHttpClient;
 import utils.Constants;
 import utils.CoordinateConversion;
@@ -64,6 +80,9 @@ public class MainActivity extends AppCompatActivity
     private TextView mLatitude;
     private TextView mLongitude;
 
+    public static String data;
+    public boolean resul;
+
     public static final int REQUEST_LOCATION = 1;
     public static final int REQUEST_CHECK_SETTINGS = 2;
 
@@ -74,7 +93,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        OkHttpClient client = new OkHttpClient();
+
         final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -223,12 +242,16 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    // FUNCIONES PARA LOCALIZAR DISPOSTIVO
+        // FUNCIONES PARA LOCALIZAR DISPOSTIVO
 
     private void updateLocationUI() {
 
-        //mLatitude.setText(String.valueOf(mLastLocation.getLatitude()));
+       // mLatitude.setText(String.valueOf(mLastLocation.getLatitude()));
         //mLongitude.setText(String.valueOf(mLastLocation.getLongitude()));
+      RegistrarDispositivos registra =new RegistrarDispositivos();
+      registra.execute();
+
+
     }
 
     private void processLastLocation() {
@@ -389,5 +412,39 @@ public class MainActivity extends AppCompatActivity
                 location.getLatitude(), location.getLongitude()));
         mLastLocation = location;
         updateLocationUI();
+        //hilo();
+
+    }
+
+    class RegistrarDispositivos extends AsyncTask<String, Void, Boolean>{
+
+        @Override
+        protected Boolean doInBackground(String... strings) {
+
+            ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+            nameValuePairs.add(new BasicNameValuePair("id", Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID)));
+            nameValuePairs.add(new BasicNameValuePair("latitud",String.valueOf(mLastLocation.getLatitude())));
+            nameValuePairs.add(new BasicNameValuePair("longitud",String.valueOf(mLastLocation.getLongitude())));
+            nameValuePairs.add(new BasicNameValuePair("estado", "online"));
+
+            try {
+                HttpClient httpclient = new DefaultHttpClient();
+                HttpPost httppost = new HttpPost("http://192.168.137.1:8090/portal-portoaguas/public/ActualizarDispositivos");
+                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
+                HttpResponse response = httpclient.execute(httppost);
+                HttpEntity entity = response.getEntity();
+                data = EntityUtils.toString(entity);
+                Log.e("DISPOSITIVO", data);
+
+                //JSONObject obj= new JSONObject(data);
+                //String  codigojson=obj.getString("registro");
+                //data=codigojson;
+                resul=true;
+            } catch (Exception e) {
+                Log.e("log_tag", "Error in http connection " + e.toString());
+                resul=false;
+            }
+            return resul;
+        }
     }
 }
