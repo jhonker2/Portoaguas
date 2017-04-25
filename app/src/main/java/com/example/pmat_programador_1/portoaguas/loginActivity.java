@@ -45,6 +45,8 @@ public class loginActivity extends AppCompatActivity {
         btnlogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                Log.e("ID MOVIL",Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID));
                 new RegistrarDispositivos().execute();
 
 
@@ -89,12 +91,13 @@ public class loginActivity extends AppCompatActivity {
 
             try {
                 HttpClient httpclient = new DefaultHttpClient();
+                //HttpPost httppost = new HttpPost("http://192.168.5.56:8090/portal-portoaguas/public/Dispositivo");
                 HttpPost httppost = new HttpPost("http://192.168.137.1:8090/portal-portoaguas/public/Dispositivo");
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
                 HttpResponse response = httpclient.execute(httppost);
                 HttpEntity entity = response.getEntity();
                 data = EntityUtils.toString(entity);
-                Log.e("DISPOSITIVO", data);
+                Log.e("LOGIN", data);
 
                 //JSONObject obj= new JSONObject(data);
                 //String  codigojson=obj.getString("registro");

@@ -33,7 +33,7 @@ public class Movimiento {
 
     public ContentValues toContentValues() {
         ContentValues values = new ContentValues();
-        values.put(MovimientoContrac.MovimientoEntry.ID, id);
+        //values.put(MovimientoContrac.MovimientoEntry.ID, id);
         values.put(MovimientoContrac.MovimientoEntry.ID_MOVIMIENTO,id_movimiento);
         values.put(MovimientoContrac.MovimientoEntry.IMAGEN, imagen);
         values.put(MovimientoContrac.MovimientoEntry.LECTURA, lectura);

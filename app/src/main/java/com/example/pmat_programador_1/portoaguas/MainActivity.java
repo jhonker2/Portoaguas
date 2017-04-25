@@ -262,7 +262,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @SuppressLint("MissingPermission")
-    private void getLastLocation() {
+    private void getLastLocation() {s
         if (isLocationPermissionGranted()) {
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         } else {
@@ -422,19 +422,19 @@ public class MainActivity extends AppCompatActivity
         protected Boolean doInBackground(String... strings) {
 
             ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-            nameValuePairs.add(new BasicNameValuePair("id", Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID)));
+            nameValuePairs.add(new BasicNameValuePair("id_dispositivo", Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID)));
             nameValuePairs.add(new BasicNameValuePair("latitud",String.valueOf(mLastLocation.getLatitude())));
             nameValuePairs.add(new BasicNameValuePair("longitud",String.valueOf(mLastLocation.getLongitude())));
-            nameValuePairs.add(new BasicNameValuePair("estado", "online"));
 
             try {
                 HttpClient httpclient = new DefaultHttpClient();
-                HttpPost httppost = new HttpPost("http://192.168.137.1:8090/portal-portoaguas/public/ActualizarDispositivos");
+                //HttpPost httppost = new HttpPost("http://192.168.5.56:8090/portal-portoaguas/public/MovimientosDispositivos");
+                HttpPost httppost = new HttpPost("http://192.168.137.1:8090/portal-portoaguas/public/MovimientosDispositivos");
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
                 HttpResponse response = httpclient.execute(httppost);
                 HttpEntity entity = response.getEntity();
                 data = EntityUtils.toString(entity);
-                Log.e("DISPOSITIVO", data);
+                Log.e("MOVIMIENTOS DISPOSITIVO", data);
 
                 //JSONObject obj= new JSONObject(data);
                 //String  codigojson=obj.getString("registro");

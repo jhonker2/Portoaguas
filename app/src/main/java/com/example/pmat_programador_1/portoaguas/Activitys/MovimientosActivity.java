@@ -1,11 +1,13 @@
 package com.example.pmat_programador_1.portoaguas.Activitys;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -36,7 +38,7 @@ import sqlit.MovimientoHelper;
 public class MovimientosActivity extends AppCompatActivity {
     public ListView lista;
     public ImageView img;
-    ArrayList<Movimiento> items=new ArrayList<Movimiento>();
+    ArrayList<Movimiento> items = new ArrayList<Movimiento>();
     public MovimientsAdapter2 Ma;
     MovimientoHelper MDB = new MovimientoHelper(MovimientosActivity.this);
 
@@ -45,17 +47,15 @@ public class MovimientosActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.item_list);
-        lista   =   (ListView) findViewById(R.id.list_bd);
-        img     =   (ImageView) findViewById(R.id.imgview);
+        lista = (ListView) findViewById(R.id.list_bd);
+        img = (ImageView) findViewById(R.id.imgview);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-//        Log.e("TOTAL  DE REGISTROS ", Integer.toString(MDB.recuperarCONTACTOS().size()));
-
         /*if(items.size()==0){
             StyleableToast.makeText(MovimientosActivity.this, "Todas sus cortes y Reconeccion han sido enviado!" , Toast.LENGTH_SHORT, R.style.StyledToast).show();
         }else {*/
-            new LoadMovimientos().execute();
-       // }
+        new ContarMovimientos().execute();
+        // }
 
     }
 
@@ -76,21 +76,36 @@ public class MovimientosActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_update) {
-            StyleableToast.makeText(MovimientosActivity.this, "Proceso de Sincronizacion...." , Toast.LENGTH_SHORT, R.style.StyledToastLoad).show();
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MovimientosActivity.this);
+            alertDialogBuilder.setTitle("PortoAguas");
+            alertDialogBuilder
+                    .setMessage("Desea sincronizar los datos a la Base de datos Central. Los datos a subir: Las imagenes de todos Cortes ¿Desea subir los datos?")
+                    .setCancelable(false)
+                    .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            StyleableToast.makeText(MovimientosActivity.this, "Proceso de Sincronizacion....", Toast.LENGTH_LONG, R.style.StyledToastLoad).show();
+                        }
+                    }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            StyleableToast.makeText(MovimientosActivity.this, "No se olvide de enviar todos los datos mas adelante....", Toast.LENGTH_LONG, R.style.StyledToastLoad).show();
+                        }
+                    });
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
 
-
-
     /*
     *   LoadMovimientos
     *
     */
-    class LoadMovimientos extends AsyncTask<String , String, String>{
+    class LoadMovimientos extends AsyncTask<String, String, String> {
         private ProgressDialog pDialog;
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -104,10 +119,9 @@ public class MovimientosActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             pDialog.dismiss();
-            if(s=="0"){
-                StyleableToast.makeText(MovimientosActivity.this, "No se encontraron datos!" , Toast.LENGTH_SHORT, R.style.StyledToastError).show();
-
-            }else {
+            if (s == "0") {
+                StyleableToast.makeText(MovimientosActivity.this, "Todas sus cortes y Reconeccion han sido enviado!", Toast.LENGTH_SHORT, R.style.StyledToastError).show();
+            } else {
                 Ma = new MovimientsAdapter2(MovimientosActivity.this, items);
                 lista.setAdapter(Ma);
             }
@@ -117,7 +131,7 @@ public class MovimientosActivity extends AppCompatActivity {
         protected String doInBackground(String... voids) {
             items.clear();
             items = MDB.recuperarCONTACTOS();
-            if(items.size()==0){
+            if (items.size() == 0) {
                 return "0";
             }
             return "1";
@@ -126,6 +140,36 @@ public class MovimientosActivity extends AppCompatActivity {
         }
     } // Fin de la Tarea LOADMovimiento
 
+
+    /*
+    *   Contar Movimientos
+    *
+    */
+    class ContarMovimientos extends AsyncTask<String, String, String> {
+        int total = 0;
+        String res;
+
+        @Override
+        protected String doInBackground(String... strings) {
+            total = MDB.TotalMovimientos();
+            Log.e("Total de item:", String.valueOf(total));
+            if (total > 0) {
+                res = "ok";
+            } else {
+                res = "vacio";
+            }
+            return res;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            if (s.equals("ok")) {
+                new LoadMovimientos().execute();
+            } else {
+                StyleableToast.makeText(MovimientosActivity.this, "Todas sus cortes y Reconeccion han sido enviado!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
+            }
+        }
+    }
 
 
 }

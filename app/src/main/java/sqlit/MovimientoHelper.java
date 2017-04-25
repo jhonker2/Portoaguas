@@ -22,14 +22,14 @@ public class MovimientoHelper extends SQLiteOpenHelper {
 
     private static final String TABLA_MOVIMIENTOS = "CREATE TABLE movimientos" +
             "(id INTEGER PRIMARY KEY AUTOINCREMENT, id_movimiento TEXT, imagen TEXT, lectura TEXT, estado TEXT)";
+
     public MovimientoHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(TABLA_MOVIMIENTOS);
-
-        //mockData(db);
     }
 
     public ArrayList<Movimiento> recuperarCONTACTOS() {
@@ -41,38 +41,39 @@ public class MovimientoHelper extends SQLiteOpenHelper {
         c.moveToFirst();
         do {
             lista_contactos.add(new Movimiento(c.getString(0), c.getString(1),
-                    c.getString(2),c.getString(3)));
+                    c.getString(2), c.getString(3)));
         } while (c.moveToNext());
         db.close();
         c.close();
         return lista_contactos;
     }
 
+    public int TotalMovimientos() {
+        SQLiteDatabase db = getReadableDatabase();
+        int cont = 0;
+        String[] valores_recuperar = {"id_movimiento", "imagen", "lectura", "estado"};
+        Cursor c = db.query("movimientos", valores_recuperar,
+                null, null, null, null, null, null);
+        c.moveToFirst();
+        do {
+            cont++;
+        } while (c.moveToNext());
+        db.close();
+        c.close();
+        return cont;
+    }
 
-    public long saveMovimiento( Movimiento movimiento) {
 
-       return getWritableDatabase().insert(
+    public long saveMovimiento(Movimiento movimiento) {
+
+        return getWritableDatabase().insert(
                 MovimientoContrac.MovimientoEntry.TABLE_NAME,
                 null,
                 movimiento.toContentValues());
     }
+
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        /*db.execSQL("DROP TABLE IF EXISTS " + TABLA_MOVIMIENTOS);
-        onCreate(db);*/
-    }
 
-
-
-    public Cursor getAllMovimientos() {
-        return getReadableDatabase()
-                .query(
-                        MovimientoContrac.MovimientoEntry.TABLE_NAME,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null);
     }
 }
