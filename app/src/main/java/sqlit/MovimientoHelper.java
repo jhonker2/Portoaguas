@@ -55,9 +55,14 @@ public class MovimientoHelper extends SQLiteOpenHelper {
         Cursor c = db.query("movimientos", valores_recuperar,
                 null, null, null, null, null, null);
         c.moveToFirst();
-        do {
-            cont++;
-        } while (c.moveToNext());
+
+        if(c.getCount()==0){
+
+        }else {
+            do {
+                cont++;
+            } while (c.moveToNext());
+        }
         db.close();
         c.close();
         return cont;
@@ -70,6 +75,12 @@ public class MovimientoHelper extends SQLiteOpenHelper {
                 MovimientoContrac.MovimientoEntry.TABLE_NAME,
                 null,
                 movimiento.toContentValues());
+    }
+
+    public void eliminar(){
+        SQLiteDatabase db = getReadableDatabase();
+        db.execSQL("DELETE FROM MOVIMIENTOS");
+        db.close();
     }
 
     @Override

@@ -41,10 +41,10 @@ dependencies {
     compile 'com.google.android.gms:play-services-location:10.2.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.1'
     compile 'com.muddzdev:styleabletoast:1.0.6'
-
     compile 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
 
-    compile 'com.squareup.okhttp3:okhttp:3.7.0'
-
+    // Libreria para subir archivos al servidor https://jonathanmelgoza.com/blog/subir-archivos-a-un-servidor-desde-android/
+    compile 'net.gotev:uploadservice:3.0'
+    
 
 }

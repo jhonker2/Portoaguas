@@ -14,18 +14,15 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AlertDialog;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -56,13 +53,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import okhttp3.OkHttpClient;
 import utils.Constants;
-import utils.CoordinateConversion;
+import utils.JSON;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks,
@@ -99,10 +94,6 @@ public class MainActivity extends AppCompatActivity
         if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             AlertNoGps();
         }
-
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        */
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -242,16 +233,11 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-        // FUNCIONES PARA LOCALIZAR DISPOSTIVO
+    // FUNCIONES PARA LOCALIZAR DISPOSTIVO
 
     private void updateLocationUI() {
-
-       // mLatitude.setText(String.valueOf(mLastLocation.getLatitude()));
-        //mLongitude.setText(String.valueOf(mLastLocation.getLongitude()));
-      RegistrarDispositivos registra =new RegistrarDispositivos();
-      registra.execute();
-
-
+        RegistrarDispositivos registra = new RegistrarDispositivos();
+        registra.execute();
     }
 
     private void processLastLocation() {
@@ -262,7 +248,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @SuppressLint("MissingPermission")
-    private void getLastLocation() {s
+    private void getLastLocation() {
         if (isLocationPermissionGranted()) {
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         } else {
@@ -416,20 +402,20 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    class RegistrarDispositivos extends AsyncTask<String, Void, Boolean>{
+    class RegistrarDispositivos extends AsyncTask<String, Void, Boolean> {
 
         @Override
         protected Boolean doInBackground(String... strings) {
 
             ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
             nameValuePairs.add(new BasicNameValuePair("id_dispositivo", Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID)));
-            nameValuePairs.add(new BasicNameValuePair("latitud",String.valueOf(mLastLocation.getLatitude())));
-            nameValuePairs.add(new BasicNameValuePair("longitud",String.valueOf(mLastLocation.getLongitude())));
+            nameValuePairs.add(new BasicNameValuePair("latitud", String.valueOf(mLastLocation.getLatitude())));
+            nameValuePairs.add(new BasicNameValuePair("longitud", String.valueOf(mLastLocation.getLongitude())));
 
             try {
                 HttpClient httpclient = new DefaultHttpClient();
                 //HttpPost httppost = new HttpPost("http://192.168.5.56:8090/portal-portoaguas/public/MovimientosDispositivos");
-                HttpPost httppost = new HttpPost("http://192.168.137.1:8090/portal-portoaguas/public/MovimientosDispositivos");
+                HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/MovimientosDispositivos");
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
                 HttpResponse response = httpclient.execute(httppost);
                 HttpEntity entity = response.getEntity();
@@ -439,10 +425,10 @@ public class MainActivity extends AppCompatActivity
                 //JSONObject obj= new JSONObject(data);
                 //String  codigojson=obj.getString("registro");
                 //data=codigojson;
-                resul=true;
+                resul = true;
             } catch (Exception e) {
                 Log.e("log_tag", "Error in http connection " + e.toString());
-                resul=false;
+                resul = false;
             }
             return resul;
         }

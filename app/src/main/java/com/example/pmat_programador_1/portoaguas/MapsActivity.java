@@ -95,6 +95,7 @@ import sqlit.Movimiento;
 import sqlit.MovimientoHelper;
 import utils.Constants;
 import utils.CoordinateConversion;
+import utils.JSON;
 
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks,
@@ -484,7 +485,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (item.get(i).getEstado().equals("I")) {
                     Marker melbourne = mMap.addMarker(new MarkerOptions()
                             .position(sydney)
-                            .title(String.valueOf(item.get(i).getCodigomedidor()))
+                            .title("Numero de Cuenta: " + String.valueOf(item.get(i).getNumeroCuenta()))
+                            .snippet("Texto secundario")
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.houses)));
                     melbourne.showInfoWindow();
 
@@ -547,8 +549,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         alertDialog.show();
                         cont = 0;
                         ced.setText(marker.getPosition().toString());
-                        //nomb.setText(marker.getTitle());
-                        cuenta.setText(marker.getTitle());
+                        cuenta.setText(marker.getTitle().substring(18));
 
 
                         //Boton de la Camara
@@ -570,22 +571,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             @Override
                             public void onClick(View v) {
                                 //Metogo para almacenar el movimiento en el mapa
-
                                 new RegistrarMovimiento().execute();
-
-
-                                //GuardarSql();
-                      /*  String cortado= ced.getText().toString().substring(10,1);
-                        String[] utm = cortado.split(",");
-                        String latZone = utm[0];
-                        String lonZone = utm[1];*/
-                               /* Toast.makeText(MapsActivity.this, "Imagen se encuentra: " + foto, Toast.LENGTH_LONG).show();
-                                Log.e("Ruta", foto.toString());*/
-
-
-                                // boolean var = usdbh.insertarMovimiento("Ruta de la Imagen", lect.getText().toString(), "A");
-
-
                             }
                         });
 
@@ -610,7 +596,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             try {
                 HttpClient httpclient = new DefaultHttpClient();
-                HttpPost httppost = new HttpPost("http://192.168.137.1:8090/portal-portoaguas/public/movimiento");
+                HttpPost httppost = new HttpPost("http://"+ JSON.ipserver+"/movimiento");
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
                 HttpResponse response = httpclient.execute(httppost);
                 HttpEntity entity = response.getEntity();
@@ -652,16 +638,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public void StoreCliente2() {
-
-        // http post
-
-    }
-
     public ArrayList<Puntos> getPuntos() throws ParseException {
         String values;
         DefaultHttpClient client = new DefaultHttpClient();
-        HttpGet request = new HttpGet("http://192.168.137.1:8090/portal-portoaguas/public/puntos");//
+        HttpGet request = new HttpGet("http://"+ JSON.ipserver+"/puntos");//
         try {
             HttpResponse response = client.execute(request);
             HttpEntity entity = response.getEntity();
@@ -746,7 +726,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             try {
                 HttpClient httpclient = new DefaultHttpClient();
                 //HttpPost httppost = new HttpPost("http://192.168.5.56:8090/portal-portoaguas/public/MovimientosDispositivos");
-                HttpPost httppost = new HttpPost("http://192.168.137.1:8090/portal-portoaguas/public/MovimientosDispositivos");
+                HttpPost httppost = new HttpPost("http://"+ JSON.ipserver+"/MovimientosDispositivos");
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
                 HttpResponse response = httpclient.execute(httppost);
                 HttpEntity entity = response.getEntity();

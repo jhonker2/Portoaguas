@@ -36,6 +36,7 @@ import java.util.ArrayList;
 
 import Models.Puntos;
 import utils.CoordinateConversion;
+import utils.JSON;
 
 
 /**
@@ -156,7 +157,7 @@ public class ArsGisActivity extends AppCompatActivity {
     public ArrayList<Puntos> getPuntos() throws ParseException {
         String values;
         DefaultHttpClient client = new DefaultHttpClient();
-        HttpGet request = new HttpGet("http://192.168.137.1:8090/portal-portoaguas/public/puntos");//
+        HttpGet request = new HttpGet("http://"+ JSON.ipserver+"/puntos");//
         try {
             HttpResponse response = null;
             try {

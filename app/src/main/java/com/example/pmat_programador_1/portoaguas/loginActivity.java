@@ -29,6 +29,8 @@ import org.apache.http.util.EntityUtils;
 
 import java.util.ArrayList;
 
+import utils.JSON;
+
 public class loginActivity extends AppCompatActivity {
     public Button btnlogin;
     public static String data;
@@ -92,7 +94,7 @@ public class loginActivity extends AppCompatActivity {
             try {
                 HttpClient httpclient = new DefaultHttpClient();
                 //HttpPost httppost = new HttpPost("http://192.168.5.56:8090/portal-portoaguas/public/Dispositivo");
-                HttpPost httppost = new HttpPost("http://192.168.137.1:8090/portal-portoaguas/public/Dispositivo");
+                HttpPost httppost = new HttpPost("http://"+ JSON.ipserver+"/Dispositivo");
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
                 HttpResponse response = httpclient.execute(httppost);
                 HttpEntity entity = response.getEntity();

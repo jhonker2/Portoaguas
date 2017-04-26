@@ -41,7 +41,16 @@
                     android:layout_height="wrap_content"
                     android:text="TextView"
                     android:layout_alignParentTop="true"
-                    android:layout_alignParentStart="true" />
+                    android:layout_toEndOf="@+id/textView7"
+                    android:layout_marginStart="11dp" />
+
+                <TextView
+                    android:id="@+id/textView7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:text="N° Cuenta:" />
             </RelativeLayout>
 
             <LinearLayout
