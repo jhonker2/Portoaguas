@@ -2,10 +2,12 @@ package com.example.pmat_programador_1.portoaguas;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -25,6 +27,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +45,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.muddzdev.styleabletoastlibrary.StyleableToast;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -53,9 +57,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import servicios.ServicioGPS;
 import utils.Constants;
 import utils.JSON;
 
@@ -72,11 +78,12 @@ public class MainActivity extends AppCompatActivity
     private LocationSettingsRequest mLocationSettingsRequest;
     private Location mLastLocation;
 
-    private TextView mLatitude;
+    private TextView mLatitude, txtNombre;
     private TextView mLongitude;
 
     public static String data;
     public boolean resul;
+    public String resuld;
 
     public static final int REQUEST_LOCATION = 1;
     public static final int REQUEST_CHECK_SETTINGS = 2;
@@ -102,6 +109,12 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+
+        View navHeaderView = navigationView.getHeaderView(0);
+        txtNombre= (TextView) navHeaderView.findViewById(R.id.textNombre);
+        txtNombre.setText(da.getString("p_nombreU",null) +" - "+da.getString("p_cargoU",null));
+
 
 
         // Establecer punto de entrada para la API de ubicación
@@ -115,6 +128,10 @@ public class MainActivity extends AppCompatActivity
 
         // Verificar ajustes de ubicación actuales
         checkLocationSettings();
+
+/*        ServicioGPS servigps = new ServicioGPS(getApplicationContext());
+
+        servigps.Miubicacion();*/
 
     }
 
@@ -177,9 +194,8 @@ public class MainActivity extends AppCompatActivity
                         public void onClick(@SuppressWarnings("unused")
                                             final DialogInterface dialog, @SuppressWarnings("unused")
                                             final int id) {
-                            Intent inte = new Intent(MainActivity.this, loginActivity.class);
-                            startActivity(inte);
-                            finish();
+                            new CerrarSesion().execute();
+
                         }
                     })
                     .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -402,6 +418,60 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    class CerrarSesion extends AsyncTask<String, Void ,String>{
+        private ProgressDialog pDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(MainActivity.this);
+            pDialog.setMessage("Saliendo...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            pDialog.dismiss();
+            if(s.equals("cerrada")){
+                SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+                da.edit().clear().commit();
+
+                Intent inte = new Intent(MainActivity.this, loginActivity.class);
+            startActivity(inte);
+            finish();
+            }else if(s.equals("No_cerrada")){
+                StyleableToast.makeText(MainActivity.this, "Error Al cerrar Sesión intente nuevamente!!", Toast.LENGTH_LONG, R.style.StyledToastError).show();
+
+            }
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+            SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+            ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+            nameValuePairs.add(new BasicNameValuePair("id_usuario", da.getString("p_idUsuario",null)));
+
+            try {
+                HttpClient httpclient = new DefaultHttpClient();
+                HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/logout");
+                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
+                HttpResponse response = httpclient.execute(httppost);
+                HttpEntity entity = response.getEntity();
+                data = EntityUtils.toString(entity);
+                Log.e("CERRAR", data);
+
+                JSONObject obj= new JSONObject(data);
+                String  res=obj.getString("respuesta");
+                //data=codigojson;
+                resuld = res;
+            } catch (Exception e) {
+                Log.e("log_tag", "Error in http connection " + e.toString());
+                resuld = "";
+            }
+            return resuld;
+        }
+    }
     class RegistrarDispositivos extends AsyncTask<String, Void, Boolean> {
 
         @Override

@@ -2,8 +2,6 @@ package com.example.pmat_programador_1.portoaguas.Activitys;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -13,50 +11,31 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.pmat_programador_1.portoaguas.MainActivity;
-import com.example.pmat_programador_1.portoaguas.MapsActivity;
 import com.example.pmat_programador_1.portoaguas.R;
 import com.muddzdev.styleabletoastlibrary.StyleableToast;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpVersion;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.CoreProtocolPNames;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.UUID;
-
-import Adapter.MovimientsAdapter2;
-import sqlit.Movimiento;
-import sqlit.MovimientoContrac;
-import sqlit.MovimientoHelper;
-import utils.JSON;
-
-
-/*
-* Librerias para subir archivos al servidor
-* */
-
 
 import net.gotev.uploadservice.MultipartUploadRequest;
 import net.gotev.uploadservice.ServerResponse;
 import net.gotev.uploadservice.UploadInfo;
 import net.gotev.uploadservice.UploadNotificationConfig;
 import net.gotev.uploadservice.UploadStatusDelegate;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.UUID;
+
+import Adapter.MovimientsAdapter2;
+import sqlit.Movimiento;
+import sqlit.MovimientoHelper;
+import utils.JSON;
+
+/*
+* Librerias para subir archivos al servidor
+* */
 
 /**
  * Created by PMAT-PROGRAMADOR_1 on 11/04/2017.
@@ -174,6 +153,8 @@ public class MovimientosActivity extends AppCompatActivity {
 
                         //////// AQUI VA EL ACTUALIZAR PARA SUBIR LOS DATOS SINCRONIZADOS
                         movimientoHelper.eliminar();
+                        finish();
+                        startActivity(getIntent());
                     } catch (Exception exc) {
                         System.out.println(exc.getMessage()+" "+exc.getLocalizedMessage());
                     }

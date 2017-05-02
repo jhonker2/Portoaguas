@@ -1,7 +1,9 @@
 package com.example.pmat_programador_1.portoaguas;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -12,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.muddzdev.styleabletoastlibrary.StyleableToast;
@@ -26,6 +29,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -33,33 +37,54 @@ import utils.JSON;
 
 public class loginActivity extends AppCompatActivity {
     public Button btnlogin;
+    public EditText txt_usuario, txt_clave;
     public static String data;
-    public boolean resul;
+    public String resul;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SharedPreferences dato = this.getSharedPreferences("perfil", Context.MODE_PRIVATE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        btnlogin = (Button) findViewById(R.id.btn_login);
-
-
-
-        btnlogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Log.e("ID MOVIL",Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID));
-                new RegistrarDispositivos().execute();
+        if (dato.getString("p_nombreU", null) != null) {
+            startActivity(new Intent(loginActivity.this, MainActivity.class));
+            finish();
+        }else {
+            btnlogin = (Button) findViewById(R.id.btn_login);
+            txt_usuario = (EditText) findViewById(R.id.textUsuario);
+            txt_clave = (EditText) findViewById(R.id.textClave);
 
 
-            }
-        });
+            btnlogin.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (txt_usuario.getText().toString().equals("") && txt_clave.getText().toString().equals("")) {
+                        StyleableToast.makeText(loginActivity.this, "Usuario y Contraseña se encuentra vacio!", Toast.LENGTH_LONG, R.style.StyledToastError).show();
+                    } else if (txt_usuario.getText().toString().equals("")) {
+                        StyleableToast.makeText(loginActivity.this, "El nombre de usuario se encuentra vacio!", Toast.LENGTH_LONG, R.style.StyledToastError).show();
+                    } else if (txt_clave.getText().toString().equals("")) {
+                        StyleableToast.makeText(loginActivity.this, "La contraseña se encuentra vacio!", Toast.LENGTH_LONG, R.style.StyledToastError).show();
+                    } else {
+                        Log.e("ID MOVIL", Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID));
+                        new RegistrarDispositivos().execute(txt_usuario.getText().toString(), txt_clave.getText().toString());
+                    }
 
 
+                }
+            });
+
+        }
     }
 
-    class RegistrarDispositivos extends AsyncTask<String, Void, Boolean> {
+    class RegistrarDispositivos extends AsyncTask<String, Void, String> {
         private ProgressDialog pDialog;
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            pDialog.dismiss();
+
+        }
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -71,43 +96,66 @@ public class loginActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(Boolean aBoolean) {
-            if(aBoolean==true){
-                pDialog.dismiss();
-                StyleableToast.makeText(loginActivity.this, "Login Correcto!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
+        protected void onPostExecute(String aBoolean) {
+            pDialog.dismiss();
+            if(aBoolean.equals("Ecedula")){
+                StyleableToast.makeText(loginActivity.this, "La cedula ingresada no se encuentra registrada!!", Toast.LENGTH_LONG, R.style.StyledToastError).show();
+                txt_usuario.setError("Usuario no existe");
+                txt_usuario.requestFocus();
+                //Intent inte =  new Intent(loginActivity.this,MainActivity.class);
+                //startActivity(inte);
+                //finish();
+            }else if(aBoolean.equals("Eclave")) {
+                    StyleableToast.makeText(loginActivity.this, "La clave es incorrecta!!", Toast.LENGTH_LONG, R.style.StyledToastError).show();
+                    txt_clave.setError("Clave incorrecta");
+                    txt_clave.requestFocus();
+                    txt_clave.setText("");
+            }else if(aBoolean.equals("Eduplicado")) {
+                StyleableToast.makeText(loginActivity.this, "El usuario ya ha iniciado Sesion en otro dispositivo!! No es posible iniciar Sesión", Toast.LENGTH_LONG, R.style.StyledToastError).show();
+            }else{
+                StyleableToast.makeText(loginActivity.this, "Login Correcto Bienvenido!!", Toast.LENGTH_LONG, R.style.StyledToast).show();
                 Intent inte =  new Intent(loginActivity.this,MainActivity.class);
                 startActivity(inte);
                 finish();
-            }else{
-                pDialog.dismiss();
-                StyleableToast.makeText(loginActivity.this, "Error al ingresar al sistema!!", Toast.LENGTH_SHORT, R.style.StyledToastError).show();
-
             }
         }
 
         @Override
-        protected Boolean doInBackground(String... strings) {
+        protected String doInBackground(String... strings) {
+            SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+
             ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
             nameValuePairs.add(new BasicNameValuePair("id_Dispositivo", Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID)));
-            nameValuePairs.add(new BasicNameValuePair("estado", "online"));
+            nameValuePairs.add(new BasicNameValuePair("cedula", strings[0]));
+            nameValuePairs.add(new BasicNameValuePair("clave", strings[1]));
 
             try {
                 HttpClient httpclient = new DefaultHttpClient();
-                //HttpPost httppost = new HttpPost("http://192.168.5.56:8090/portal-portoaguas/public/Dispositivo");
-                HttpPost httppost = new HttpPost("http://"+ JSON.ipserver+"/Dispositivo");
+                HttpPost httppost = new HttpPost("http://"+ JSON.ipserver+"/login");
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
                 HttpResponse response = httpclient.execute(httppost);
                 HttpEntity entity = response.getEntity();
                 data = EntityUtils.toString(entity);
-                Log.e("LOGIN", data);
+                //Log.e("LOGIN", data);
+                JSONObject obj = new JSONObject(data);
+                String respuesta = obj.getString("respuesta");
+                String id_usuario = obj.getString("id_usu");
+                String nombre = obj.getString("nombre_usu");
+                String cargo = obj.getString("cargo_usu");
 
-                //JSONObject obj= new JSONObject(data);
-                //String  codigojson=obj.getString("registro");
-                //data=codigojson;
-                resul=true;
+
+                //OBTENER LOS DATOS PARA LA PREFERENCIA
+                Log.e("Datos",id_usuario+" "+cargo+" "+nombre);
+
+                SharedPreferences.Editor editor = dato.edit();
+                editor.putString("p_idUsuario", id_usuario);
+                editor.putString("p_nombreU", nombre);
+                editor.putString("p_cargoU", cargo);
+                editor.commit();
+               resul=respuesta;
             } catch (Exception e) {
                 Log.e("log_tag", "Error in http connection " + e.toString());
-                resul=false;
+                resul="";
             }
             return resul;
         }
