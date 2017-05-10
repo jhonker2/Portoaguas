@@ -78,8 +78,7 @@ public class MainActivity extends AppCompatActivity
     private LocationSettingsRequest mLocationSettingsRequest;
     private Location mLastLocation;
 
-    private TextView mLatitude, txtNombre;
-    private TextView mLongitude;
+    private TextView txtNombre, txtCargo;
 
     public static String data;
     public boolean resul;
@@ -112,8 +111,10 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
 
         View navHeaderView = navigationView.getHeaderView(0);
-        txtNombre= (TextView) navHeaderView.findViewById(R.id.textNombre);
-        txtNombre.setText(da.getString("p_nombreU",null) +" - "+da.getString("p_cargoU",null));
+        txtNombre   = (TextView) navHeaderView.findViewById(R.id.textNombre);
+        txtCargo    = (TextView) navHeaderView.findViewById(R.id.textCargo);
+        txtNombre.setText(da.getString("p_nombreU",null));
+        txtCargo.setText(da.getString("p_cargoU",null));
 
 
 
@@ -476,11 +477,12 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected Boolean doInBackground(String... strings) {
-
+            SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
             ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
             nameValuePairs.add(new BasicNameValuePair("id_dispositivo", Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID)));
             nameValuePairs.add(new BasicNameValuePair("latitud", String.valueOf(mLastLocation.getLatitude())));
             nameValuePairs.add(new BasicNameValuePair("longitud", String.valueOf(mLastLocation.getLongitude())));
+            nameValuePairs.add(new BasicNameValuePair("cedula",dato.getString("p_idUsuario", null) ));
 
             try {
                 HttpClient httpclient = new DefaultHttpClient();

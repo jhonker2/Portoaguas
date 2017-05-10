@@ -36,6 +36,23 @@ public class ServicioGPS extends Service implements LocationListener {
         getLocation();
     }
 
+    @Override
+    public void onCreate() {
+        Log.d("Servicio", "Servicio creado...");
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Miubicacion();
+        return START_NOT_STICKY;
+
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
     public void Miubicacion() {
         Log.e("Mi nueva Ubicacion Ser", Lat + "," + longitud);
     }

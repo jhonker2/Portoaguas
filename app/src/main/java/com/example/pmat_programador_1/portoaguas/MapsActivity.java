@@ -102,7 +102,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status> {
     public GoogleMap mMap;
     private EditText ced, lect, comentario;
-    public static TextView total, cuenta;
+    public static TextView total, cuenta, meses, deuda;
     private Button btnSaveCliente;
     private ImageButton btnC;
     private ImageView img;
@@ -446,7 +446,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         protected void onPreExecute() {
             super.onPreExecute();
             pDialog = new ProgressDialog(MapsActivity.this);
-            pDialog.setMessage("Cargando Puntos...");
+            pDialog.setMessage("Cargando Cortes...");
             pDialog.setIndeterminate(false);
             pDialog.setCancelable(false);
             pDialog.show();
@@ -482,106 +482,103 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 double longLat = item.get(i).getLongitud();
                 double[] ltn = obj.utm2LatLon("17 M " + longLat + " " + lati);
                 sydney = new LatLng(ltn[0], ltn[1]);
-                if (item.get(i).getEstado().equals("I")) {
-                    Marker melbourne = mMap.addMarker(new MarkerOptions()
-                            .position(sydney)
-                            .title("Numero de Cuenta: " + String.valueOf(item.get(i).getNumeroCuenta()))
-                            .snippet("Texto secundario")
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.houses)));
-                    melbourne.showInfoWindow();
 
-                } else {
                     Marker melbourne = mMap.addMarker(new MarkerOptions()
                             .position(sydney)
-                            .title("Numero de Cuenta: " + String.valueOf(item.get(i).getNumeroCuenta()))
-                            .snippet("Texto secundario")
+                            .title("Nº. Cuenta: " + String.valueOf(item.get(i).getNumero_cuenta()))
+                            .snippet("Meses: "+item.get(i).getMes_deuda() + " Deuda: "+item.get(i).getDeuda_portoagua())
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.blank)));
                     melbourne.showInfoWindow();
 
-                }
+
                 float zoomlevel = 19;
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, zoomlevel));
             }
 
-
-            mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                 @Override
-                public boolean onMarkerClick(Marker marker) {
+                public void onInfoWindowClick(Marker marker) {
+                    ArrayList rubros = new ArrayList();
+                    rubros.add(new Rubros("65","RECONEXION CON EXCAVADORA EN TIERRAAPERTURA MANUAL DE ZANJA","6", "78"));
+                    rubros.add(new Rubros("66","RECONEXION CON EXCAVADORA MANUAL DE ZANJA EN AREA CON H.S","13", "79"));
+                    rubros.add(new Rubros("64","LLAVE DE ACERO","6.50", "80"));
+                    rubros.add(new Rubros("67","INSTALACION Y REUBICACION DE MEDIDOR Y VALVULA DE ESFERA","12", "81"));
+                    rubros.add(new Rubros("63","OTROS MATERIALES","1", "77"));
+                    rubros.add(new Rubros("54", "CORTE CON LLAVE DE ACERO", "2.50","67"));
+                    rubros.add(new Rubros("55", "CORTE CON LLAVE DE ESFERA", "2","68"));
+                    rubros.add(new Rubros("56", "CORTE CON EXCAVACION DE TIERRA", "6","69"));
+                    rubros.add(new Rubros("57", "CORTE CON EXCAVACION MANUAL", "13","70"));
+                    rubros.add(new Rubros("58", "RECONEXION CON LLAVE DE ACERO", "2.50","71"));
+                    rubros.add(new Rubros("59", "RECONEXION CON LLAVE DE ESFERA", "2","72"));
+                    rubros.add(new Rubros("60", "RECONEXION CON LLAVE DE ACERO CON CAMARA OBSTRUIDA", "3","73"));
+                    rubros.add(new Rubros("61", "INSTALACION DE LLAVE DE ESFERA", "5","74"));
+                    rubros.add(new Rubros("62", "LLAVE DE ESFERA", "4.8","75"));
+                    rubros.add(new Rubros("157", "RECONEXION EN TUBERIA", "4","130"));
+                    rubros.add(new Rubros("156", "CORTE EN TUBERIA", "4","130"));
+                    rubros.add(new Rubros("53", "ENTREGA AVISO NOTIFICACION", "1.75","66"));
 
-                    long Cur = System.currentTimeMillis();
+                    AlertDialog.Builder buil = new AlertDialog.Builder(MapsActivity.this);
+                    View mView = getLayoutInflater().inflate(R.layout.storepunto, null);
 
-                    if (Cur - mlas > mTim) {
-                        mlas = Cur;
+                    ced             = (EditText) mView.findViewById(R.id.textCedulaCliente);
+                    comentario      = (EditText) mView.findViewById(R.id.t_comentario);
+                    btnSaveCliente  = (Button) mView.findViewById(R.id.buttonNewC);
+                    btnC            = (ImageButton) mView.findViewById(R.id.btn_camera);
+                    img             = (ImageView) mView.findViewById(R.id.img1);
+                    recycler        = (RecyclerView) mView.findViewById(R.id.my_recycler_view);
+                    total           = (TextView) mView.findViewById(R.id.txt_total);
+                    cuenta          = (TextView) mView.findViewById(R.id.txt_cuenta);
+                    meses           = (TextView) mView.findViewById(R.id.txt_meses);
+                    deuda           = (TextView) mView.findViewById(R.id.txt_deuda);
 
-                    } else {
+                    lManager = new LinearLayoutManager(MapsActivity.this, LinearLayoutManager.HORIZONTAL, false);
+                    recycler.setHasFixedSize(true);
+                    recycler.setLayoutManager(lManager);
 
-                        ArrayList rubros = new ArrayList();
-                        rubros.add(new Rubros("54", "CORTE CON LLAVE DE ACERO", "1"));
-                        rubros.add(new Rubros("55", "CORTE CON LLAVE DE ESFERA", "2.50"));
-                        rubros.add(new Rubros("56", "CORTE CON EXCAVACION DE TIERRA", "6"));
+                    adapter = new RecycleViewAdapter(MapsActivity.this, rubros);
 
+                    recycler.setAdapter(adapter);
+                    recycler.setNestedScrollingEnabled(false);
 
-                        //Toast.makeText(MapsActivity.this, "Punto Precionado! "+marker.getPosition(), Toast.LENGTH_SHORT).show();
-                        AlertDialog.Builder buil = new AlertDialog.Builder(MapsActivity.this);
-                        View mView = getLayoutInflater().inflate(R.layout.storepunto, null);
+                    buil.setView(mView);
+                    alertDialog = buil.create();
+                    alertDialog.show();
+                    cont = 0;
+                    ced.setText(marker.getPosition().toString());
+                    cuenta.setText(marker.getTitle().substring(12));
 
-                        ced = (EditText) mView.findViewById(R.id.textCedulaCliente);
-                        lect = (EditText) mView.findViewById(R.id.textLectura);
-                        comentario = (EditText) mView.findViewById(R.id.t_comentario);
-                        btnSaveCliente = (Button) mView.findViewById(R.id.buttonNewC);
-                        btnC = (ImageButton) mView.findViewById(R.id.btn_camera);
-                        img = (ImageView) mView.findViewById(R.id.img1);
-                        recycler = (RecyclerView) mView.findViewById(R.id.my_recycler_view);
-                        total = (TextView) mView.findViewById(R.id.txt_total);
-                        cuenta = (TextView) mView.findViewById(R.id.txt_cuenta);
-
-                        lManager = new LinearLayoutManager(MapsActivity.this, LinearLayoutManager.HORIZONTAL, false);
-                        recycler.setHasFixedSize(true);
-                        recycler.setLayoutManager(lManager);
-
-                        adapter = new RecycleViewAdapter(MapsActivity.this, rubros);
-
-                        recycler.setAdapter(adapter);
-                        recycler.setNestedScrollingEnabled(false);
-
-                        buil.setView(mView);
-                        alertDialog = buil.create();
-                        alertDialog.show();
-                        cont = 0;
-                        ced.setText(marker.getPosition().toString());
-                        cuenta.setText(marker.getTitle().substring(18));
-
-
-                        //Boton de la Camara
-                        btnC.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                try {
-                                    createImageFile();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-
-                        });
-
-
-                        //Boton para almacenar punto
-                        btnSaveCliente.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                //Metogo para almacenar el movimiento en el mapa
-                                new RegistrarMovimiento().execute();
-                            }
-                        });
-
+                    for (int x=0; x<item.size(); x++){
+                        if(String.valueOf(item.get(x).getNumero_cuenta()).equals(cuenta.getText().toString())){
+                            deuda.setText(String.valueOf(item.get(x).getDeuda_portoagua()));
+                            meses.setText(String.valueOf(item.get(x).getMes_deuda()));
+                        }
                     }
-                    return false;
+
+                    //Boton de la Camara
+                    btnC.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            try {
+                                createImageFile();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                    });
+
+
+                    //Boton para almacenar punto
+                    btnSaveCliente.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            //Metogo para almacenar el movimiento en el mapa
+                            new RegistrarMovimiento().execute();
+                        }
+                    });
                 }
             });
         }
-
-
     }
 
     class RegistrarMovimiento extends AsyncTask<String, Void, Boolean> {
@@ -639,11 +636,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public ArrayList<Puntos> getPuntos() throws ParseException {
+        SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+        ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+        nameValuePairs.add(new BasicNameValuePair("cedula",dato.getString("p_idUsuario", null) ));
         String values;
-        DefaultHttpClient client = new DefaultHttpClient();
-        HttpGet request = new HttpGet("http://"+ JSON.ipserver+"/puntos");//
         try {
-            HttpResponse response = client.execute(request);
+            HttpClient httpclient = new DefaultHttpClient();
+        HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/punto");
+        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
+
+            HttpResponse response = httpclient.execute(httppost);
             HttpEntity entity = response.getEntity();
             values = EntityUtils.toString(entity);
 
@@ -652,15 +654,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             JSONArray obj = new JSONArray(values);
             for (int index = 0; index < obj.length(); index++) {
                 JSONObject jsonObject = obj.getJSONObject(index);
-                Long codigojson = jsonObject.getLong("id");
-                String hemisferiojson = jsonObject.getString("hemisferio");
-                String zonajson = jsonObject.getString("zona");
-                String estadojson = jsonObject.getString("estado");
-                Double latitudjson = jsonObject.getDouble("latitud");
-                Double longitudjson = jsonObject.getDouble("longitud");
-                Long codigoMedidorjson = jsonObject.getLong("codigoMedidor");
-                Long numeroCuentajson = jsonObject.getLong("numeroCuenta");
-                item.add(new Puntos(codigojson, hemisferiojson, zonajson, estadojson, latitudjson, longitudjson, codigoMedidorjson, numeroCuentajson));
+                Long idtramitejson          = jsonObject.getLong("id_tramite");
+                Long numeroCuentejson       = jsonObject.getLong("numero_cuenta");
+                Long codClientejson         = jsonObject.getLong("cod_cliente");
+                Double latitudjson          = jsonObject.getDouble("latitud");
+                Double longitudjson         = jsonObject.getDouble("longitud");
+                Long deuda_portoaguasjson   = jsonObject.getLong("deuda_portoagua");
+                Long mes_deudajson          = jsonObject.getLong("mes_deuda");
+                Long codMedidorjson         = jsonObject.getLong("codigo_medidor");
+                String serieMedidorjson     = jsonObject.getString("serie_medidor");
+                item.add(new Puntos(serieMedidorjson,latitudjson,longitudjson,deuda_portoaguasjson,codMedidorjson,idtramitejson,numeroCuentejson,codClientejson,mes_deudajson,codMedidorjson));
             }
         } catch (JSONException e) {
             // TODO Auto-generated catch block
@@ -717,11 +720,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         @Override
         protected Boolean doInBackground(String... strings) {
-
+            SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
             ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
             nameValuePairs.add(new BasicNameValuePair("id_dispositivo", Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID)));
             nameValuePairs.add(new BasicNameValuePair("latitud", String.valueOf(mLastLocation.getLatitude())));
             nameValuePairs.add(new BasicNameValuePair("longitud", String.valueOf(mLastLocation.getLongitude())));
+            nameValuePairs.add(new BasicNameValuePair("cedula",dato.getString("p_idUsuario", null) ));
 
             try {
                 HttpClient httpclient = new DefaultHttpClient();

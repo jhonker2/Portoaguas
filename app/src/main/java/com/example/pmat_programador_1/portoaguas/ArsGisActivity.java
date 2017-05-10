@@ -178,15 +178,16 @@ public class ArsGisActivity extends AppCompatActivity {
             }
             for (int index = 0; index < obj.length(); index++) {
                 JSONObject jsonObject = obj.getJSONObject(index);
-                Long codigojson = jsonObject.getLong("id");
-                String hemisferiojson = jsonObject.getString("hemisferio");
-                String zonajson = jsonObject.getString("zona");
-                String estadojson = jsonObject.getString("estado");
-                Double latitudjson = jsonObject.getDouble("latitud");
-                Double longitudjson = jsonObject.getDouble("longitud");
-                Long codigoMedidorjson = jsonObject.getLong("codigoMedidor");
-                Long numeroCuentajson   = jsonObject.getLong("numeroCuenta");
-                item.add(new Puntos(codigojson, hemisferiojson, zonajson, estadojson, latitudjson, longitudjson, codigoMedidorjson,numeroCuentajson));
+                Long idtramitejson          = jsonObject.getLong("id_tramite");
+                Long numeroCuentejson       = jsonObject.getLong("numero_cuenta");
+                Long codClientejson         = jsonObject.getLong("cod_cliente");
+                Double latitudjson          = jsonObject.getDouble("latitud");
+                Double longitudjson         = jsonObject.getDouble("longitud");
+                Long deuda_portoaguasjson   = jsonObject.getLong("deuda_portoagua");
+                Long mes_deudajson          = jsonObject.getLong("mes_deuda");
+                Long codMedidorjson         = jsonObject.getLong("codigo_medidor");
+                String serieMedidorjson     = jsonObject.getString("serie_medidor");
+                item.add(new Puntos(serieMedidorjson,latitudjson,longitudjson,deuda_portoaguasjson,codMedidorjson,idtramitejson,numeroCuentejson,codClientejson,mes_deudajson,codMedidorjson));
             }
         } catch (JSONException e) {
             // TODO Auto-generated catch block

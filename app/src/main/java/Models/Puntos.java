@@ -5,41 +5,17 @@ package Models;
  */
 
 public class Puntos {
-    public  String Hemisferio,zona,estado;
-    public double latitud,longitud;
-    public long codigomedidor,codigo,numeroCuenta;
+    public String serie_medidor;
+    public double latitud,longitud,deuda_portoagua;
+    public long codigomedidor,codigo,id_tramite,numero_cuenta,codigo_cliente,mes_deuda,codigo_medidor;
 
 
-    public long getNumeroCuenta() {
-        return numeroCuenta;
+    public String getSerie_medidor() {
+        return serie_medidor;
     }
 
-    public void setNumeroCuenta(long numeroCuenta) {
-        this.numeroCuenta = numeroCuenta;
-    }
-
-    public String getHemisferio() {
-        return Hemisferio;
-    }
-
-    public void setHemisferio(String hemisferio) {
-        Hemisferio = hemisferio;
-    }
-
-    public String getZona() {
-        return zona;
-    }
-
-    public void setZona(String zona) {
-        this.zona = zona;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
+    public void setSerie_medidor(String serie_medidor) {
+        this.serie_medidor = serie_medidor;
     }
 
     public double getLatitud() {
@@ -58,6 +34,14 @@ public class Puntos {
         this.longitud = longitud;
     }
 
+    public double getDeuda_portoagua() {
+        return deuda_portoagua;
+    }
+
+    public void setDeuda_portoagua(double deuda_portoagua) {
+        this.deuda_portoagua = deuda_portoagua;
+    }
+
     public long getCodigomedidor() {
         return codigomedidor;
     }
@@ -74,15 +58,56 @@ public class Puntos {
         this.codigo = codigo;
     }
 
-    public Puntos(Long codigo,String hemisferio, String zona, String estado, double latitud, double longitud, long codigomedidor, long numeroCuenta) {
-        this.codigo = codigo;
-        this.Hemisferio = hemisferio;
-        this.zona = zona;
-        this.estado = estado;
+    public long getId_tramite() {
+        return id_tramite;
+    }
+
+    public void setId_tramite(long id_tramite) {
+        this.id_tramite = id_tramite;
+    }
+
+    public long getNumero_cuenta() {
+        return numero_cuenta;
+    }
+
+    public void setNumero_cuenta(long numero_cuenta) {
+        this.numero_cuenta = numero_cuenta;
+    }
+
+    public long getCodigo_cliente() {
+        return codigo_cliente;
+    }
+
+    public void setCodigo_cliente(long codigo_cliente) {
+        this.codigo_cliente = codigo_cliente;
+    }
+
+    public long getMes_deuda() {
+        return mes_deuda;
+    }
+
+    public void setMes_deuda(long mes_deuda) {
+        this.mes_deuda = mes_deuda;
+    }
+
+    public long getCodigo_medidor() {
+        return codigo_medidor;
+    }
+
+    public void setCodigo_medidor(long codigo_medidor) {
+        this.codigo_medidor = codigo_medidor;
+    }
+
+    public Puntos(String serie_medidor, double latitud, double longitud, double deuda_portoagua, long codigomedidor, long id_tramite, long numero_cuenta, long codigo_cliente, long mes_deuda, long codigo_medidor) {
+        this.serie_medidor = serie_medidor;
         this.latitud = latitud;
         this.longitud = longitud;
+        this.deuda_portoagua = deuda_portoagua;
         this.codigomedidor = codigomedidor;
-        this.numeroCuenta =numeroCuenta;
-
+        this.id_tramite = id_tramite;
+        this.numero_cuenta = numero_cuenta;
+        this.codigo_cliente = codigo_cliente;
+        this.mes_deuda = mes_deuda;
+        this.codigo_medidor = codigo_medidor;
     }
 }

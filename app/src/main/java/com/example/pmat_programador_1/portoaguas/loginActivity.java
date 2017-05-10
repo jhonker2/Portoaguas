@@ -82,7 +82,6 @@ public class loginActivity extends AppCompatActivity {
         protected void onCancelled() {
             super.onCancelled();
             pDialog.dismiss();
-
         }
 
         @Override
@@ -112,7 +111,7 @@ public class loginActivity extends AppCompatActivity {
                     txt_clave.setText("");
             }else if(aBoolean.equals("Eduplicado")) {
                 StyleableToast.makeText(loginActivity.this, "El usuario ya ha iniciado Sesion en otro dispositivo!! No es posible iniciar Sesión", Toast.LENGTH_LONG, R.style.StyledToastError).show();
-            }else{
+            }else if(aBoolean.equals("Login Correcto")){
                 StyleableToast.makeText(loginActivity.this, "Login Correcto Bienvenido!!", Toast.LENGTH_LONG, R.style.StyledToast).show();
                 Intent inte =  new Intent(loginActivity.this,MainActivity.class);
                 startActivity(inte);

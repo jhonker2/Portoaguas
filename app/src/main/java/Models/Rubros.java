@@ -9,11 +9,13 @@ public class Rubros {
     private String codigo;
     private String titulos;
     private String precio;
+    private String cod_prod;
 
-    public Rubros(String codigo,String titulos, String precio) {
-        this.codigo = codigo;
-        this.titulos = titulos;
-        this.precio = precio;
+    public Rubros(String codigo,String titulos, String precio, String cod_prod) {
+        this.codigo     = codigo;
+        this.titulos    = titulos;
+        this.precio     = precio;
+        this.cod_prod   = cod_prod;
     }
 
     public Rubros(String codigo,String precio){
@@ -22,6 +24,13 @@ public class Rubros {
 
     }
 
+    public String getCod_prod() {
+        return cod_prod;
+    }
+
+    public void setCod_prod(String cod_prod) {
+        this.cod_prod = cod_prod;
+    }
     public String getTitulos() {
         return titulos;
     }

@@ -29,85 +29,62 @@ import static com.example.pmat_programador_1.portoaguas.MapsActivity.total;
     public ArrayList<Detalles> detall= new ArrayList<Detalles>();
     private Context mContext;
     public double contTotal=0;
+    String []cantidades={"0","1","2","3","4","5","6","7","8","9","10"};
     public class ItemRowHolder extends RecyclerView.ViewHolder {
 
-        protected TextView titulo, precio,codigo;
+        protected TextView titulo, precio,codigo, cod_prod;
         public Spinner cantidad_s;
         protected RecyclerView recycler_view_list;
 
 
         public ItemRowHolder(View view) {
             super(view);
-            codigo = (TextView) view.findViewById(R.id.codigo);
-            titulo = (TextView) view.findViewById(R.id.card_titulo);
-            precio = (TextView) view.findViewById(R.id.card_precio_val);
+            codigo  = (TextView) view.findViewById(R.id.codigo);
+            titulo  = (TextView) view.findViewById(R.id.card_titulo);
+            precio  = (TextView) view.findViewById(R.id.card_precio_val);
+            cod_prod= (TextView) view.findViewById(R.id.txt_cod_prod);
             recycler_view_list = (RecyclerView) view.findViewById(R.id.my_recycler_view);
             cantidad_s  =   (Spinner) view.findViewById(R.id.cantidad_spi);
-            String []cantidades={"0","1","2","3","4","5","6","7","8","9","10"};
+            /*String []cantidades={"0","1","2","3","4","5","6","7","8","9","10"};
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(view.getContext(), android.R.layout.simple_spinner_item, cantidades);
             cantidad_s.setAdapter(adapter);
-
-
             cantidad_s.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     Log.e("Items del detalle", String.valueOf(items.size()));
                     if(detall.isEmpty()) {
-                        detall.add(new Detalles(cantidad_s.getSelectedItem().toString(), codigo.getText().toString(), precio.getText().toString()));
+                        detall.add(new Detalles(cantidad_s.getSelectedItem().toString(), codigo.getText().toString(), precio.getText().toString(), cod_prod.getText().toString()));
                     }else{
                         int aux=0;
                         for (int x=0; x<detall.size(); x++){
                             if(detall.get(x).getCodigo().equals(codigo.getText())){
-                                detall.set(x,new Detalles(cantidad_s.getSelectedItem().toString(), codigo.getText().toString(), precio.getText().toString()));
+                                detall.set(x,new Detalles(cantidad_s.getSelectedItem().toString(), codigo.getText().toString(), precio.getText().toString(), cod_prod.getText().toString()));
                                 aux++;
                             }
                         }
                         if(aux==0) {
-                            detall.add(new Detalles(cantidad_s.getSelectedItem().toString(), codigo.getText().toString(), precio.getText().toString()));
+                            detall.add(new Detalles(cantidad_s.getSelectedItem().toString(), codigo.getText().toString(), precio.getText().toString(), cod_prod.getText().toString()));
                         }
-                    }
+                     }
+
+                    //IMPRIMIR TOTAL DE LOS RUBROS
                     contTotal=0;
                     for (int y=0; y<detall.size(); y++){
-
                         contTotal=contTotal+(Double.parseDouble(detall.get(y).getCantidad())*Double.parseDouble(detall.get(y).getPrecio()));
                         total.setText(String.valueOf(contTotal));
                     }
 
-                        Log.e("CANTIDADES DETALLES:", String.valueOf( detall.size()));
+                    for (int x=0 ; x<detall.size(); x++){
+                        if(detall.get(x).getCantidad().equals("0")){
 
-
-
+                        }else{
+                            Log.e("COL_LIB",detall.get(x).getCodigo()+"@@"+detall.get(x).getCod_prod()+"@@"+detall.get(x).getPrecio()+"@@"+detall.get(x).getCantidad());
+                        }
+                    }
                 }
 
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-/*
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(final View v) {
-                    Toast.makeText(v.getContext(), precio.getText(),Toast.LENGTH_SHORT).show();
-
-                    AlertDialog.Builder buil = new AlertDialog.Builder(v.getContext());
-                    buil.setTitle(titulo.getText());
-                    final NumberPicker numberPicker = new NumberPicker(v.getContext());
-                    numberPicker.setMaxValue(20);
-                    numberPicker.setMinValue(1);
-                    numberPicker.setWrapSelectorWheel(false);
-                    buil.setView(numberPicker);
-                    buil.setPositiveButton("Aceptar", new DialogInterface.OnClickListener(){
-
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            contTotal = contTotal+(Double.parseDouble(precio.getText().toString()) * numberPicker.getValue());
-
-                            Toast.makeText(v.getContext(),"Total:"+contTotal,Toast.LENGTH_SHORT).show();
-                            total.setText(String.valueOf(contTotal));
-                        }
-                    });
-                    buil.show();
 
                 }
             });*/
@@ -136,18 +113,52 @@ import static com.example.pmat_programador_1.portoaguas.MapsActivity.total;
         holder.codigo.setText(items.get(position).getCodigo());
         holder.titulo.setText(items.get(position).getTitulos());
         holder.precio.setText(items.get(position).getPrecio());
+        holder.cod_prod.setText(items.get(position).getCod_prod());
 
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.mContext, android.R.layout.simple_spinner_item, cantidades);
+        holder.cantidad_s.setAdapter(adapter);
+        holder.cantidad_s.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.e("Items del detalle", String.valueOf(items.size()));
+                if(detall.isEmpty()) {
+                    detall.add(new Detalles(holder.cantidad_s.getSelectedItem().toString(), holder.codigo.getText().toString(), holder.precio.getText().toString(), holder.cod_prod.getText().toString()));
+                }else{
+                    int aux=0;
+                    for (int x=0; x<detall.size(); x++){
+                        if(detall.get(x).getCodigo().equals(holder.codigo.getText())){
+                            detall.set(x,new Detalles(holder.cantidad_s.getSelectedItem().toString(), holder.codigo.getText().toString(), holder.precio.getText().toString(), holder.cod_prod.getText().toString()));
+                            aux++;
+                        }
+                    }
+                    if(aux==0) {
+                        detall.add(new Detalles(holder.cantidad_s.getSelectedItem().toString(), holder.codigo.getText().toString(), holder.precio.getText().toString(), holder.cod_prod.getText().toString()));
+                    }
+                }
 
+                //IMPRIMIR TOTAL DE LOS RUBROS
+                contTotal=0;
+                for (int y=0; y<detall.size(); y++){
+                    contTotal=contTotal+(Double.parseDouble(detall.get(y).getCantidad())*Double.parseDouble(detall.get(y).getPrecio()));
+                    total.setText(String.valueOf(contTotal));
+                }
 
+                for (int x=0 ; x<detall.size(); x++){
+                    if(detall.get(x).getCantidad().equals("0")){
 
+                    }else{
+                        Log.e("COL_LIB",detall.get(x).getCodigo()+"@@"+detall.get(x).getCod_prod()+"@@"+detall.get(x).getPrecio()+"@@"+detall.get(x).getCantidad());
+                    }
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
     }
-
     @Override
-    public int getItemCount() {
-        return items.size();
-    }
-
-
-
+    public int getItemCount() {        return items.size();    }
 }
