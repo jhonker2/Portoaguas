@@ -101,7 +101,7 @@ import utils.JSON;
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status> {
     public GoogleMap mMap;
-    private EditText ced, lect, comentario;
+    private EditText lect, comentario;
     public static TextView total, cuenta, meses, deuda;
     private Button btnSaveCliente;
     private ImageButton btnC;
@@ -113,7 +113,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     *Declarar instancias globales
     */
     private RecyclerView recycler;
-    private RecyclerView.Adapter adapter;
+    //private RecyclerView.Adapter adapter; // revisar aki
+    private RecycleViewAdapter adapter;
     private RecyclerView.LayoutManager lManager;
     int cont = 0;
     private long mlas = 0;
@@ -520,7 +521,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     AlertDialog.Builder buil = new AlertDialog.Builder(MapsActivity.this);
                     View mView = getLayoutInflater().inflate(R.layout.storepunto, null);
 
-                    ced             = (EditText) mView.findViewById(R.id.textCedulaCliente);
                     comentario      = (EditText) mView.findViewById(R.id.t_comentario);
                     btnSaveCliente  = (Button) mView.findViewById(R.id.buttonNewC);
                     btnC            = (ImageButton) mView.findViewById(R.id.btn_camera);
@@ -534,17 +534,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     lManager = new LinearLayoutManager(MapsActivity.this, LinearLayoutManager.HORIZONTAL, false);
                     recycler.setHasFixedSize(true);
                     recycler.setLayoutManager(lManager);
-
                     adapter = new RecycleViewAdapter(MapsActivity.this, rubros);
-
                     recycler.setAdapter(adapter);
-                    recycler.setNestedScrollingEnabled(false);
+
+                    recycler.setNestedScrollingEnabled(true);
 
                     buil.setView(mView);
                     alertDialog = buil.create();
                     alertDialog.show();
                     cont = 0;
-                    ced.setText(marker.getPosition().toString());
+                    //ced.setText(marker.getPosition().toString());
                     cuenta.setText(marker.getTitle().substring(12));
 
                     for (int x=0; x<item.size(); x++){

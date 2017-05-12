@@ -109,32 +109,6 @@
             </RelativeLayout>
 
             <LinearLayout
-                android:id="@+id/linearLayout3"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@+id/textView14"
-                android:layout_centerHorizontal="true"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp">
-
-                <android.support.design.widget.TextInputLayout
-                    android:id="@+id/til_cedula"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp">
-
-                    <EditText
-                        android:id="@+id/textCedulaCliente"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:ems="10"
-                        android:hint="Latitud y Longitud"
-                        android:inputType="text"
-                        android:singleLine="true" />
-                </android.support.design.widget.TextInputLayout>
-            </LinearLayout>
-
-            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
@@ -192,7 +166,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:ems="10"
-                        android:hint="Escriba un comentario(Opcional)"
+                        android:hint="Escriba un comentario"
                         android:inputType="textMultiLine" />
                 </android.support.design.widget.TextInputLayout>
 
