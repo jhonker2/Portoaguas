@@ -654,15 +654,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             for (int index = 0; index < obj.length(); index++) {
                 JSONObject jsonObject = obj.getJSONObject(index);
                 Long idtramitejson          = jsonObject.getLong("id_tramite");
+                Long id_tarea_tramitejson   = jsonObject.getLong("id_tarea_tramite");
                 Long numeroCuentejson       = jsonObject.getLong("numero_cuenta");
                 Long codClientejson         = jsonObject.getLong("cod_cliente");
+                Long codPrediojson          = jsonObject.getLong("cod_predio");
                 Double latitudjson          = jsonObject.getDouble("latitud");
                 Double longitudjson         = jsonObject.getDouble("longitud");
                 Long deuda_portoaguasjson   = jsonObject.getLong("deuda_portoagua");
                 Long mes_deudajson          = jsonObject.getLong("mes_deuda");
                 Long codMedidorjson         = jsonObject.getLong("codigo_medidor");
                 String serieMedidorjson     = jsonObject.getString("serie_medidor");
-                item.add(new Puntos(serieMedidorjson,latitudjson,longitudjson,deuda_portoaguasjson,codMedidorjson,idtramitejson,numeroCuentejson,codClientejson,mes_deudajson,codMedidorjson));
+                item.add(new Puntos(serieMedidorjson,latitudjson,longitudjson,deuda_portoaguasjson,codMedidorjson,idtramitejson,numeroCuentejson,codClientejson,mes_deudajson,codMedidorjson,codPrediojson,id_tarea_tramitejson));
+                // Aki mandar a almacenar a la base sqlite
             }
         } catch (JSONException e) {
             // TODO Auto-generated catch block

@@ -7,7 +7,7 @@ package Models;
 public class Puntos {
     public String serie_medidor;
     public double latitud,longitud,deuda_portoagua;
-    public long codigomedidor,codigo,id_tramite,numero_cuenta,codigo_cliente,mes_deuda,codigo_medidor;
+    public long codigomedidor,codigo,id_tramite,id_tarea_tramite,numero_cuenta,codigo_cliente,codigo_predio,mes_deuda,codigo_medidor;
 
 
     public String getSerie_medidor() {
@@ -98,7 +98,23 @@ public class Puntos {
         this.codigo_medidor = codigo_medidor;
     }
 
-    public Puntos(String serie_medidor, double latitud, double longitud, double deuda_portoagua, long codigomedidor, long id_tramite, long numero_cuenta, long codigo_cliente, long mes_deuda, long codigo_medidor) {
+    public long getId_tarea_tramite() {
+        return id_tarea_tramite;
+    }
+
+    public void setId_tarea_tramite(long id_tarea_tramite) {
+        this.id_tarea_tramite = id_tarea_tramite;
+    }
+
+    public long getCodigo_predio() {
+        return codigo_predio;
+    }
+
+    public void setCodigo_predio(long codigo_predio) {
+        this.codigo_predio = codigo_predio;
+    }
+
+    public Puntos(String serie_medidor, double latitud, double longitud, double deuda_portoagua, long codigomedidor, long id_tramite, long numero_cuenta, long codigo_cliente, long mes_deuda, long codigo_medidor, long codigo_predio, long id_tarea_tramite) {
         this.serie_medidor = serie_medidor;
         this.latitud = latitud;
         this.longitud = longitud;
@@ -109,5 +125,7 @@ public class Puntos {
         this.codigo_cliente = codigo_cliente;
         this.mes_deuda = mes_deuda;
         this.codigo_medidor = codigo_medidor;
+        this.id_tarea_tramite =  id_tarea_tramite;
+        this.codigo_predio = codigo_predio;
     }
 }
