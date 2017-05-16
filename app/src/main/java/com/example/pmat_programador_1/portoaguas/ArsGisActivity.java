@@ -187,7 +187,7 @@ public class ArsGisActivity extends AppCompatActivity {
                 Long mes_deudajson          = jsonObject.getLong("mes_deuda");
                 Long codMedidorjson         = jsonObject.getLong("codigo_medidor");
                 String serieMedidorjson     = jsonObject.getString("serie_medidor");
-                item.add(new Puntos(serieMedidorjson,latitudjson,longitudjson,deuda_portoaguasjson,codMedidorjson,idtramitejson,numeroCuentejson,codClientejson,mes_deudajson,codMedidorjson));
+               // item.add(new Puntos(serieMedidorjson,latitudjson,longitudjson,deuda_portoaguasjson,codMedidorjson,idtramitejson,numeroCuentejson,codClientejson,mes_deudajson,codMedidorjson));
             }
         } catch (JSONException e) {
             // TODO Auto-generated catch block

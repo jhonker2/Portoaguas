@@ -56,7 +56,7 @@
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
                 <TextView
-                    android:id="@+id/textView8"
+                    android:id="@+id/textMeses"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
@@ -69,14 +69,13 @@
                     android:id="@+id/txt_meses"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@+id/textView8"
-                    android:layout_alignBottom="@+id/textView8"
+                    android:text="TextView"
+                    android:layout_centerVertical="true"
                     android:layout_alignLeft="@+id/txt_cuenta"
-                    android:layout_alignStart="@+id/txt_cuenta"
-                    android:text="TextView" />
+                    android:layout_alignStart="@+id/txt_cuenta" />
 
                 <TextView
-                    android:id="@+id/textView10"
+                    android:id="@+id/textDeuda"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
@@ -91,17 +90,17 @@
                     android:id="@+id/txt_deuda"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="11dp"
+                    android:layout_marginStart="11dp"
+                    android:text="TextView"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="13dp"
-                    android:layout_marginStart="13dp"
-                    android:layout_toEndOf="@+id/textView10"
-                    android:layout_toRightOf="@+id/textView10"
-                    android:text="TextView" />
+                    android:layout_toRightOf="@+id/textDeuda"
+                    android:layout_toEndOf="@+id/textDeuda" />
 
                 <ImageButton
-                    android:id="@+id/imageButton"
-                    android:layout_width="35dp"
-                    android:layout_height="35dp"
+                    android:id="@+id/btn_act_deuda"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     app:srcCompat="@drawable/autorenew"
                     android:layout_alignBottom="@+id/txt_deuda"
                     android:layout_alignParentRight="true"
@@ -121,6 +120,8 @@
                     android:layout_marginRight="16dp"
                     android:layout_marginTop="10dp"
                     android:orientation="horizontal" />
+
+
             </LinearLayout>
 
             <LinearLayout

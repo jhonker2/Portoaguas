@@ -10,6 +10,7 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.location.Location;
 import android.media.ExifInterface;
@@ -40,6 +41,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.pmat_programador_1.portoaguas.Activitys.MovimientosActivity;
 import com.example.pmat_programador_1.portoaguas.Activitys.locationActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -93,6 +95,8 @@ import Models.Puntos;
 import Models.Rubros;
 import sqlit.Movimiento;
 import sqlit.MovimientoHelper;
+import sqlit.TramiteHelper;
+import sqlit.Tramites;
 import utils.Constants;
 import utils.CoordinateConversion;
 import utils.JSON;
@@ -102,11 +106,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status> {
     public GoogleMap mMap;
     private EditText lect, comentario;
-    public static TextView total, cuenta, meses, deuda;
+    public static TextView total, cuenta, meses, deuda,textMeses,textDeuda;
     private Button btnSaveCliente;
-    private ImageButton btnC;
+    private ImageButton btnC,btn_deuda;
     private ImageView img;
     private MovimientoHelper movimientoHelper;
+    private TramiteHelper tramiteHelper;
     public ArrayList<Puntos> item = new ArrayList<Puntos>();
     AlertDialog alertDialog;
     /*
@@ -122,7 +127,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static String data;
     public boolean resul;
 
-    public String foto = "";
+    public String foto = "", deuda_ac = "",facturas_impagos="";
     public Uri output;
     public File storageDir;
     CoordinateConversion obj = new CoordinateConversion();
@@ -138,6 +143,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public static final int REQUEST_LOCATION = 1;
     public static final int REQUEST_CHECK_SETTINGS = 2;
+    TramiteHelper TDB = new TramiteHelper(MapsActivity.this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -211,7 +217,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
     }
 
-
+    /*
+    Funcion para Capturar una fotografia
+     */
     private void createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -230,6 +238,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         startActivityForResult(intent, 1);
     }
 
+    /*
+    Funcion onActivityResult Para mostrar la foto capturada en un imagenview
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // super.onActivityResult(requestCode, resultCode, data);
@@ -341,13 +352,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void updateLocationUI() {
-
-        // mLatitude.setText(String.valueOf(mLastLocation.getLatitude()));
-        //mLongitude.setText(String.valueOf(mLastLocation.getLongitude()));
         RegistrarDispositivos2 registra = new RegistrarDispositivos2();
         registra.execute();
-
-
     }
 
     @SuppressLint("MissingPermission")
@@ -362,8 +368,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void manageDeniedPermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)) {
-            // Aquí muestras confirmación explicativa al usuario
-            // por si rechazó los permisos anteriormente
         } else {
             ActivityCompat.requestPermissions(
                     this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
@@ -442,6 +446,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     //FUNCION PARA OBTENER DATOS
     public class LoadPuntos extends AsyncTask<String, String, String> {
         private ProgressDialog pDialog;
+        String res;
 
         @Override
         protected void onPreExecute() {
@@ -455,14 +460,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         @Override
         protected String doInBackground(String... strings) {
-            try {
-                item.clear();
-                item = getPuntos();
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
+                try {
+                    item.clear();
+                    item = getPuntos();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             return null;
-        }
+        } //Fin del doInBackround
 
         @Override
         protected void onPostExecute(String s) {
@@ -490,8 +495,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             .snippet("Meses: "+item.get(i).getMes_deuda() + " Deuda: "+item.get(i).getDeuda_portoagua())
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.blank)));
                     melbourne.showInfoWindow();
-
-
                 float zoomlevel = 19;
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, zoomlevel));
             }
@@ -524,20 +527,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     comentario      = (EditText) mView.findViewById(R.id.t_comentario);
                     btnSaveCliente  = (Button) mView.findViewById(R.id.buttonNewC);
                     btnC            = (ImageButton) mView.findViewById(R.id.btn_camera);
+                    btn_deuda       = (ImageButton) mView.findViewById(R.id.btn_act_deuda);
                     img             = (ImageView) mView.findViewById(R.id.img1);
                     recycler        = (RecyclerView) mView.findViewById(R.id.my_recycler_view);
                     total           = (TextView) mView.findViewById(R.id.txt_total);
                     cuenta          = (TextView) mView.findViewById(R.id.txt_cuenta);
                     meses           = (TextView) mView.findViewById(R.id.txt_meses);
                     deuda           = (TextView) mView.findViewById(R.id.txt_deuda);
-
+                    textMeses       = (TextView) mView.findViewById(R.id.textMeses);
+                    textDeuda       = (TextView) mView.findViewById(R.id.textDeuda);
                     lManager = new LinearLayoutManager(MapsActivity.this, LinearLayoutManager.HORIZONTAL, false);
                     recycler.setHasFixedSize(true);
                     recycler.setLayoutManager(lManager);
                     adapter = new RecycleViewAdapter(MapsActivity.this, rubros);
+                    adapter.notifyDataSetChanged();
                     recycler.setAdapter(adapter);
-
-                    recycler.setNestedScrollingEnabled(true);
+                    //recycler.setNestedScrollingEnabled(true);
 
                     buil.setView(mView);
                     alertDialog = buil.create();
@@ -575,6 +580,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             new RegistrarMovimiento().execute();
                         }
                     });
+
+                    //BOTON PARA ACTUALIZAR DEUDA DEL CLIENTE
+
+                    btn_deuda.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            String cuenta2=cuenta.getText().toString();
+                            new Act_Deuda().execute(cuenta2);
+                        }
+                    }); // Fin de btn_deuda
+
                 }
             });
         }
@@ -641,9 +657,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         String values;
         try {
             HttpClient httpclient = new DefaultHttpClient();
-        HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/punto");
-        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
-
+            HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/punto");
+            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
             HttpResponse response = httpclient.execute(httppost);
             HttpEntity entity = response.getEntity();
             values = EntityUtils.toString(entity);
@@ -660,12 +675,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Long codPrediojson          = jsonObject.getLong("cod_predio");
                 Double latitudjson          = jsonObject.getDouble("latitud");
                 Double longitudjson         = jsonObject.getDouble("longitud");
-                Long deuda_portoaguasjson   = jsonObject.getLong("deuda_portoagua");
+                Double deuda_portoaguasjson   = jsonObject.getDouble("deuda_portoagua");
                 Long mes_deudajson          = jsonObject.getLong("mes_deuda");
                 Long codMedidorjson         = jsonObject.getLong("codigo_medidor");
                 String serieMedidorjson     = jsonObject.getString("serie_medidor");
-                item.add(new Puntos(serieMedidorjson,latitudjson,longitudjson,deuda_portoaguasjson,codMedidorjson,idtramitejson,numeroCuentejson,codClientejson,mes_deudajson,codMedidorjson,codPrediojson,id_tarea_tramitejson));
+                item.add(new Puntos(serieMedidorjson,latitudjson,longitudjson,deuda_portoaguasjson,idtramitejson,numeroCuentejson,codClientejson,mes_deudajson,codMedidorjson,codPrediojson,id_tarea_tramitejson));
                 // Aki mandar a almacenar a la base sqlite
+                /*Puntos ptramites = new Puntos(serieMedidorjson,latitudjson,longitudjson,deuda_portoaguasjson,idtramitejson,numeroCuentejson,codClientejson,mes_deudajson,codMedidorjson,codPrediojson,id_tarea_tramitejson);
+                new AddTramites().execute(ptramites);*/
+
             }
         } catch (JSONException e) {
             // TODO Auto-generated catch block
@@ -675,12 +693,77 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } catch (IOException e1) {
             e1.printStackTrace();
         }
-
         return item;
-
     }
+    /*
+        Funcion para consulta la deuda del cliente
+     */
+    class Act_Deuda extends AsyncTask<String, Void, Boolean>{
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
 
+        @Override
+        protected Boolean doInBackground(String... strings) {
+            Boolean res=false;
+            ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+            nameValuePairs.add(new BasicNameValuePair("numero_cuenta", strings[0]));
+            String values;
+            try {
+                HttpClient httpclient = new DefaultHttpClient();
+                HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/deuda_cliente");
+                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
 
+                HttpResponse response = httpclient.execute(httppost);
+                HttpEntity entity = response.getEntity();
+                values = EntityUtils.toString(entity);
+
+                Log.e("Deuda Actualizada", values);
+                JSONArray obj = new JSONArray(values);
+                for (int index = 0; index < obj.length(); index++) {
+                    JSONObject jsonObject = obj.getJSONObject(index);
+                    deuda_ac          = jsonObject.getString("valor_deuda");
+                    facturas_impagos  = jsonObject.getString("numero_facturas_impagos");
+                    Log.e("Deuda Actual",deuda_ac);
+                    res=true;
+                }
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (ClientProtocolException e1) {
+                e1.printStackTrace();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+
+            return res;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+           if(aBoolean==true){
+               if(Integer.parseInt(facturas_impagos)>0){
+                meses.setTextColor(Color.RED);
+                textMeses.setTextColor(Color.RED);
+                deuda.setTextColor(Color.RED);
+                textDeuda.setTextColor(Color.RED);
+               }else{
+                   meses.setTextColor(Color.GREEN);
+                   textMeses.setTextColor(Color.GREEN);
+                   deuda.setTextColor(Color.GREEN);
+                   textDeuda.setTextColor(Color.GREEN);
+               }
+               deuda.setText(deuda_ac);
+               meses.setText(facturas_impagos);
+           }//FIN DEL IF ABOOLEAN
+
+        }
+    }
+    /*
+    *   Contar Movimientos
+    *
+    */
     //Funcion para almacenar
     private void GuardarSql(String imagens, String lecturas, String estados, String id_Movimiento) {
         String imagen = imagens;
@@ -731,17 +814,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             try {
                 HttpClient httpclient = new DefaultHttpClient();
-                //HttpPost httppost = new HttpPost("http://192.168.5.56:8090/portal-portoaguas/public/MovimientosDispositivos");
                 HttpPost httppost = new HttpPost("http://"+ JSON.ipserver+"/MovimientosDispositivos");
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
                 HttpResponse response = httpclient.execute(httppost);
                 HttpEntity entity = response.getEntity();
                 data = EntityUtils.toString(entity);
                 Log.e("MOVIMIENTOS DISPOSITIVO", data);
-
-                //JSONObject obj= new JSONObject(data);
-                //String  codigojson=obj.getString("registro");
-                //data=codigojson;
                 resul = true;
             } catch (Exception e) {
                 Log.e("log_tag", "Error in http connection " + e.toString());

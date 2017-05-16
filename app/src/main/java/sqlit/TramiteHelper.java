@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
 
+import Models.Puntos;
+
 /**
  * Created by PMAT-PROGRAMADOR_1 on 12/05/2017.
  */
@@ -17,7 +19,7 @@ public class TramiteHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "Portobd.db";
 
     private static final String TABLA_TRAMITES = "CREATE TABLE tramites" +
-            "(id INTEGER PRIMARY KEY AUTOINCREMENT, id_tramite TEXT, id_tarea_tramite TEXT, munero_cuenta TEXT, latitud TEXT, longitud TEXT,  cod_cliente TEXT, cod_predio TEXT, deuda_portoaguas TEXT, mes_deuda TEXT, cod_medidor TEXT, serie_medidor TEXT)";
+            "(id INTEGER PRIMARY KEY AUTOINCREMENT, id_tramite INTEGER, id_tarea_tramite INTEGER, munero_cuenta INTEGER, latitud REAL, longitud REAL,  cod_cliente INTEGER, cod_predio INTEGER, deuda_portoaguas REAL, mes_deuda INTEGER, cod_medidor INTEGER, serie_medidor TEXT)";
 
     public TramiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -27,17 +29,17 @@ public class TramiteHelper extends SQLiteOpenHelper {
         db.execSQL(TABLA_TRAMITES);
     }
 
-    public ArrayList<Tramites> recuperarTRAMITES() {
+    public ArrayList<Puntos> recuperarTRAMITES() {
         SQLiteDatabase db = getReadableDatabase();
-        ArrayList<Tramites> lista_tramites = new ArrayList<Tramites>();
-        String[] valores_recuperar = {"id_tramite", "id_tarea_tramite", "numero_cuenta", "latitud","longitud","cod_cliente","cod_predio","deud_portoaguas","mes_deuda","cod_medidor","serie_medidor"};
+        ArrayList<Puntos> lista_tramites = new ArrayList<Puntos>();
+        String[] valores_recuperar = {"serie_medidor","latitud","longitud","deuda_portoaguas","id_tramite", "numero_cuenta", "cod_cliente","mes_deuda","cod_medidor","cod_predio","id_tarea_tramite"};
         Cursor c = db.query("tramites", valores_recuperar,
                 null, null, null, null, null, null);
         c.moveToFirst();
         do {
-            lista_tramites.add(new Tramites(c.getLong(0), c.getLong(1),
-                    c.getLong(2), c.getLong(3),c.getLong(4),c.getLong(5),c.getDouble(6),
-                    c.getDouble(7),c.getFloat(8),c.getString(9),c.getString(10)));
+            lista_tramites.add(new Puntos(c.getString(0), c.getDouble(1),
+                    c.getDouble(2), c.getDouble(3),c.getLong(4),c.getLong(5),c.getLong(6),
+                    c.getLong(7),c.getLong(8),c.getLong(9),c.getLong(10)));
         } while (c.moveToNext());
         db.close();
         c.close();
@@ -65,7 +67,7 @@ public class TramiteHelper extends SQLiteOpenHelper {
     }
 
 
-    public long saveTramites(Tramites tramites) {
+    public long saveTramites(Puntos tramites) {
 
         return getWritableDatabase().insert(
                 TramiteContrac.TramitesEntry.TABLE_NAME,
