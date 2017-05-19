@@ -1,0 +1,11 @@
+<!-- drawable/portoaguas.xml -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="24dp"
+    android:width="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path android:fillColor="#000" android:pathData="M10.869,10.39c-0.001-0.022-0.004-0.043-0.004-0.064c0-1.646,1.339-2.983,2.985-2.983
+			c0.189,0,0.374,0.019,0.554,0.054c-0.093-0.292-0.229-0.567-0.407-0.819L11.48,3.023L8.858,6.728
+			c-0.3,0.485-0.457,1.044-0.457,1.615c0,0.581,0.159,1.143,0.46,1.624c0.244,0.396,0.574,0.733,0.958,0.98
+			c0.32,0.206,0.674,0.349,1.045,0.423v-0.98H10.869z" />
+</vector>

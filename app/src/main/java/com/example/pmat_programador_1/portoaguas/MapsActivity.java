@@ -101,12 +101,14 @@ import utils.Constants;
 import utils.CoordinateConversion;
 import utils.JSON;
 
+import static Adapter.RecycleViewAdapter.detall;
+
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status> {
     public GoogleMap mMap;
     private EditText lect, comentario;
-    public static TextView total, cuenta, meses, deuda,textMeses,textDeuda;
+    public static TextView total, cuenta, meses, deuda,textMeses,textDeuda,txt_reclamo,txtidtramite;
     private Button btnSaveCliente;
     private ImageButton btnC,btn_deuda;
     private ImageView img;
@@ -127,11 +129,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static String data;
     public boolean resul;
 
-    public String foto = "", deuda_ac = "",facturas_impagos="";
+    public String foto = "", deuda_ac = "",facturas_impagos="", reclamo="";
     public Uri output;
     public File storageDir;
     CoordinateConversion obj = new CoordinateConversion();
 
+    /*
+    VARIABLES PARA ALMACENAR LOS DATOS QUE SE VAN A ENVIAR A HACER UPDATE DEL MOVIMIENTO
+     */
+    public double latitud_r,logintud_r;
     //VARIABLES PARA LOCALIZAR DISPOSITIVOS
     private static final String TAG = locationActivity.class.getSimpleName();
     private static final String LOCATION_KEY = "location-key";
@@ -223,7 +229,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "PORTOAGUAS_" + timeStamp + "_";
+        String imageFileName = txtidtramite.getText().toString()+"_"+timeStamp;
         foto = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Portoaguas/" + imageFileName + ".jpg";
         File storageDir2 = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Portoaguas");
         storageDir = new File(foto);
@@ -502,7 +508,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                 @Override
                 public void onInfoWindowClick(Marker marker) {
-                    ArrayList rubros = new ArrayList();
+                    final ArrayList rubros = new ArrayList();
                     rubros.add(new Rubros("65","RECONEXION CON EXCAVADORA EN TIERRAAPERTURA MANUAL DE ZANJA","6", "78"));
                     rubros.add(new Rubros("66","RECONEXION CON EXCAVADORA MANUAL DE ZANJA EN AREA CON H.S","13", "79"));
                     rubros.add(new Rubros("64","LLAVE DE ACERO","6.50", "80"));
@@ -536,6 +542,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     deuda           = (TextView) mView.findViewById(R.id.txt_deuda);
                     textMeses       = (TextView) mView.findViewById(R.id.textMeses);
                     textDeuda       = (TextView) mView.findViewById(R.id.textDeuda);
+                    txt_reclamo     = (TextView) mView.findViewById(R.id.txt_reclamo);
+                    txtidtramite    = (TextView) mView.findViewById(R.id.txt_id_tramite);
                     lManager = new LinearLayoutManager(MapsActivity.this, LinearLayoutManager.HORIZONTAL, false);
                     recycler.setHasFixedSize(true);
                     recycler.setLayoutManager(lManager);
@@ -555,6 +563,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         if(String.valueOf(item.get(x).getNumero_cuenta()).equals(cuenta.getText().toString())){
                             deuda.setText(String.valueOf(item.get(x).getDeuda_portoagua()));
                             meses.setText(String.valueOf(item.get(x).getMes_deuda()));
+                            txtidtramite.setText(String.valueOf(item.get(x).getId_tramite()));
                         }
                     }
 
@@ -572,12 +581,90 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     });
 
 
-                    //Boton para almacenar punto
+                    //Boton para ENVIAR DATOS AL SERVIDOR PORTOAGUAS
                     btnSaveCliente.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            //Metogo para almacenar el movimiento en el mapa
-                            new RegistrarMovimiento().execute();
+                            /*
+                            LATITUD Y LONGITUD EN UTM PARA ENVIAR
+                             */
+                            latitud_r=mLastLocation.getLatitude();
+                            logintud_r=mLastLocation.getLongitude();
+                            String UTM=obj.latLon2UTM(latitud_r,logintud_r);
+                            String[] _utm =UTM.split(" ");
+                            double easting = Double.parseDouble(_utm[2]);
+                            double northing = Double.parseDouble(_utm[3]);
+                            Log.e("UTM",String.valueOf(easting)+" "+String.valueOf(northing));
+
+                            //////////////////////////////////////////
+                            /*
+                            SAL_ABIL PARA ENVIAR
+                            PATRON
+                             63     @@      77  @@   1   @@  6 -> ||
+                              ^     ^       ^   ^    ^   ^   ^     ^
+                              |     |       |   |    |   |   |     |
+                              COD         COD        V     CANT
+                              R.          PRO        UNI
+                             */
+
+                            String patron="";
+                            JSONArray tabla = new JSONArray();
+                            for (int x=0 ; x<detall.size(); x++){
+                                JSONObject pc = new JSONObject();
+
+                                if(detall.get(x).getCantidad().equals("0")){
+
+                                }else{
+                                        patron=patron+detall.get(x).getCodigo()+"@@"+detall.get(x).getCod_prod()+"@@"+detall.get(x).getPrecio()+"@@"+detall.get(x).getCantidad()+"||";
+                                    try {
+                                        pc.put("Cod_rubro",detall.get(x).getCodigo());
+                                        pc.put("Cod_prod",detall.get(x).getCod_prod());
+                                        pc.put("v_unit",detall.get(x).getPrecio());
+                                        pc.put("cant",detall.get(x).getCantidad());
+                                        tabla.put(pc);
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                            int length= patron.length();
+                            String _patron="";
+                            if(patron.endsWith("||")){
+                                Log.e("Patron",patron.substring(0,length-2));
+                                _patron=patron.substring(0,length-2);
+                            }else{
+                                Log.e("Patron",patron);
+                                _patron=patron;
+                            }
+                            /////////////////////////////////////////////
+
+                            /*
+                                TOTAL MOVIMIENTO
+                             */
+                            double total_ = Double.parseDouble(total.getText().toString());
+                            String Observacion = comentario.getText().toString();
+                            Log.e("TOTAL", String.valueOf(total_));
+                            Log.e("Comentario", Observacion);
+
+                            ////////////////////////////////
+                            /*
+                                ID_TRAMITE Y ID_TAREA_TRAMITE
+                             */
+                            long idtrami = 0,id_tarea_tra=0;
+                            for(int xx=0; xx<item.size(); xx++){
+                                if(item.get(xx).getNumero_cuenta()==Long.parseLong(cuenta.getText().toString())){
+                                    idtrami=item.get(xx).getId_tramite();
+                                    id_tarea_tra=item.get(xx).getId_tarea_tramite();
+                                }
+                            }
+
+                            Log.e("ID_TRAMITE", String.valueOf(idtrami)+" "+String.valueOf(id_tarea_tra));
+
+                            ///////////////////////////////////////
+
+                            //Metodo para almacenar el movimiento en el mapa
+                            new RegistrarMovimiento().execute(String.valueOf(easting),String.valueOf(northing),String.valueOf(Observacion),String.valueOf(total_),_patron,String.valueOf(id_tarea_tra), tabla.toString());
+
                         }
                     });
 
@@ -602,15 +689,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         protected Boolean doInBackground(String... strings) {
             ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-            nameValuePairs.add(new BasicNameValuePair("lectura", lect.getText().toString()));
-            nameValuePairs.add(new BasicNameValuePair("comentario", comentario.getText().toString()));
-            nameValuePairs.add(new BasicNameValuePair("cuenta", cuenta.getText().toString()));
+            nameValuePairs.add(new BasicNameValuePair("lat_reg_trab",strings[0]));
+            nameValuePairs.add(new BasicNameValuePair("long_reg_trab", strings[1]));
+            nameValuePairs.add(new BasicNameValuePair("id_tarea_tramite",strings[5]));
+            nameValuePairs.add(new BasicNameValuePair("observacion", strings[2]));
+            nameValuePairs.add(new BasicNameValuePair("sal_abil", strings[4]));
+            nameValuePairs.add(new BasicNameValuePair("total_mov", strings[3]));
+            nameValuePairs.add(new BasicNameValuePair("tabla", strings[6]));
 
             try {
                 HttpClient httpclient = new DefaultHttpClient();
-                HttpPost httppost = new HttpPost("http://"+ JSON.ipserver+"/movimiento");
+                HttpPost httppost = new HttpPost("http://"+ JSON.ipserver+"/call_tramite");
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
                 HttpResponse response = httpclient.execute(httppost);
+                String status= String.valueOf(response.getStatusLine().getStatusCode());
+                Log.e("Estado",status);
                 HttpEntity entity = response.getEntity();
                 data = EntityUtils.toString(entity);
                 JSONObject obj = new JSONObject(data);
@@ -642,7 +735,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (aBoolean) {
                 StyleableToast.makeText(MapsActivity.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
                 alertDialog.dismiss();
-                GuardarSql(foto, lect.getText().toString(), "S", data);
+                GuardarSql(foto, comentario.getText().toString(), "S", data);
             } else {
                 StyleableToast.makeText(MapsActivity.this, "Error al realizar la transacción!", Toast.LENGTH_SHORT, R.style.StyledToastError).show();
 
@@ -675,7 +768,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Long codPrediojson          = jsonObject.getLong("cod_predio");
                 Double latitudjson          = jsonObject.getDouble("latitud");
                 Double longitudjson         = jsonObject.getDouble("longitud");
-                Double deuda_portoaguasjson   = jsonObject.getDouble("deuda_portoagua");
+                Double deuda_portoaguasjson = jsonObject.getDouble("deuda_portoagua");
                 Long mes_deudajson          = jsonObject.getLong("mes_deuda");
                 Long codMedidorjson         = jsonObject.getLong("codigo_medidor");
                 String serieMedidorjson     = jsonObject.getString("serie_medidor");
@@ -723,8 +816,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 JSONArray obj = new JSONArray(values);
                 for (int index = 0; index < obj.length(); index++) {
                     JSONObject jsonObject = obj.getJSONObject(index);
-                    deuda_ac          = jsonObject.getString("valor_deuda");
-                    facturas_impagos  = jsonObject.getString("numero_facturas_impagos");
+                    deuda_ac          = jsonObject.getString("VALOR_DEUDA");
+                    facturas_impagos  = jsonObject.getString("NUMERO_FACTURAS_IMPAGOS");
+                    reclamo           = jsonObject.getString("RECLAMO");
                     Log.e("Deuda Actual",deuda_ac);
                     res=true;
                 }
@@ -756,6 +850,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                }
                deuda.setText(deuda_ac);
                meses.setText(facturas_impagos);
+               txt_reclamo.setText(reclamo);
            }//FIN DEL IF ABOOLEAN
 
         }

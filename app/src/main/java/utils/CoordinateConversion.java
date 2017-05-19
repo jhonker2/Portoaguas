@@ -99,10 +99,13 @@ public class CoordinateConversion
       double _easting = getEasting();
       double _northing = getNorthing(latitude);
 
-      UTM = longZone + " " + latZone + " " + ((int) _easting) + " "
-          + ((int) _northing);
+     // UTM = longZone + " " + latZone + " " + ((int) _easting) + " "
+       //   + ((int) _northing);
       // UTM = longZone + " " + latZone + " " + decimalFormat.format(_easting) +
       // " "+ decimalFormat.format(_northing);
+
+       UTM = longZone + " " + latZone + " " + _easting+
+      " "+ _northing;
 
       return UTM;
 

@@ -22,6 +22,7 @@ import com.muddzdev.styleabletoastlibrary.StyleableToast;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -31,6 +32,7 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import utils.JSON;
@@ -78,11 +80,7 @@ public class loginActivity extends AppCompatActivity {
     class RegistrarDispositivos extends AsyncTask<String, Void, String> {
         private ProgressDialog pDialog;
 
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
-            pDialog.dismiss();
-        }
+
 
         @Override
         protected void onPreExecute() {
@@ -120,6 +118,12 @@ public class loginActivity extends AppCompatActivity {
         }
 
         @Override
+        protected void onCancelled(String s) {
+            pDialog.dismiss();
+
+        }
+
+        @Override
         protected String doInBackground(String... strings) {
             SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
 
@@ -133,6 +137,8 @@ public class loginActivity extends AppCompatActivity {
                 HttpPost httppost = new HttpPost("http://"+ JSON.ipserver+"/login");
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
                 HttpResponse response = httpclient.execute(httppost);
+                String status= String.valueOf(response.getStatusLine().getStatusCode());
+                Log.e("Estado",status);
                 HttpEntity entity = response.getEntity();
                 data = EntityUtils.toString(entity);
                 //Log.e("LOGIN", data);
@@ -147,12 +153,20 @@ public class loginActivity extends AppCompatActivity {
                 Log.e("Datos",id_usuario+" "+cargo+" "+nombre);
 
                 SharedPreferences.Editor editor = dato.edit();
-                editor.putString("p_idUsuario", id_usuario);
+               editor.putString("p_idUsuario", id_usuario);
                 editor.putString("p_nombreU", nombre);
                 editor.putString("p_cargoU", cargo);
                 editor.commit();
                resul=respuesta;
-            } catch (Exception e) {
+
+            }catch (UnsupportedEncodingException e){
+                e.printStackTrace();
+                resul="";
+            }
+            catch (ClientProtocolException e){
+                Log.e("ClienteProtocol", "Error in http connection " + e.toString());
+                resul="";
+            } catch (Exception e ) {
                 Log.e("log_tag", "Error in http connection " + e.toString());
                 resul="";
             }

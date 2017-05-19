@@ -197,7 +197,7 @@ public class MovimientosActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... voids) {
             items.clear();
-            items = MDB.recuperarCONTACTOS();
+            items = movimientoHelper.recuperarCONTACTOS();
             if (items.size() == 0) {
                 return "0";
             }
@@ -218,7 +218,7 @@ public class MovimientosActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(String... strings) {
-            total = MDB.TotalMovimientos();
+            total = movimientoHelper.TotalMovimientos();
             Log.e("Total de item:", String.valueOf(total));
             if (total > 0) {
                 res = "ok";

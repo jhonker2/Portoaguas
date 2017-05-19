@@ -35,7 +35,7 @@ import static com.example.pmat_programador_1.portoaguas.MapsActivity.total;
  */
 
     public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.ItemRowHolder> {
-    public ArrayList<Detalles> detall= new ArrayList<Detalles>();
+    public static ArrayList<Detalles> detall= new ArrayList<Detalles>();
     public ArrayList<Rubros> listObjeto;
     public double contTotal=0;
     private Context mContext;
@@ -54,9 +54,7 @@ import static com.example.pmat_programador_1.portoaguas.MapsActivity.total;
     class ItemRowHolder extends ViewHolder implements View.OnClickListener {
 
         protected TextView titulo, precio,codigo, cod_prod,cant;
-       // final public Spinner cantidad_s;
         protected RecyclerView recycler_view_list;
-        public CardView card;
         public Button min,plus;
 
 
@@ -70,21 +68,10 @@ import static com.example.pmat_programador_1.portoaguas.MapsActivity.total;
                 this.min    =(Button) view.findViewById(R.id.btn_min);
                 this.plus   =(Button) view.findViewById(R.id.btn_plus);
                 this.cant   =(EditText) view.findViewById(R.id.txt_cant);
-                //this.cantidad_s = (Spinner) view.findViewById(R.id.cantidad_spi);
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(view.getContext(), android.R.layout.simple_spinner_item, cantidades);
-                //adapter.notifyDataSetChanged();
-                //this.cantidad_s.setAdapter(adapter);
-                this.card =(CardView) view.findViewById(R.id.cardPrincipal);
                 listObjeto=datos;
-                //this.cantidad_s.setOnItemSelectedListener(this);
-                /*this.card.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Toast.makeText(v.getContext(),"Mensaje", Toast.LENGTH_LONG).show();
-                    }
-                });*/
                 min.setOnClickListener(this);
                 plus.setOnClickListener(this);
+
                 this.cant.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -109,9 +96,7 @@ import static com.example.pmat_programador_1.portoaguas.MapsActivity.total;
         public void onClick(View v) {
             int pos = getAdapterPosition();
             Rubros ob = items.get(pos);
-
             if(v.getId()==min.getId()){
-                //Toast.makeText(min.getContext(),"Boton Min "+pos+"",Toast.LENGTH_LONG).show();
                 String cantidad = cant.getText().toString();
                     if(cantidad.equals("")){
                         cantidad="0";
@@ -141,14 +126,13 @@ import static com.example.pmat_programador_1.portoaguas.MapsActivity.total;
 
                 for (int x=0 ; x<detall.size(); x++){
                     if(detall.get(x).getCantidad().equals("0")){
-                        //holder.cantidad_s.setSelection(0);
+
                     }else{
                         Log.e("COL_LIB",detall.get(x).getCodigo()+"@@"+detall.get(x).getCod_prod()+"@@"+detall.get(x).getPrecio()+"@@"+detall.get(x).getCantidad());
                     }
                 }
 
             }else{
-               // Toast.makeText(min.getContext(),"Boton Mas "+pos+"",Toast.LENGTH_LONG).show();
                 String cantidad = cant.getText().toString();
                 if(cantidad.equals("")){
                     cantidad="0";
@@ -178,7 +162,7 @@ import static com.example.pmat_programador_1.portoaguas.MapsActivity.total;
 
                 for (int x=0 ; x<detall.size(); x++){
                     if(detall.get(x).getCantidad().equals("0")){
-                        //holder.cantidad_s.setSelection(0);
+
                     }else{
                         Log.e("COL_LIB",detall.get(x).getCodigo()+"@@"+detall.get(x).getCod_prod()+"@@"+detall.get(x).getPrecio()+"@@"+detall.get(x).getCantidad());
                     }
@@ -243,9 +227,6 @@ import static com.example.pmat_programador_1.portoaguas.MapsActivity.total;
 
     @Override
     public void onBindViewHolder(final ItemRowHolder holder, int position) {
-        final int pos = position;
-
-       // holder.itemView.setTag(items.get(position));
 
         holder.codigo.setText(items.get(position).getCodigo());
         holder.titulo.setText(items.get(position).getTitulos());

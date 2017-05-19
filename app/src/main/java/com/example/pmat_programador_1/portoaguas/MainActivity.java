@@ -223,21 +223,21 @@ public class MainActivity extends AppCompatActivity
             Intent inte = new Intent(MainActivity.this, MapsActivity.class);
             startActivity(inte);
 
-        } else if (id == R.id.nav_slideshow) {
+        } /*else if (id == R.id.nav_slideshow) {
             Intent inte = new Intent(MainActivity.this, ArsGisActivity.class);
             startActivity(inte);
 
-        } else if (id == R.id.nav_manage) {
+        } */ else if (id == R.id.nav_manage) {
             Intent inte = new Intent(MainActivity.this, com.example.pmat_programador_1.portoaguas.Activitys.MainActivity.class);
             startActivity(inte);
 
-        } else if (id == R.id.nav_share) {
+        }else if (id == R.id.nav_share) {
             Intent inte = new Intent(MainActivity.this, MovimientosActivity.class);
             startActivity(inte);
-        } else if (id == R.id.Position) {
+        } /*else if (id == R.id.Position) {
             Intent inte = new Intent(MainActivity.this, locationActivity.class);
             startActivity(inte);
-        } else if (id == R.id.nav_send) {
+        } */else if (id == R.id.nav_send) {
             Intent inte = new Intent(MainActivity.this, loginActivity.class);
             startActivity(inte);
             finish();
