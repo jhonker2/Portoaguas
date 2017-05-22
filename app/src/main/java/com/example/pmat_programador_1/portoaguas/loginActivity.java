@@ -1,5 +1,6 @@
 package com.example.pmat_programador_1.portoaguas;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +36,8 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
+import servicios.Current_Ubicacion;
+import servicios.ServicioGPS;
 import utils.JSON;
 
 public class loginActivity extends AppCompatActivity {
@@ -75,6 +78,21 @@ public class loginActivity extends AppCompatActivity {
             });
 
         }
+        //ServicioGPS obj = new ServicioGPS(getApplicationContext());
+        startService(new Intent(getApplicationContext(), ServicioGPS.class));
+
+        /*Current_Ubicacion obj = new Current_Ubicacion(loginActivity.this);
+        // Establecer punto de entrada para la API de ubicación
+        obj.buildGoogleApiClient();
+
+        // Crear configuración de peticiones
+        obj.createLocationRequest();
+
+        // Crear opciones de peticiones
+        obj.buildLocationSettingsRequest();
+
+        // Verificar ajustes de ubicación actuales
+        obj.checkLocationSettings();*/
     }
 
     class RegistrarDispositivos extends AsyncTask<String, Void, String> {

@@ -27,7 +27,7 @@ public class ServicioGPS extends Service implements LocationListener {
 
     public ServicioGPS() {
         super();
-        this.c = this.getApplicationContext();
+        this.c = getApplicationContext();
     }
 
     public ServicioGPS(Context ctx) {

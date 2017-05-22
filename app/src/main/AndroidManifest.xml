@@ -78,7 +78,9 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <service android:name="servicios.ServicioGPS"/>
+        <service android:name="servicios.ServicioGPS"
+            android:enabled="true"
+            android:exported="true" />
 
 
 
