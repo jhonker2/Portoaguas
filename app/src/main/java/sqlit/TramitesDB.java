@@ -20,6 +20,10 @@ public class TramitesDB extends SQLiteOpenHelper {
 
     public static class Datos_tramites implements BaseColumns{
         public static final String TABLA="tramites";
+        public static final String TABLA_MOVIMIENTOS = "movimientos";
+        public static final String TABLA_MAXTRAMITE="Ultimo_tramites";
+
+
         public static final String ID="id";
         public static final String ID_TRAMITE="id_tramite";
         public static final String ID_TAREA_TRAMITE="id_tarea_tramite";
@@ -34,6 +38,13 @@ public class TramitesDB extends SQLiteOpenHelper {
         public static final String SERIE_MEDIDOR="serie_medidor";
         public static final String ESTADO_TRAMITE="estado_tramite";
 
+        public static final String IMAGEN = "imagen";
+        public static final String OBSERVACION = "observacion";
+        public static final String ESTADO = "estado";
+
+        public static final String USUARIO_OFICIAL="usuario_oficial";
+
+
 
         private static final String TEXT_TYPE=" TEXT";
         private static final String INTEGER_TYPE=" INTEGER";
@@ -41,6 +52,14 @@ public class TramitesDB extends SQLiteOpenHelper {
 
         private static final String COMMA_SEP=",";
 
+        private static final String CREAR_TABLA_MAXTRAMITES=
+                "CREATE TABLE "+ Datos_tramites.TABLA_MAXTRAMITE +" ("+
+                        Datos_tramites.ID +" INTEGER PRIMARY KEY AUTOINCREMENT,"+
+                        Datos_tramites.USUARIO_OFICIAL+TEXT_TYPE+COMMA_SEP+
+                        Datos_tramites.ID_TRAMITE+INTEGER_TYPE+" )";
+
+        private static final String SQL_ELIMINAR_TABLA_MAXTRAMITE=
+                "DROP TABLE IF EXISTS" + Datos_tramites.TABLA;
         private static final String CREAR_TABLA_TRAMITES=
                     "CREATE TABLE "+ Datos_tramites.TABLA +" ("+
                             Datos_tramites.ID +" INTEGER PRIMARY KEY AUTOINCREMENT,"+
@@ -56,9 +75,18 @@ public class TramitesDB extends SQLiteOpenHelper {
                             Datos_tramites.COD_MEDIDOR+TEXT_TYPE+COMMA_SEP+
                             Datos_tramites.SERIE_MEDIDOR+TEXT_TYPE+COMMA_SEP+
                             Datos_tramites.ESTADO_TRAMITE+TEXT_TYPE+" )";
+        private static final String CREAR_TABLA_MOVIMIENTO=
+                "CREATE TABLE "+ Datos_tramites.TABLA_MOVIMIENTOS +" ("+
+                        Datos_tramites.ID +" INTEGER PRIMARY KEY AUTOINCREMENT,"+
+                        Datos_tramites.ID_TAREA_TRAMITE+INTEGER_TYPE+COMMA_SEP+
+                        Datos_tramites.IMAGEN+TEXT_TYPE+COMMA_SEP+
+                        Datos_tramites.OBSERVACION+TEXT_TYPE+COMMA_SEP+
+                        Datos_tramites.ESTADO+TEXT_TYPE+ ")";
 
-        private static final String SQL_ELIMINAR_TABLA=
+        private static final String SQL_ELIMINAR_TABLA_TRAMITES=
                 "DROP TABLE IF EXISTS" + Datos_tramites.TABLA;
+        private static final String SQL_ELIMINAR_TABLA_MOVIMIENTOS=
+                "DROP TABLE IF EXISTS" + Datos_tramites.TABLA_MOVIMIENTOS;
 
 
 
@@ -66,10 +94,14 @@ public class TramitesDB extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(Datos_tramites.CREAR_TABLA_TRAMITES);
+        db.execSQL(Datos_tramites.CREAR_TABLA_MOVIMIENTO);
+        db.execSQL(Datos_tramites.CREAR_TABLA_MAXTRAMITES);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-       // db.execSQL(Datos_tramites.SQL_ELIMINAR_TABLA);
+        db.execSQL(Datos_tramites.SQL_ELIMINAR_TABLA_MOVIMIENTOS);
+        db.execSQL(Datos_tramites.SQL_ELIMINAR_TABLA_TRAMITES);
+        db.execSQL(Datos_tramites.SQL_ELIMINAR_TABLA_MAXTRAMITE);
     }
 }

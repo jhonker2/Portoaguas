@@ -33,6 +33,7 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
@@ -50,6 +51,7 @@ public class loginActivity extends AppCompatActivity {
         SharedPreferences dato = this.getSharedPreferences("perfil", Context.MODE_PRIVATE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
         if (dato.getString("p_nombreU", null) != null) {
             startActivity(new Intent(loginActivity.this, MainActivity.class));
             finish();
@@ -57,6 +59,10 @@ public class loginActivity extends AppCompatActivity {
             btnlogin = (Button) findViewById(R.id.btn_login);
             txt_usuario = (EditText) findViewById(R.id.textUsuario);
             txt_clave = (EditText) findViewById(R.id.textClave);
+            View parentLayout = findViewById(R.id.imageView3);
+            if(!isOnlineNet()){
+                Snackbar.make(parentLayout,"No hay conexion con el servidor vuelva mas tarde",Snackbar.LENGTH_LONG).setAction("Action",null).show();
+            }
 
 
             btnlogin.setOnClickListener(new View.OnClickListener() {
@@ -78,8 +84,9 @@ public class loginActivity extends AppCompatActivity {
             });
 
         }
-        //ServicioGPS obj = new ServicioGPS(getApplicationContext());
-        startService(new Intent(getApplicationContext(), ServicioGPS.class));
+/*        ServicioGPS obj = new ServicioGPS(getApplicationContext());
+        obj.Miubicacion();*/
+       // startService(new Intent(getApplicationContext(), ServicioGPS.class));
 
         /*Current_Ubicacion obj = new Current_Ubicacion(loginActivity.this);
         // Establecer punto de entrada para la API de ubicación
@@ -93,6 +100,19 @@ public class loginActivity extends AppCompatActivity {
 
         // Verificar ajustes de ubicación actuales
         obj.checkLocationSettings();*/
+    }
+    public Boolean isOnlineNet(){
+        try {
+            Process p = Runtime.getRuntime().exec("ping -c 1 http://192.168.137.1:8090/portal-portoaguas/public/");
+            int val = p.waitFor();
+            boolean reachable = (val == 0);
+            return  reachable;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     class RegistrarDispositivos extends AsyncTask<String, Void, String> {

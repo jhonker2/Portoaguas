@@ -48,6 +48,7 @@ dependencies {
 
     // Libreria para subir archivos al servidor https://jonathanmelgoza.com/blog/subir-archivos-a-un-servidor-desde-android/
     compile 'net.gotev:uploadservice:3.0'
-    
-
-}
+    compile 'com.google.firebase:firebase-core:9.0.0'
+    compile 'com.google.firebase:firebase-messaging:9.0.0'
+    }
+apply plugin: 'com.google.gms.google-services'

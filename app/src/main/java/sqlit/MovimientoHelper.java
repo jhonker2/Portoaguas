@@ -35,7 +35,7 @@ public class MovimientoHelper extends SQLiteOpenHelper {
     public ArrayList<Movimiento> recuperarCONTACTOS() {
         SQLiteDatabase db = getReadableDatabase();
         ArrayList<Movimiento> lista_contactos = new ArrayList<Movimiento>();
-        String[] valores_recuperar = {"id_movimiento", "imagen", "lectura", "estado"};
+        String[] valores_recuperar = {"id_tarea_tramite", "imagen", "observacion", "estado"};
         Cursor c = db.query("movimientos", valores_recuperar,
                 null, null, null, null, null, null);
         c.moveToFirst();
@@ -51,7 +51,7 @@ public class MovimientoHelper extends SQLiteOpenHelper {
     public int TotalMovimientos() {
         SQLiteDatabase db = getReadableDatabase();
         int cont = 0;
-        String[] valores_recuperar = {"id_movimiento", "imagen", "lectura", "estado"};
+        String[] valores_recuperar = {"id_tarea_tramite", "imagen", "observacion", "estado"};
         Cursor c = db.query("movimientos", valores_recuperar,
                 null, null, null, null, null, null);
         c.moveToFirst();

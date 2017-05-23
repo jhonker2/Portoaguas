@@ -43,7 +43,7 @@ public class ServicioGPS extends Service implements LocationListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Miubicacion();
+        //Miubicacion();
         return START_NOT_STICKY;
 
     }
@@ -54,7 +54,7 @@ public class ServicioGPS extends Service implements LocationListener {
     }
 
     public void Miubicacion() {
-        Log.e("Mi nueva Ubicacion Ser", Lat + "," + longitud);
+        Log.e("Mi nueva Ubicacion es", Lat + "," + longitud);
     }
 
     public void getLocation() {
@@ -78,7 +78,7 @@ public class ServicioGPS extends Service implements LocationListener {
                 location = locationManager.getLastKnownLocation(locationManager.GPS_PROVIDER);
                 Lat = location.getLatitude();
                 longitud = location.getLongitude();
-            }else {
+            } else {
                 locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 1000 * 60, 10, this);
                 location = locationManager.getLastKnownLocation(locationManager.GPS_PROVIDER);
                 Lat = location.getLatitude();
@@ -96,6 +96,8 @@ public class ServicioGPS extends Service implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
 
+        getLocation();
+        Miubicacion();
     }
 
     @Override

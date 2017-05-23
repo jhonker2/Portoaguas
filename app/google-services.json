@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "195357985289",
+    "firebase_url": "https://portoaguas-165214.firebaseio.com",
+    "project_id": "portoaguas-165214",
+    "storage_bucket": "portoaguas-165214.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:195357985289:android:0ed5c85cccfb61c7",
+        "android_client_info": {
+          "package_name": "com.example.pmat_programador_1.portoaguas"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "195357985289-v6ase91hrvrgejc2i6stm37gfu10t4jr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXvOHb4F01RJrHcWggpuutJU1R01k9GGk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
