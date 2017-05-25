@@ -74,7 +74,8 @@ public class TramitesDB extends SQLiteOpenHelper {
                             Datos_tramites.DEUDA_PORTOAGUAS+TEXT_TYPE+COMMA_SEP+
                             Datos_tramites.COD_MEDIDOR+TEXT_TYPE+COMMA_SEP+
                             Datos_tramites.SERIE_MEDIDOR+TEXT_TYPE+COMMA_SEP+
-                            Datos_tramites.ESTADO_TRAMITE+TEXT_TYPE+" )";
+                            Datos_tramites.ESTADO_TRAMITE+TEXT_TYPE+COMMA_SEP+
+                            Datos_tramites.USUARIO_OFICIAL+TEXT_TYPE+" )";
         private static final String CREAR_TABLA_MOVIMIENTO=
                 "CREATE TABLE "+ Datos_tramites.TABLA_MOVIMIENTOS +" ("+
                         Datos_tramites.ID +" INTEGER PRIMARY KEY AUTOINCREMENT,"+

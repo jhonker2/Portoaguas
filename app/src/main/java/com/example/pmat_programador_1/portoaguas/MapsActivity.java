@@ -2,6 +2,7 @@ package com.example.pmat_programador_1.portoaguas;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -96,6 +97,7 @@ import Models.Puntos;
 import Models.Rubros;
 import sqlit.Movimiento;
 import sqlit.MovimientoHelper;
+import sqlit.Tramites;
 import sqlit.TramitesDB;
 import utils.Constants;
 import utils.CoordinateConversion;
@@ -148,6 +150,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public static final int REQUEST_LOCATION = 1;
     public static final int REQUEST_CHECK_SETTINGS = 2;
+
+    //////////////////////////////////////////////////
+    public int id_tramite_DB=0;
+    //////////////////////////////////////////////////
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -203,7 +209,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_map) {
-            return true;
+            finish();
+            startActivity(getIntent());
         }
 
         return super.onOptionsItemSelected(item);
@@ -229,7 +236,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = txtidtramite.getText().toString()+"_"+timeStamp;
+        String imageFileName =cuenta.getText().toString()+"_"+timeStamp;
         foto = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Portoaguas/" + imageFileName + ".jpg";
         File storageDir2 = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Portoaguas");
         storageDir = new File(foto);
@@ -460,20 +467,36 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             pDialog.setIndeterminate(false);
             pDialog.setCancelable(false);
             pDialog.show();
+            new LoadMaxTramite().execute();
         }
 
         @Override
         protected String doInBackground(String... strings) {
                 try {
-                    Log.e("TOTAL PUNTOS DB",String.valueOf(Total_tramitesDB()));
-                    Log.e("TOTAL PUNTOS SQLITE",String.valueOf(Total_tramitesSQLITE()));
-                    Log.e("MAX PUNTO SQLITE",String.valueOf(Max_tramiteSQLITE()));
-
+                    Log.e("TOTAL PUNTOS DB", String.valueOf(Total_tramitesDB()));
+                    Log.e("TOTAL PUNTOS SQLITE", String.valueOf(Total_tramitesSQLITE()));
+                    Log.e("MAX PUNTO DB", String.valueOf(id_tramite_DB));
                     item.clear();
-                    item = recuperarTramites();
-                    if(item.size()==0){
+                    if (Total_tramitesSQLITE() == 0) {
                         item = getPuntos();
+                    } else {
+                        Log.e("MAX PUNTO SQLITE", String.valueOf(Max_tramiteSQLITE()));
+                        if (Max_tramiteSQLITE() < id_tramite_DB) {// preguntamos si el maximo idtramite de sql es menor al id_trtamite de la BASE
+                        //Consultar los puntos nuevos
+                        item = getNextsPuntos(Max_tramiteSQLITE());
+                        // item = recuperarTramites();
+                        if (item.size() == 0) {
+                            item = recuperarTramites();
+                        }
+                    } else {
+                        item = recuperarTramites();
+                        if (item.size() == 0) {
+                            item = getPuntos();
+                        }
                     }
+                }
+
+
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
@@ -650,7 +673,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             /*
                                 TOTAL MOVIMIENTO
                              */
-                            double total_ = Double.parseDouble(total.getText().toString());
+                            double total_=0;
+                            if(total.getText().toString().equals("")|| total.getText().toString().equals(0) ){
+                                total_ = 0;
+                            }else{
+                                total_ = Double.parseDouble(total.getText().toString());
+                            }
+
                             String Observacion = comentario.getText().toString();
                             Log.e("TOTAL", String.valueOf(total_));
                             Log.e("Comentario", Observacion);
@@ -677,8 +706,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                     });
 
-                    //BOTON PARA ACTUALIZAR DEUDA DEL CLIENTE
 
+                    //BOTON PARA ACTUALIZAR DEUDA DEL CLIENTE
                     btn_deuda.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -691,7 +720,30 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             });
         }
     }
+    /*
+    FUNCION LOADMAXTRAMITE PERMITE CREA UN HILO PARA LLAMAR A
+    LA FUNCION MAX_TRAMITEDB
+    Y LO ALMACENA EN LA VARIABLE ENTERA ID_TRAMITE_DB
+     */
+    public class LoadMaxTramite extends AsyncTask<String, String, String> {
 
+        @Override
+        protected String doInBackground(String... strings) {
+            try {
+               id_tramite_DB=Max_tramiteDB();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
+    /*
+     CLASS REGISTRARMOVIMIENTOS
+     ES UN HILO QUE PERMITE LLAMAR A UN SP PARA ALMACENAR EL TRAMITE QUE SE HAGA
+     Y A LA VEZ ALMACENAREMOS LA RUTA DE LA FOTO EN LA BASE DE DATOS SQLITE
+     Y ACTUALIZAMOS EL ESTADO DEL TRAMITE QUE ESTA ALMACENADO EN LA BASE DE DATOS SQLITE
+     */
     class RegistrarMovimiento extends AsyncTask<String, Void, Boolean> {
         private ProgressDialog pDialog;
 
@@ -745,36 +797,41 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 StyleableToast.makeText(MapsActivity.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
                 alertDialog.dismiss();
                 //GuardarSql(foto, comentario.getText().toString(), "S", data);
-                SQLiteDatabase db= objDB.getWritableDatabase();
-                ContentValues valores1 =  new ContentValues();
-                valores1.put(TramitesDB.Datos_tramites.ID_TAREA_TRAMITE,data);
-                valores1.put(TramitesDB.Datos_tramites.IMAGEN,foto);
-                valores1.put(TramitesDB.Datos_tramites.OBSERVACION,comentario.getText().toString());
-                valores1.put(TramitesDB.Datos_tramites.ESTADO,"S");
-                Long id_Guardar=db.insert(TramitesDB.Datos_tramites.TABLA_MOVIMIENTOS,null,valores1);
-                if(id_Guardar==-1){
-                    Log.e("SQLITE SAVE","ERRORguardados");
-                }else{
-                    Log.e("SQLITE SAVE","Datos guardados");
-                     /*
-                ACTUALIZAR PUNTO EL ESTADO SQLITE
-                 */
-                    SQLiteDatabase bd = objDB.getWritableDatabase();
-                    ContentValues valores = new ContentValues();
-                    valores.put(TramitesDB.Datos_tramites.ESTADO_TRAMITE,"E");
-                    String [] argsel = {data};
-                    String Selection = TramitesDB.Datos_tramites.ID_TAREA_TRAMITE+"=?";
-                    int count = bd.update(TramitesDB.Datos_tramites.TABLA,
+                    SQLiteDatabase db= objDB.getWritableDatabase();
+                    ContentValues valores1 =  new ContentValues();
+                    valores1.put(TramitesDB.Datos_tramites.ID_TAREA_TRAMITE,data);
+                    valores1.put(TramitesDB.Datos_tramites.IMAGEN,foto);
+                    valores1.put(TramitesDB.Datos_tramites.OBSERVACION,comentario.getText().toString());
+                    valores1.put(TramitesDB.Datos_tramites.ESTADO,"S");
+                    Long id_Guardar=db.insert(TramitesDB.Datos_tramites.TABLA_MOVIMIENTOS,null,valores1);
+                        if(id_Guardar==-1){
+                            Log.e("SQLITE SAVE","ERRORguardados");
+                        }else{
+                            Log.e("SQLITE SAVE","Datos guardados");
+                            /*
+                            ACTUALIZAR PUNTO EL ESTADO SQLITE
+                            */
+                            SQLiteDatabase bd = objDB.getWritableDatabase();
+                            ContentValues valores = new ContentValues();
+                            valores.put(TramitesDB.Datos_tramites.ESTADO_TRAMITE,"E");
+                            String [] argsel = {data};
+                            String Selection = TramitesDB.Datos_tramites.ID_TAREA_TRAMITE+"=?";
+                            int count = bd.update(TramitesDB.Datos_tramites.TABLA,
                             valores,Selection,argsel);
-                    Log.e("UPDATE", String.valueOf(count));
-                /*
-                **************************************************************
-                 */
-                    //REINICIAMOS LA ACTIVIDAD
-                    finish();
-                    startActivity(getIntent());
-                    //*********************************************************
-                }
+                            Log.e("UPDATE", String.valueOf(count));
+
+                            /*
+                            *******************************CONSULTAR SI EXISTEN NUEVOS `PUNTOS ******
+                             */
+
+                            /*
+                            **************************************************************
+                            */
+                            //REINICIAMOS LA ACTIVIDAD
+                            finish();
+                            startActivity(getIntent());
+                            //*********************************************************
+                        }
 
             } else {
                 StyleableToast.makeText(MapsActivity.this, "Error al realizar la transacción!", Toast.LENGTH_SHORT, R.style.StyledToastError).show();
@@ -783,10 +840,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    /*
+    FUNCION RECUPERARTRAMITES PERMITE OBTENER LOS
+    PUNTOS (TRAMITES) QUE SE ENCUENTRAR ALMACENADO EN LA
+    BASE DE DATOS SQLITE
+     */
     public ArrayList<Puntos> recuperarTramites(){
         SQLiteDatabase db = objDB.getReadableDatabase();
         ArrayList<Puntos> lista_tramites= new ArrayList<Puntos>();
-        String[] campos = {"id_tramite","id_tarea_tramite","numero_cuenta","cod_cliente","cod_predio","mes_deuda","latitud","longitud","deuda_portoaguas","cod_medidor","serie_medidor","estado_tramite"};
+        String[] campos = {"id_tramite","id_tarea_tramite","numero_cuenta","cod_cliente","cod_predio","mes_deuda","latitud","longitud","deuda_portoaguas","cod_medidor","serie_medidor","estado_tramite","usuario_oficial"};
         Cursor c = db.query("tramites",campos,null,null,null,null,null,null);
         c.moveToFirst();
         if(c.getCount()==0){
@@ -795,12 +857,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             do{
                 lista_tramites.add(new Puntos(c.getLong(0),c.getLong(1),c.getLong(2),c.getLong(3),
                     c.getLong(4),c.getLong(5),c.getDouble(6),c.getDouble(7),c.getFloat(8),
-                    c.getString(9),c.getString(10),c.getString(11)));
+                    c.getString(9),c.getString(10),c.getString(11),c.getString(12)));
             } while(c.moveToNext());
         }
         return lista_tramites;
     }
 
+    /*
+    FUNCION MAX_TRAMITESQLITE PERMITE OBTENR EL MAXIMO ID_TRAMITE
+    DE LA BASE DE DATOS SQLITE
+     */
     public int Max_tramiteSQLITE(){
         int max_tramite=0;
         SQLiteDatabase db = objDB.getReadableDatabase();
@@ -808,7 +874,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Cursor c = db.query("tramites", valores_recuperar,
                 null, null, null, null, null, null);
         c.moveToFirst();
-        if(c.getCount()==0){
+        if(!c.moveToFirst()){
 
         }else {
             do {
@@ -819,7 +885,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         c.close();
         return max_tramite;
     }
-
+    /*
+    FUNCION TOTAL_TRAMITESSQLITE PERMITE OBTENER EL TOTAL DE TRAMITES QUE
+    EXISTEN EN LA BASE DE DATOS SQLITE DEL DISPOSITIVO
+     */
     public int Total_tramitesSQLITE(){
         int total_tra_sqlite=0;
 
@@ -840,6 +909,47 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         return total_tra_sqlite;
     }
+
+    /*
+      FUNCION MAX_TRAMITEDB PERMITE OBTENER EL MAX ID_TRAMITES
+      QUE EXISTE EN LA BASE DE DATOS PRINCIPAL
+     */
+    public int Max_tramiteDB() throws  ParseException{
+       int max_tramite=0;
+        SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+        ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+        nameValuePairs.add(new BasicNameValuePair("cedula",dato.getString("p_idUsuario", null) ));
+        String values;
+        try {
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/maxTramite");
+            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
+            HttpResponse response = httpclient.execute(httppost);
+            HttpEntity entity = response.getEntity();
+            values = EntityUtils.toString(entity);
+            JSONArray obj = new JSONArray(values);
+            for (int index = 0; index < obj.length(); index++) {
+                JSONObject jsonObject = obj.getJSONObject(index);
+                String usuario_oficialjson  = jsonObject.getString("usuario_oficial");
+                int id_tramitejson         = jsonObject.getInt("id_tramite");
+                Log.e("Return Maxtramite",usuario_oficialjson+' '+id_tramitejson);
+                max_tramite=id_tramitejson;
+
+            }
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ClientProtocolException e1) {
+            e1.printStackTrace();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        return max_tramite;
+    }
+    /*
+     FUNCION TOTAL_TRAMITESDB
+     PERMITE RETORNA EL TOTAL DE TRAMITES QUE EXISTENE EN LA BASE DE DATOS PRINCIPAL
+     */
     public int Total_tramitesDB() throws ParseException {
         int total_registros=0;
         SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
@@ -865,7 +975,100 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         return total_registros;
     }
+    /*
+        GETNEXTSPUNTOS FUNCION PARA OBTENER LOS OTROS PUNTOS NUEVOS ASIGNADOS
+        SI ESQUE LLEGARANA A ASIGANRLE AL USUARIO
+     */
+    public ArrayList<Puntos> getNextsPuntos(int tramite) throws ParseException{
+        SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+        ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+        nameValuePairs.add(new BasicNameValuePair("cedula",dato.getString("p_idUsuario", null) ));
+        nameValuePairs.add(new BasicNameValuePair("id_tramite",String.valueOf(tramite)));
+        String values;
+        try {
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/next_puntos");
+            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
+            HttpResponse response = httpclient.execute(httppost);
+            HttpEntity entity = response.getEntity();
+            values = EntityUtils.toString(entity);
+            JSONArray obj = new JSONArray(values);
+            if (obj.length() == 0) {
 
+            } else {
+                SQLiteDatabase db = objDB.getReadableDatabase();
+                ArrayList<Puntos> lista_tramites= new ArrayList<Puntos>();
+                String[] campos = {"id_tramite","id_tarea_tramite","numero_cuenta","cod_cliente","cod_predio","mes_deuda","latitud","longitud","deuda_portoaguas","cod_medidor","serie_medidor","estado_tramite","usuario_oficial"};
+                Cursor c = db.query("tramites",campos,null,null,null,null,null,null);
+                c.moveToFirst();
+                if(c.getCount()==0){
+                    Log.e("Cursor","Cursor Vacio");
+                }else {
+                    do{
+                        item.add(new Puntos(c.getLong(0),c.getLong(1),c.getLong(2),c.getLong(3),
+                                c.getLong(4),c.getLong(5),c.getDouble(6),c.getDouble(7),c.getFloat(8),
+                                c.getString(9),c.getString(10),c.getString(11),c.getString(12)));
+                    } while(c.moveToNext());
+                }
+                for (int index = 0; index < obj.length(); index++) {
+                JSONObject jsonObject = obj.getJSONObject(index);
+                Long idtramitejson = jsonObject.getLong("id_tramite");
+                Long id_tarea_tramitejson = jsonObject.getLong("id_tarea_tramite");
+                Long numeroCuentejson = jsonObject.getLong("numero_cuenta");
+                Long codClientejson = jsonObject.getLong("cod_cliente");
+                Long codPrediojson = jsonObject.getLong("cod_predio");
+                Double latitudjson = jsonObject.getDouble("latitud");
+                Double longitudjson = jsonObject.getDouble("longitud");
+                Double deuda_portoaguasjson = jsonObject.getDouble("deuda_portoagua");
+                Long mes_deudajson = jsonObject.getLong("mes_deuda");
+                String codMedidorjson = jsonObject.getString("codigo_medidor");
+                String serieMedidorjson = jsonObject.getString("serie_medidor");
+                String usuarioOficialjson = jsonObject.getString("usuario_oficial");
+                item.add(new Puntos(idtramitejson, id_tarea_tramitejson, numeroCuentejson, codClientejson, codPrediojson, mes_deudajson, latitudjson, longitudjson, deuda_portoaguasjson, codMedidorjson, serieMedidorjson, "I",usuarioOficialjson));
+                SQLiteDatabase db1 = objDB.getWritableDatabase();
+                ContentValues valores = new ContentValues();
+                valores.put(TramitesDB.Datos_tramites.ID_TRAMITE, idtramitejson);
+                valores.put(TramitesDB.Datos_tramites.ID_TAREA_TRAMITE, id_tarea_tramitejson);
+                valores.put(TramitesDB.Datos_tramites.NUMERO_CUENTA, numeroCuentejson);
+                valores.put(TramitesDB.Datos_tramites.COD_CLIENTE, codClientejson);
+                valores.put(TramitesDB.Datos_tramites.COD_PREDIO, codPrediojson);
+                valores.put(TramitesDB.Datos_tramites.LATITUD, latitudjson);
+                valores.put(TramitesDB.Datos_tramites.LONGITUD, longitudjson);
+                valores.put(TramitesDB.Datos_tramites.DEUDA_PORTOAGUAS, deuda_portoaguasjson);
+                valores.put(TramitesDB.Datos_tramites.MES_DEUDA, mes_deudajson);
+                valores.put(TramitesDB.Datos_tramites.COD_MEDIDOR, codMedidorjson);
+                valores.put(TramitesDB.Datos_tramites.SERIE_MEDIDOR, serieMedidorjson);
+                valores.put(TramitesDB.Datos_tramites.ESTADO_TRAMITE, "I");
+                valores.put(TramitesDB.Datos_tramites.USUARIO_OFICIAL,usuarioOficialjson);
+                Long id_Guardar = db1.insert(TramitesDB.Datos_tramites.TABLA, null, valores);
+                if (id_Guardar == -1) {
+                    //StyleableToast.makeText(MapsActivity.this, "Error al guardar los cortes con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
+                    Log.e("SQLITE SAVE", "ERRORguardados");
+                    //alertDialog.dismiss();
+                } else {
+                    // StyleableToast.makeText(MapsActivity.this, "Datos almacenados con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
+                    Log.e("SQLITE SAVE", "Datos guardados");
+                    //alertDialog.dismiss();
+                }
+
+            }
+
+        }
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ClientProtocolException e1) {
+            e1.printStackTrace();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        return item;
+    }
+
+    /*
+    * GETPUNTOS FUNCION PARA OBTENER LOS PUNTOS POR PRIMERA VEZ
+    * Y LOS ALMACENA A LA BASE DE DATOS SQLITE
+    */
     public ArrayList<Puntos> getPuntos() throws ParseException {
         SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
         ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
@@ -895,7 +1098,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Long mes_deudajson          = jsonObject.getLong("mes_deuda");
                 String codMedidorjson         = jsonObject.getString("codigo_medidor");
                 String serieMedidorjson     = jsonObject.getString("serie_medidor");
-                item.add(new Puntos(idtramitejson,id_tarea_tramitejson,numeroCuentejson,codClientejson,codPrediojson,mes_deudajson,latitudjson,longitudjson,deuda_portoaguasjson,codMedidorjson,serieMedidorjson,"I"));
+                String usuarioOficialjson     = jsonObject.getString("usuario_oficial");
+                item.add(new Puntos(idtramitejson,id_tarea_tramitejson,numeroCuentejson,codClientejson,codPrediojson,mes_deudajson,latitudjson,longitudjson,deuda_portoaguasjson,codMedidorjson,serieMedidorjson,"I",usuarioOficialjson));
 
                 SQLiteDatabase db= objDB.getWritableDatabase();
                 ContentValues valores =  new ContentValues();
@@ -911,6 +1115,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 valores.put(TramitesDB.Datos_tramites.COD_MEDIDOR,codMedidorjson);
                 valores.put(TramitesDB.Datos_tramites.SERIE_MEDIDOR,serieMedidorjson);
                 valores.put(TramitesDB.Datos_tramites.ESTADO_TRAMITE,"I");
+                valores.put(TramitesDB.Datos_tramites.USUARIO_OFICIAL,usuarioOficialjson);
                 Long id_Guardar=db.insert(TramitesDB.Datos_tramites.TABLA,null,valores);
                 if(id_Guardar==-1){
                     //StyleableToast.makeText(MapsActivity.this, "Error al guardar los cortes con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
@@ -933,6 +1138,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         return item;
     }
+
     /*
         Funcion para consulta la deuda del cliente
      */
@@ -995,47 +1201,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         }
     }
+
+
     /*
-    *   Contar Movimientos
-    *
-    */
-    //Funcion para almacenar
-    private void GuardarSql(String imagens, String lecturas, String estados, String id_Movimiento) {
-        String imagen = imagens;
-        String lectura = lecturas;
-        String estado = estados;
-        String idM = id_Movimiento;
-        Movimiento movimiento = new Movimiento(idM, imagen, lectura, estado);
-        new AddMovimientoTarea().execute(movimiento);
-    }
-
-    private class AddMovimientoTarea extends AsyncTask<Movimiento, Void, Boolean> {
-
-        @Override
-        protected Boolean doInBackground(Movimiento... movimientos) {
-            movimientoHelper.saveMovimiento(movimientos[0]);
-
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-
-            showLawyersScreen(result);
-        }
-
-    }
-
-    public void showLawyersScreen(Boolean result) {
-        if (result) {
-            Toast.makeText(MapsActivity.this, "Datos Almacenado", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(MapsActivity.this,
-                    "Error al agregar nueva información", Toast.LENGTH_SHORT).show();
-        }
-
-    }
-
+     FUNCION PARA REGISTRAR DISPOSITIVOS LA LATITUD Y LONGITUD
+     */
     class RegistrarDispositivos2 extends AsyncTask<String, Void, Boolean> {
 
         @Override

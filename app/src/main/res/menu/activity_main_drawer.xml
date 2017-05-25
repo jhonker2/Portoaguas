@@ -3,7 +3,7 @@
 
     <group android:checkableBehavior="single">
         <item android:id="@+id/nav_gallery" android:icon="@drawable/ic_portoaguas_01"
-            android:title="Mapa GoogleMaps" />
+            android:title="Corte y Reconexión" />
         <!--<item android:id="@+id/nav_slideshow" android:icon="@drawable/map_marker"-->
             <!--android:title="Mapa ArsGIS" />-->
         <!--<item android:id="@+id/Position" android:icon="@drawable/map_marker"-->

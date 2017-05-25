@@ -83,6 +83,12 @@ public class MovimientoHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    public void eliminar_dato(int dato){
+        SQLiteDatabase db = getReadableDatabase();
+        db.execSQL("DELETE FROM MOVIMIENTOS where id_tarea_tramite ="+dato);
+        db.close();
+    }
+
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 

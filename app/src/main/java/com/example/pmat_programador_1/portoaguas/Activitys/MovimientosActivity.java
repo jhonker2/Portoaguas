@@ -1,21 +1,34 @@
 package com.example.pmat_programador_1.portoaguas.Activitys;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.pmat_programador_1.portoaguas.MapsActivity;
 import com.example.pmat_programador_1.portoaguas.R;
+import com.example.pmat_programador_1.portoaguas.loginActivity;
 import com.muddzdev.styleabletoastlibrary.StyleableToast;
 
 import net.gotev.uploadservice.MultipartUploadRequest;
@@ -31,6 +44,7 @@ import java.util.UUID;
 import Adapter.MovimientsAdapter2;
 import sqlit.Movimiento;
 import sqlit.MovimientoHelper;
+import sqlit.TramitesDB;
 import utils.JSON;
 
 /*
@@ -41,13 +55,15 @@ import utils.JSON;
  * Created by PMAT-PROGRAMADOR_1 on 11/04/2017.
  */
 
-public class MovimientosActivity extends AppCompatActivity {
+public class MovimientosActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public ImageView img;
     public ListView lista;
     public MovimientsAdapter2 Ma;
     private MovimientoHelper movimientoHelper;
     ArrayList<Movimiento> items = new ArrayList<Movimiento>();
     MovimientoHelper MDB = new MovimientoHelper(MovimientosActivity.this);
+    private TextView txtNombre, txtCargo;
+    TramitesDB objDB;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,7 +74,23 @@ public class MovimientosActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         movimientoHelper = new MovimientoHelper(MovimientosActivity.this);
+        objDB = new TramitesDB(getApplicationContext());
 
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_2);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view_2);
+        navigationView.setNavigationItemSelectedListener(this);
+        SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+
+        View navHeaderView = navigationView.getHeaderView(0);
+        txtNombre   = (TextView) navHeaderView.findViewById(R.id.textNombre);
+        txtCargo    = (TextView) navHeaderView.findViewById(R.id.textCargo);
+        txtNombre.setText(da.getString("p_nombreU",null));
+        txtCargo.setText(da.getString("p_cargoU",null));
         /*if(items.size()==0){
             StyleableToast.makeText(MovimientosActivity.this, "Todas sus cortes y Reconeccion han sido enviado!" , Toast.LENGTH_SHORT, R.style.StyledToast).show();
         }else {*/
@@ -108,6 +140,43 @@ public class MovimientosActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_gallery) {
+            Intent inte = new Intent(this, MapsActivity.class);
+            startActivity(inte);
+
+        } /*else if (id == R.id.nav_slideshow) {
+            Intent inte = new Intent(MainActivity.this, ArsGisActivity.class);
+            startActivity(inte);
+
+        } */ else if (id == R.id.nav_manage) {
+            Intent inte = new Intent(this, com.example.pmat_programador_1.portoaguas.Activitys.MainActivity.class);
+            startActivity(inte);
+
+        }else if (id == R.id.nav_share) {
+            Intent inte = new Intent(this, MovimientosActivity.class);
+            startActivity(inte);
+        } /*else if (id == R.id.Position) {
+            Intent inte = new Intent(MainActivity.this, locationActivity.class);
+            startActivity(inte);
+        } */else if (id == R.id.nav_send) {
+            Intent inte = new Intent(this, loginActivity.class);
+            startActivity(inte);
+            finish();
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_2);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
     /*
     *   Subir Datos al servidor de sqlite a mysql
     *
@@ -123,7 +192,7 @@ public class MovimientosActivity extends AppCompatActivity {
                         final int finalX = x;
                         new MultipartUploadRequest(MovimientosActivity.this, uploadId, "http://"+ JSON.ipserver+"/sincronizarImagen")
                                 .addFileToUpload(items.get(x).getImage(), "fotoUp")
-                                .addParameter("Nombre", "Foto prueba")
+                                .addParameter("Nombre", items.get(x).getId_movimiento())
                                 .setMaxRetries(2)
                                 .setDelegate(new UploadStatusDelegate() {
                                     @Override
@@ -136,23 +205,29 @@ public class MovimientosActivity extends AppCompatActivity {
                                     public void onCompleted(UploadInfo uploadInfo, ServerResponse serverResponse) {
                                         //ELiminar imagen
                                         File eliminar = new File(items.get(finalX).getImage());
-                                        if (eliminar.exists()) {
+                                        /*if (eliminar.exists()) {
                                             if (eliminar.delete()) {
                                                 System.out.println("archivo eliminado:" + items.get(finalX).getImage());
                                             } else {
                                                 System.out.println("archivo no eliminado" + items.get(finalX).getImage());
                                             }
-                                        }
+                                        }*/
                                         Toast.makeText(MovimientosActivity.this,"Imagen subida exitosamente.",Toast.LENGTH_SHORT).show();
                                     }
 
                                     @Override
                                     public void onCancelled(UploadInfo uploadInfo) {}
-                                }).setNotificationConfig(new UploadNotificationConfig().setTitle("Portoaguas EP.").setCompletedMessage("Subida Completada en [[ELAPSED_TIME]]"))
+                                }).setNotificationConfig(new UploadNotificationConfig().setTitle("Portoaguas EP.").setCompletedMessage("Subida Completada en [[ELAPSED_TIME]]").setIcon(R.drawable.ic_stat_name))
                                 .startUpload();
 
                         //////// AQUI VA EL ACTUALIZAR PARA SUBIR LOS DATOS SINCRONIZADOS
-                        movimientoHelper.eliminar();
+                        //movimientoHelper.eliminar_dato(Integer.getInteger(items.get(x).getId_movimiento()));
+                        SQLiteDatabase DB =objDB.getWritableDatabase();
+                        String Selection= TramitesDB.Datos_tramites.ID_TAREA_TRAMITE+"=?";
+                        String [] argsel= {items.get(x).getId_movimiento()};
+                        int valor = DB.delete(TramitesDB.Datos_tramites.TABLA_MOVIMIENTOS,Selection,argsel);
+                        Log.e("VAL", String.valueOf(valor));
+
                         finish();
                         startActivity(getIntent());
                     } catch (Exception exc) {

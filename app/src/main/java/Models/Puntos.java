@@ -9,8 +9,16 @@ import android.content.ContentValues;
 public class Puntos {
     public long id_tramite,id_tarea_tramite,numero_cuenta,codigo_cliente,codigo_predio,mes_deuda;
     public double latitud,longitud,deuda_portoagua;
-    public String codigo_medidor,serie_medidor,estado_tramite;
+    public String codigo_medidor,serie_medidor,estado_tramite,usuario_oficial;
 
+
+    public String getUsuario_oficial() {
+        return usuario_oficial;
+    }
+
+    public void setUsuario_oficial(String usuario_oficial) {
+        this.usuario_oficial = usuario_oficial;
+    }
 
     public String getEstado_tramite() {
         return estado_tramite;
@@ -121,7 +129,7 @@ public class Puntos {
         this.codigo_medidor = codigo_medidor;
         this.serie_medidor = serie_medidor;
     }
-    public Puntos(long id_tramite, long id_tarea_tramite, long numero_cuenta, long codigo_cliente, long codigo_predio, long mes_deuda, double latitud, double longitud, double deuda_portoagua, String codigo_medidor, String serie_medidor,String estado_tramite) {
+    public Puntos(long id_tramite, long id_tarea_tramite, long numero_cuenta, long codigo_cliente, long codigo_predio, long mes_deuda, double latitud, double longitud, double deuda_portoagua, String codigo_medidor, String serie_medidor,String estado_tramite, String usuario_oficial) {
         this.id_tramite = id_tramite;
         this.id_tarea_tramite = id_tarea_tramite;
         this.numero_cuenta = numero_cuenta;
@@ -134,5 +142,6 @@ public class Puntos {
         this.codigo_medidor = codigo_medidor;
         this.serie_medidor = serie_medidor;
         this.estado_tramite= estado_tramite;
+        this.usuario_oficial=usuario_oficial;
     }
 }

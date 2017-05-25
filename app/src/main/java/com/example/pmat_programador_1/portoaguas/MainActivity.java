@@ -195,6 +195,7 @@ public class MainActivity extends AppCompatActivity
                         public void onClick(@SuppressWarnings("unused")
                                             final DialogInterface dialog, @SuppressWarnings("unused")
                                             final int id) {
+
                             new CerrarSesion().execute();
 
                         }
@@ -437,10 +438,9 @@ public class MainActivity extends AppCompatActivity
             if(s.equals("cerrada")){
                 SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
                 da.edit().clear().commit();
-
                 Intent inte = new Intent(MainActivity.this, loginActivity.class);
-            startActivity(inte);
-            finish();
+                startActivity(inte);
+                finish();
             }else if(s.equals("No_cerrada")){
                 StyleableToast.makeText(MainActivity.this, "Error Al cerrar Sesión intente nuevamente!!", Toast.LENGTH_LONG, R.style.StyledToastError).show();
 
