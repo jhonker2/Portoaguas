@@ -45,6 +45,8 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.1'
     compile 'com.muddzdev:styleabletoast:1.0.6'
     compile 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
+    compile 'com.android.volley:volley:1.0.0'
+
 
     // Libreria para subir archivos al servidor https://jonathanmelgoza.com/blog/subir-archivos-a-un-servidor-desde-android/
     compile 'net.gotev:uploadservice:3.0'

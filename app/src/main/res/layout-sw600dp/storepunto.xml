@@ -263,11 +263,11 @@
             <ImageView
                 android:id="@+id/img1"
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
+                android:layout_height="230dp"
                 android:layout_below="@+id/btn_camera"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="16dp"
-                app:srcCompat="@drawable/robot" />
+                app:srcCompat="@drawable/ic_portoaguas_2" />
 
             <TextView
                 android:id="@+id/textView15"

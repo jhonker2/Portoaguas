@@ -1,6 +1,7 @@
 package com.example.pmat_programador_1.portoaguas.Activitys;
 
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -227,6 +228,21 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
                         String [] argsel= {items.get(x).getId_movimiento()};
                         int valor = DB.delete(TramitesDB.Datos_tramites.TABLA_MOVIMIENTOS,Selection,argsel);
                         Log.e("VAL", String.valueOf(valor));
+
+
+                        /* ***************************
+                           ACTUALIZACION EN LA TABLA TRAMITES EL ESTADO FINALIZADO
+                         *****/
+                        SQLiteDatabase bd = objDB.getWritableDatabase();
+                        ContentValues valores = new ContentValues();
+                        valores.put(TramitesDB.Datos_tramites.ESTADO_TRAMITE,"F");
+                        String [] argsel1 = {items.get(x).getId_movimiento()};
+                        String Selection1 = TramitesDB.Datos_tramites.ID_TAREA_TRAMITE+"=?";
+                        int count = bd.update(TramitesDB.Datos_tramites.TABLA,
+                                valores,Selection1,argsel1);
+
+                        Log.e("TRAMITES",String.valueOf(count));
+
 
                         finish();
                         startActivity(getIntent());

@@ -37,6 +37,7 @@ public class TramitesDB extends SQLiteOpenHelper {
         public static final String COD_MEDIDOR="cod_medidor";
         public static final String SERIE_MEDIDOR="serie_medidor";
         public static final String ESTADO_TRAMITE="estado_tramite";
+        public static final String TIPO_TRAMITE="tipo_tramite";
 
         public static final String IMAGEN = "imagen";
         public static final String OBSERVACION = "observacion";
@@ -75,6 +76,7 @@ public class TramitesDB extends SQLiteOpenHelper {
                             Datos_tramites.COD_MEDIDOR+TEXT_TYPE+COMMA_SEP+
                             Datos_tramites.SERIE_MEDIDOR+TEXT_TYPE+COMMA_SEP+
                             Datos_tramites.ESTADO_TRAMITE+TEXT_TYPE+COMMA_SEP+
+                            Datos_tramites.TIPO_TRAMITE+TEXT_TYPE+COMMA_SEP+
                             Datos_tramites.USUARIO_OFICIAL+TEXT_TYPE+" )";
         private static final String CREAR_TABLA_MOVIMIENTO=
                 "CREATE TABLE "+ Datos_tramites.TABLA_MOVIMIENTOS +" ("+

@@ -103,7 +103,7 @@ public class loginActivity extends AppCompatActivity {
     }
     public Boolean isOnlineNet(){
         try {
-            Process p = Runtime.getRuntime().exec("ping -c 1 http://192.168.137.1:8090/portal-portoaguas/public/");
+            Process p = Runtime.getRuntime().exec("ping -c 1 192.168.137.1");
             int val = p.waitFor();
             boolean reachable = (val == 0);
             return  reachable;
@@ -191,9 +191,10 @@ public class loginActivity extends AppCompatActivity {
                 Log.e("Datos",id_usuario+" "+cargo+" "+nombre);
 
                 SharedPreferences.Editor editor = dato.edit();
-               editor.putString("p_idUsuario", id_usuario);
+                editor.putString("p_idUsuario", id_usuario);
                 editor.putString("p_nombreU", nombre);
                 editor.putString("p_cargoU", cargo);
+                editor.putString("p_idmovil",Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID));
                 editor.commit();
                resul=respuesta;
 

@@ -45,6 +45,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.pmat_programador_1.portoaguas.Activitys.locationActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -91,6 +98,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import Adapter.RecycleViewAdapter;
 import Models.Puntos;
@@ -178,6 +187,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         movimientoHelper = new MovimientoHelper(MapsActivity.this);
         objDB = new TramitesDB(getApplicationContext());
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String URL= "http://192.168.137.1:8090/portal-portoaguas/public/";
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+            }
+        },new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("Response","Error al conectar o en los datos");
+                String json = null;
+
+
+                    //Additional cases
+                }
+            });
+        queue.add(stringRequest);
+
+
         new LoadPuntos().execute();
 
 
@@ -196,6 +226,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         checkLocationSettings();
         /* ****************************/
     }
+
 
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -351,7 +382,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void processLastLocation() {
         getLastLocation();
         if (mLastLocation != null) {
-            updateLocationUI();
+            //updateLocationUI();
         }
     }
 
@@ -365,8 +396,34 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void updateLocationUI() {
-        RegistrarDispositivos2 registra = new RegistrarDispositivos2();
-        registra.execute();
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String URL= "http://192.168.137.1:8090/portal-portoaguas/public/MovimientosDispositivos";
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.e("MOVIMIENTOS DISPOSITIVO", response);
+
+            }
+        },new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("Response","Error a almacenar la posicion del usuario");
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("id_dispositivo",Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID));
+                params.put("latitud", String.valueOf(mLastLocation.getLatitude()));
+                params.put("longitud",  String.valueOf(mLastLocation.getLongitude()));
+                params.put("cedula", dato.getString("p_idUsuario", null) );
+
+                return params;
+            }
+        };
+        queue.add(stringRequest);
     }
 
     @SuppressLint("MissingPermission")
@@ -468,14 +525,24 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             pDialog.setCancelable(false);
             pDialog.show();
             new LoadMaxTramite().execute();
+            SQLiteDatabase DB =objDB.getWritableDatabase();
+            String Selection= TramitesDB.Datos_tramites.ESTADO_TRAMITE+"=?";
+            String [] argsel= {"F"};
+            int valor = DB.delete(TramitesDB.Datos_tramites.TABLA,Selection,argsel);
+            if(valor!=1){
+                Log.e("DELETE TRAMITES","ERROR AL ELIMINAR EL TRAMITES FINALIZADO");
+            }else{
+                Log.e("DELETE TRAMITES","DATOS ELIMINADOS FINALIZADO");
+
+            }
         }
 
         @Override
         protected String doInBackground(String... strings) {
                 try {
-                    Log.e("TOTAL PUNTOS DB", String.valueOf(Total_tramitesDB()));
-                    Log.e("TOTAL PUNTOS SQLITE", String.valueOf(Total_tramitesSQLITE()));
-                    Log.e("MAX PUNTO DB", String.valueOf(id_tramite_DB));
+                    //Log.e("TOTAL PUNTOS DB", String.valueOf(Total_tramitesDB()));
+                    //Log.e("TOTAL PUNTOS SQLITE", String.valueOf(Total_tramitesSQLITE()));
+                    //Log.e("MAX PUNTO DB", String.valueOf(id_tramite_DB));
                     item.clear();
                     if (Total_tramitesSQLITE() == 0) {
                         item = getPuntos();
@@ -488,7 +555,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         if (item.size() == 0) {
                             item = recuperarTramites();
                         }
-                    } else {
+                    } else if(Max_tramiteSQLITE()==0){
+
+                        }else{
                         item = recuperarTramites();
                         if (item.size() == 0) {
                             item = getPuntos();
@@ -506,6 +575,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         protected void onPostExecute(String s) {
             pDialog.dismiss();
+
             mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
             mMap.setIndoorEnabled(true);
             if (ContextCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -517,23 +587,39 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             UiSettings uiSettings = mMap.getUiSettings();
             uiSettings.setZoomControlsEnabled(true);
             LatLng sydney;
-            for (int i = 0; i < item.size(); i++) {
-                if(item.get(i).getEstado_tramite().equals("F")){
+            if(item.size()==0){
+                LatLng sydney2= new LatLng(-1.035966, -80.464269);
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney2,new Float(15)));
+                StyleableToast.makeText(MapsActivity.this, "No contiene puntos de corte en su mapa comuniquese con la central para que se le asignen mas puntos de corte....", Toast.LENGTH_LONG, R.style.StyledToastError).show();
 
-                }else if(item.get(i).getEstado_tramite().equals("I")) {
-                    double lati = item.get(i).getLatitud();
-                    double longLat = item.get(i).getLongitud();
-                    double[] ltn = obj.utm2LatLon("17 M " + longLat + " " + lati);
-                    sydney = new LatLng(ltn[0], ltn[1]);
+            }else {
 
-                    Marker melbourne = mMap.addMarker(new MarkerOptions()
-                            .position(sydney)
-                            .title("Nº. Cuenta: " + String.valueOf(item.get(i).getNumero_cuenta()))
-                            .snippet("Meses: " + item.get(i).getMes_deuda() + " Deuda: " + Math.rint(item.get(i).getDeuda_portoagua() * 100) / 100)
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.circle_verde)));
-                    melbourne.showInfoWindow();
-                    float zoomlevel = 19;
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, zoomlevel));
+                for (int i = 0; i < item.size(); i++) {
+                    if (item.get(i).getTipo_tramite().equals("RECONEXION")) {
+                        if(item.get(i).getEstado_tramite().equals("I")){
+
+                        }else if(item.get(i).getEstado_tramite().equals("F")){
+
+                        }
+                    } else if(item.get(i).getTipo_tramite().equals("CORTE")){
+                        if (item.get(i).getEstado_tramite().equals("I")) {
+                            double lati = item.get(i).getLatitud();
+                            double longLat = item.get(i).getLongitud();
+                            double[] ltn = obj.utm2LatLon("17 M " + longLat + " " + lati);
+                            float zoomlevel = 19;
+                            sydney = new LatLng(ltn[0], ltn[1]);
+
+                                Marker melbourne = mMap.addMarker(new MarkerOptions()
+                                    .position(sydney)
+                                    .title("CORTE - Nº. Cuenta: " + String.valueOf(item.get(i).getNumero_cuenta()))
+                                    .snippet("Meses: " + item.get(i).getMes_deuda() + " Deuda: " + Math.rint(item.get(i).getDeuda_portoagua() * 100) / 100)
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.circle_verde)));
+                                melbourne.showInfoWindow();
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, zoomlevel));
+                        }else if(item.get(i).getEstado_tramite().equals("F")){
+
+                        }
+                    }
                 }
             }
 
@@ -589,7 +675,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     alertDialog.show();
                     cont = 0;
                     //ced.setText(marker.getPosition().toString());
-                    cuenta.setText(marker.getTitle().substring(12));
+                    cuenta.setText(marker.getTitle().substring(20));
 
                     for (int x=0; x<item.size(); x++){
                         if(String.valueOf(item.get(x).getNumero_cuenta()).equals(cuenta.getText().toString())){
@@ -617,18 +703,24 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     btnSaveCliente.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+
+                            String Observacion = comentario.getText().toString();
+                            if (Observacion.equals("")) {
+                                comentario.setError("Debe ingresar una observación");
+                            } else {
+                                Log.e("Comentario", Observacion);
                             /*
                             LATITUD Y LONGITUD EN UTM PARA ENVIAR
                              */
-                            latitud_r=mLastLocation.getLatitude();
-                            logintud_r=mLastLocation.getLongitude();
-                            String UTM=obj.latLon2UTM(latitud_r,logintud_r);
-                            String[] _utm =UTM.split(" ");
-                            double easting = Double.parseDouble(_utm[2]);
-                            double northing = Double.parseDouble(_utm[3]);
-                            Log.e("UTM",String.valueOf(easting)+" "+String.valueOf(northing));
+                                latitud_r = mLastLocation.getLatitude();
+                                logintud_r = mLastLocation.getLongitude();
+                                String UTM = obj.latLon2UTM(latitud_r, logintud_r);
+                                String[] _utm = UTM.split(" ");
+                                double easting = Double.parseDouble(_utm[2]);
+                                double northing = Double.parseDouble(_utm[3]);
+                                Log.e("UTM", String.valueOf(easting) + " " + String.valueOf(northing));
 
-                            //////////////////////////////////////////
+                                //////////////////////////////////////////
                             /*
                             SAL_ABIL PARA ENVIAR
                             PATRON
@@ -639,70 +731,69 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                               R.          PRO        UNI
                              */
 
-                            String patron="";
-                            JSONArray tabla = new JSONArray();
-                            for (int x=0 ; x<detall.size(); x++){
-                                JSONObject pc = new JSONObject();
+                                String patron = "";
+                                JSONArray tabla = new JSONArray();
+                                for (int x = 0; x < detall.size(); x++) {
+                                    JSONObject pc = new JSONObject();
 
-                                if(detall.get(x).getCantidad().equals("0")){
+                                    if (detall.get(x).getCantidad().equals("0")) {
 
-                                }else{
-                                        patron=patron+detall.get(x).getCodigo()+"@@"+detall.get(x).getCod_prod()+"@@"+detall.get(x).getPrecio()+"@@"+detall.get(x).getCantidad()+"||";
-                                    try {
-                                        pc.put("Cod_rubro",detall.get(x).getCodigo());
-                                        pc.put("Cod_prod",detall.get(x).getCod_prod());
-                                        pc.put("v_unit",detall.get(x).getPrecio());
-                                        pc.put("cant",detall.get(x).getCantidad());
-                                        tabla.put(pc);
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
+                                    } else {
+                                        patron = patron + detall.get(x).getCodigo() + "@@" + detall.get(x).getCod_prod() + "@@" + detall.get(x).getPrecio() + "@@" + detall.get(x).getCantidad() + "||";
+                                        try {
+                                            pc.put("Cod_rubro", detall.get(x).getCodigo());
+                                            pc.put("Cod_prod", detall.get(x).getCod_prod());
+                                            pc.put("v_unit", detall.get(x).getPrecio());
+                                            pc.put("cant", detall.get(x).getCantidad());
+                                            tabla.put(pc);
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
                                     }
                                 }
-                            }
-                            int length= patron.length();
-                            String _patron="";
-                            if(patron.endsWith("||")){
-                                Log.e("Patron",patron.substring(0,length-2));
-                                _patron=patron.substring(0,length-2);
-                            }else{
-                                Log.e("Patron",patron);
-                                _patron=patron;
-                            }
-                            /////////////////////////////////////////////
+                                int length = patron.length();
+                                String _patron = "";
+                                if (patron.endsWith("||")) {
+                                    Log.e("Patron", patron.substring(0, length - 2));
+                                    _patron = patron.substring(0, length - 2);
+                                } else {
+                                    Log.e("Patron", patron);
+                                    _patron = patron;
+                                }
+                                /////////////////////////////////////////////
 
                             /*
                                 TOTAL MOVIMIENTO
                              */
-                            double total_=0;
-                            if(total.getText().toString().equals("")|| total.getText().toString().equals(0) ){
-                                total_ = 0;
-                            }else{
-                                total_ = Double.parseDouble(total.getText().toString());
-                            }
+                                double total_ = 0;
+                                if (total.getText().toString().equals("") || total.getText().toString().equals(0)) {
+                                    total_ = 0;
+                                } else {
+                                    total_ = Double.parseDouble(total.getText().toString());
+                                }
+                                Log.e("TOTAL", String.valueOf(total_));
 
-                            String Observacion = comentario.getText().toString();
-                            Log.e("TOTAL", String.valueOf(total_));
-                            Log.e("Comentario", Observacion);
 
-                            ////////////////////////////////
+                                ////////////////////////////////
                             /*
                                 ID_TRAMITE Y ID_TAREA_TRAMITE
                              */
-                            long idtrami = 0,id_tarea_tra=0;
-                            for(int xx=0; xx<item.size(); xx++){
-                                if(item.get(xx).getNumero_cuenta()==Long.parseLong(cuenta.getText().toString())){
-                                    idtrami=item.get(xx).getId_tramite();
-                                    id_tarea_tra=item.get(xx).getId_tarea_tramite();
+                                long idtrami = 0, id_tarea_tra = 0;
+                                for (int xx = 0; xx < item.size(); xx++) {
+                                    if (item.get(xx).getNumero_cuenta() == Long.parseLong(cuenta.getText().toString())) {
+                                        idtrami = item.get(xx).getId_tramite();
+                                        id_tarea_tra = item.get(xx).getId_tarea_tramite();
+                                    }
                                 }
-                            }
 
-                            Log.e("ID_TRAMITE", String.valueOf(idtrami)+" "+String.valueOf(id_tarea_tra));
+                                Log.e("ID_TRAMITE", String.valueOf(idtrami) + " " + String.valueOf(id_tarea_tra));
 
-                            ///////////////////////////////////////
+                                ///////////////////////////////////////
 
-                            //Metodo para almacenar el movimiento en el mapa
-                            new RegistrarMovimiento().execute(String.valueOf(easting),String.valueOf(northing),String.valueOf(Observacion),String.valueOf(total_),_patron,String.valueOf(id_tarea_tra), tabla.toString());
+                                //Metodo para almacenar el movimiento en el mapa
+                                new RegistrarMovimiento().execute(String.valueOf(easting), String.valueOf(northing), String.valueOf(Observacion), String.valueOf(total_), _patron, String.valueOf(id_tarea_tra), tabla.toString());
 
+                            }// fin del if de observacion
                         }
                     });
 
@@ -746,7 +837,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      */
     class RegistrarMovimiento extends AsyncTask<String, Void, Boolean> {
         private ProgressDialog pDialog;
-
+        SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
         @Override
         protected Boolean doInBackground(String... strings) {
             ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
@@ -757,7 +848,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             nameValuePairs.add(new BasicNameValuePair("sal_abil", strings[4]));
             nameValuePairs.add(new BasicNameValuePair("total_mov", strings[3]));
             nameValuePairs.add(new BasicNameValuePair("tabla", strings[6]));
-
+            nameValuePairs.add(new BasicNameValuePair("cedula",dato.getString("p_idUsuario", null) ));
+            nameValuePairs.add(new BasicNameValuePair("id_dispositivo",dato.getString("p_idmovil", null) ));
             try {
                 HttpClient httpclient = new DefaultHttpClient();
                 HttpPost httppost = new HttpPost("http://"+ JSON.ipserver+"/call_tramite");
@@ -796,7 +888,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (aBoolean) {
                 StyleableToast.makeText(MapsActivity.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
                 alertDialog.dismiss();
-                //GuardarSql(foto, comentario.getText().toString(), "S", data);
                     SQLiteDatabase db= objDB.getWritableDatabase();
                     ContentValues valores1 =  new ContentValues();
                     valores1.put(TramitesDB.Datos_tramites.ID_TAREA_TRAMITE,data);
@@ -848,7 +939,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public ArrayList<Puntos> recuperarTramites(){
         SQLiteDatabase db = objDB.getReadableDatabase();
         ArrayList<Puntos> lista_tramites= new ArrayList<Puntos>();
-        String[] campos = {"id_tramite","id_tarea_tramite","numero_cuenta","cod_cliente","cod_predio","mes_deuda","latitud","longitud","deuda_portoaguas","cod_medidor","serie_medidor","estado_tramite","usuario_oficial"};
+        String[] campos = {"id_tramite","id_tarea_tramite","numero_cuenta","cod_cliente","cod_predio","mes_deuda","latitud","longitud","deuda_portoaguas","cod_medidor","serie_medidor","estado_tramite","usuario_oficial","tipo_tramite"};
         Cursor c = db.query("tramites",campos,null,null,null,null,null,null);
         c.moveToFirst();
         if(c.getCount()==0){
@@ -857,7 +948,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             do{
                 lista_tramites.add(new Puntos(c.getLong(0),c.getLong(1),c.getLong(2),c.getLong(3),
                     c.getLong(4),c.getLong(5),c.getDouble(6),c.getDouble(7),c.getFloat(8),
-                    c.getString(9),c.getString(10),c.getString(11),c.getString(12)));
+                    c.getString(9),c.getString(10),c.getString(11),c.getString(12),c.getString(13)));
             } while(c.moveToNext());
         }
         return lista_tramites;
@@ -872,13 +963,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SQLiteDatabase db = objDB.getReadableDatabase();
         String[] valores_recuperar = {"max(id_tramite)"};
         Cursor c = db.query("tramites", valores_recuperar,
-                null, null, null, null, null, null);
-        c.moveToFirst();
-        if(!c.moveToFirst()){
-
-        }else {
+                "estado_tramite=?", new String[]{"I"}, null, null, null, null);
+       // c.moveToFirst();
+        if(c.moveToFirst()){
             do {
-                max_tramite=Integer.parseInt(c.getString(0));
+                if(c.getString(0)==null){
+                    max_tramite=0;
+                }else {
+                    max_tramite = Integer.parseInt(c.getString(0));
+                }
             } while (c.moveToNext());
         }
         db.close();
@@ -919,23 +1012,24 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
         ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
         nameValuePairs.add(new BasicNameValuePair("cedula",dato.getString("p_idUsuario", null) ));
+        nameValuePairs.add(new BasicNameValuePair("id_dispositivo",dato.getString("p_idmovil", null) ));
         String values;
         try {
             HttpClient httpclient = new DefaultHttpClient();
             HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/maxTramite");
             httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
             HttpResponse response = httpclient.execute(httppost);
-            HttpEntity entity = response.getEntity();
-            values = EntityUtils.toString(entity);
-            JSONArray obj = new JSONArray(values);
-            for (int index = 0; index < obj.length(); index++) {
-                JSONObject jsonObject = obj.getJSONObject(index);
-                String usuario_oficialjson  = jsonObject.getString("usuario_oficial");
-                int id_tramitejson         = jsonObject.getInt("id_tramite");
-                Log.e("Return Maxtramite",usuario_oficialjson+' '+id_tramitejson);
-                max_tramite=id_tramitejson;
+                HttpEntity entity = response.getEntity();
+                values = EntityUtils.toString(entity);
+                JSONArray obj = new JSONArray(values);
+                for (int index = 0; index < obj.length(); index++) {
+                    JSONObject jsonObject = obj.getJSONObject(index);
+                    String usuario_oficialjson = jsonObject.getString("usuario_oficial");
+                    int id_tramitejson = jsonObject.getInt("id_tramite");
+                    Log.e("Return Maxtramite", usuario_oficialjson + ' ' + id_tramitejson);
+                    max_tramite = id_tramitejson;
+                }
 
-            }
         } catch (JSONException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -955,6 +1049,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
         ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
         nameValuePairs.add(new BasicNameValuePair("cedula",dato.getString("p_idUsuario", null) ));
+
         String values;
         try {
             HttpClient httpclient = new DefaultHttpClient();
@@ -983,6 +1078,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
         ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
         nameValuePairs.add(new BasicNameValuePair("cedula",dato.getString("p_idUsuario", null) ));
+        nameValuePairs.add(new BasicNameValuePair("id_dispositivo",dato.getString("p_idmovil",null)));
         nameValuePairs.add(new BasicNameValuePair("id_tramite",String.valueOf(tramite)));
         String values;
         try {
@@ -998,7 +1094,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             } else {
                 SQLiteDatabase db = objDB.getReadableDatabase();
                 ArrayList<Puntos> lista_tramites= new ArrayList<Puntos>();
-                String[] campos = {"id_tramite","id_tarea_tramite","numero_cuenta","cod_cliente","cod_predio","mes_deuda","latitud","longitud","deuda_portoaguas","cod_medidor","serie_medidor","estado_tramite","usuario_oficial"};
+                String[] campos = {"id_tramite","id_tarea_tramite","numero_cuenta","cod_cliente","cod_predio","mes_deuda","latitud","longitud","deuda_portoaguas","cod_medidor","serie_medidor","estado_tramite","usuario_oficial","tipo_tramite"};
                 Cursor c = db.query("tramites",campos,null,null,null,null,null,null);
                 c.moveToFirst();
                 if(c.getCount()==0){
@@ -1007,7 +1103,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     do{
                         item.add(new Puntos(c.getLong(0),c.getLong(1),c.getLong(2),c.getLong(3),
                                 c.getLong(4),c.getLong(5),c.getDouble(6),c.getDouble(7),c.getFloat(8),
-                                c.getString(9),c.getString(10),c.getString(11),c.getString(12)));
+                                c.getString(9),c.getString(10),c.getString(11),c.getString(12),c.getString(13)));
                     } while(c.moveToNext());
                 }
                 for (int index = 0; index < obj.length(); index++) {
@@ -1024,7 +1120,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String codMedidorjson = jsonObject.getString("codigo_medidor");
                 String serieMedidorjson = jsonObject.getString("serie_medidor");
                 String usuarioOficialjson = jsonObject.getString("usuario_oficial");
-                item.add(new Puntos(idtramitejson, id_tarea_tramitejson, numeroCuentejson, codClientejson, codPrediojson, mes_deudajson, latitudjson, longitudjson, deuda_portoaguasjson, codMedidorjson, serieMedidorjson, "I",usuarioOficialjson));
+                String tipotramitejson = jsonObject.getString("tipo_tramite");
+                item.add(new Puntos(idtramitejson, id_tarea_tramitejson, numeroCuentejson, codClientejson, codPrediojson, mes_deudajson, latitudjson, longitudjson, deuda_portoaguasjson, codMedidorjson, serieMedidorjson, "I",usuarioOficialjson,tipotramitejson));
                 SQLiteDatabase db1 = objDB.getWritableDatabase();
                 ContentValues valores = new ContentValues();
                 valores.put(TramitesDB.Datos_tramites.ID_TRAMITE, idtramitejson);
@@ -1073,6 +1170,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
         ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
         nameValuePairs.add(new BasicNameValuePair("cedula",dato.getString("p_idUsuario", null) ));
+        nameValuePairs.add(new BasicNameValuePair("id_dispositivo",dato.getString("p_idmovil",null)));
         String values;
         try {
             HttpClient httpclient = new DefaultHttpClient();
@@ -1080,6 +1178,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
             HttpResponse response = httpclient.execute(httppost);
             HttpEntity entity = response.getEntity();
+            response.getStatusLine();
             values = EntityUtils.toString(entity);
 
             Log.e("Puntos en el Mapa", values);
@@ -1099,7 +1198,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String codMedidorjson         = jsonObject.getString("codigo_medidor");
                 String serieMedidorjson     = jsonObject.getString("serie_medidor");
                 String usuarioOficialjson     = jsonObject.getString("usuario_oficial");
-                item.add(new Puntos(idtramitejson,id_tarea_tramitejson,numeroCuentejson,codClientejson,codPrediojson,mes_deudajson,latitudjson,longitudjson,deuda_portoaguasjson,codMedidorjson,serieMedidorjson,"I",usuarioOficialjson));
+                String tipotramitejson      = jsonObject.getString("tipo_tramite");
+                item.add(new Puntos(idtramitejson,id_tarea_tramitejson,numeroCuentejson,codClientejson,codPrediojson,mes_deudajson,latitudjson,longitudjson,deuda_portoaguasjson,codMedidorjson,serieMedidorjson,"I",usuarioOficialjson,tipotramitejson));
 
                 SQLiteDatabase db= objDB.getWritableDatabase();
                 ContentValues valores =  new ContentValues();
@@ -1115,6 +1215,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 valores.put(TramitesDB.Datos_tramites.COD_MEDIDOR,codMedidorjson);
                 valores.put(TramitesDB.Datos_tramites.SERIE_MEDIDOR,serieMedidorjson);
                 valores.put(TramitesDB.Datos_tramites.ESTADO_TRAMITE,"I");
+                valores.put(TramitesDB.Datos_tramites.TIPO_TRAMITE,tipotramitejson);
                 valores.put(TramitesDB.Datos_tramites.USUARIO_OFICIAL,usuarioOficialjson);
                 Long id_Guardar=db.insert(TramitesDB.Datos_tramites.TABLA,null,valores);
                 if(id_Guardar==-1){
@@ -1143,11 +1244,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Funcion para consulta la deuda del cliente
      */
     class Act_Deuda extends AsyncTask<String, Void, Boolean>{
+        SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+
         @Override
         protected Boolean doInBackground(String... strings) {
             Boolean res=false;
             ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
             nameValuePairs.add(new BasicNameValuePair("numero_cuenta", strings[0]));
+            nameValuePairs.add(new BasicNameValuePair("cedula",dato.getString("p_idUsuario", null) ));
+            nameValuePairs.add(new BasicNameValuePair("id_dispositivo",dato.getString("p_idmovil",null)));
             String values;
             try {
                 HttpClient httpclient = new DefaultHttpClient();
@@ -1203,36 +1308,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-    /*
-     FUNCION PARA REGISTRAR DISPOSITIVOS LA LATITUD Y LONGITUD
-     */
-    class RegistrarDispositivos2 extends AsyncTask<String, Void, Boolean> {
 
-        @Override
-        protected Boolean doInBackground(String... strings) {
-            SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
-            ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-            nameValuePairs.add(new BasicNameValuePair("id_dispositivo", Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID)));
-            nameValuePairs.add(new BasicNameValuePair("latitud", String.valueOf(mLastLocation.getLatitude())));
-            nameValuePairs.add(new BasicNameValuePair("longitud", String.valueOf(mLastLocation.getLongitude())));
-            nameValuePairs.add(new BasicNameValuePair("cedula",dato.getString("p_idUsuario", null) ));
-
-            try {
-                HttpClient httpclient = new DefaultHttpClient();
-                HttpPost httppost = new HttpPost("http://"+ JSON.ipserver+"/MovimientosDispositivos");
-                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
-                HttpResponse response = httpclient.execute(httppost);
-                HttpEntity entity = response.getEntity();
-                data = EntityUtils.toString(entity);
-                Log.e("MOVIMIENTOS DISPOSITIVO", data);
-                resul = true;
-            } catch (Exception e) {
-                Log.e("log_tag", "Error in http connection " + e.toString());
-                resul = false;
-            }
-            return resul;
-        }
-    }
 
 }
 

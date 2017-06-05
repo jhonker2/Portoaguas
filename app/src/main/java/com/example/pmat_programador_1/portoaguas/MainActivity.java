@@ -31,6 +31,12 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.pmat_programador_1.portoaguas.Activitys.MovimientosActivity;
 import com.example.pmat_programador_1.portoaguas.Activitys.locationActivity;
 import com.google.android.gms.common.ConnectionResult;
@@ -60,6 +66,8 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import servicios.ServicioGPS;
 import utils.Constants;
@@ -97,9 +105,9 @@ public class MainActivity extends AppCompatActivity
 
         final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            AlertNoGps();
-        }
+        //if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+         //   AlertNoGps();
+        //}
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -117,7 +125,7 @@ public class MainActivity extends AppCompatActivity
         txtCargo.setText(da.getString("p_cargoU",null));
 
 
-
+        new ValidarLogin().execute();
         // Establecer punto de entrada para la API de ubicación
         buildGoogleApiClient();
 
@@ -158,7 +166,6 @@ public class MainActivity extends AppCompatActivity
         alert = builder.create();
         alert.show();
     }
-
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -195,15 +202,12 @@ public class MainActivity extends AppCompatActivity
                         public void onClick(@SuppressWarnings("unused")
                                             final DialogInterface dialog, @SuppressWarnings("unused")
                                             final int id) {
-
                             new CerrarSesion().execute();
-
                         }
                     })
                     .setNegativeButton("No", new DialogInterface.OnClickListener() {
                         public void onClick(final DialogInterface dialog, @SuppressWarnings("unused")
                         final int id) {
-
                         }
                     });
             alert = builder.create();
@@ -249,22 +253,43 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
-
     // FUNCIONES PARA LOCALIZAR DISPOSTIVO
-
     private void updateLocationUI() {
-        RegistrarDispositivos registra = new RegistrarDispositivos();
-        registra.execute();
-    }
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String URL= "http://192.168.137.1:8090/portal-portoaguas/public/MovimientosDispositivos";
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.e("MOVIMIENTOS DISPOSITIVO", response);
 
+            }
+        },new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("Response","Error a almacenar la posicion del usuario");
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("id_dispositivo",Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID));
+                params.put("latitud", String.valueOf(mLastLocation.getLatitude()));
+                params.put("longitud",  String.valueOf(mLastLocation.getLongitude()));
+                params.put("cedula", dato.getString("p_idUsuario", null) );
+
+                return params;
+            }
+        };
+        queue.add(stringRequest);
+    }
     private void processLastLocation() {
         getLastLocation();
         if (mLastLocation != null) {
-            updateLocationUI();
+           // updateLocationUI();
         }
     }
-
     @SuppressLint("MissingPermission")
     private void getLastLocation() {
         if (isLocationPermissionGranted()) {
@@ -452,7 +477,7 @@ public class MainActivity extends AppCompatActivity
             SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
             ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
             nameValuePairs.add(new BasicNameValuePair("id_usuario", da.getString("p_idUsuario",null)));
-
+            nameValuePairs.add(new BasicNameValuePair("id_dispositivo", da.getString("p_idmovil",null)));
             try {
                 HttpClient httpclient = new DefaultHttpClient();
                 HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/logout");
@@ -486,7 +511,6 @@ public class MainActivity extends AppCompatActivity
 
             try {
                 HttpClient httpclient = new DefaultHttpClient();
-                //HttpPost httppost = new HttpPost("http://192.168.5.56:8090/portal-portoaguas/public/MovimientosDispositivos");
                 HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/MovimientosDispositivos");
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
                 HttpResponse response = httpclient.execute(httppost);
@@ -504,5 +528,59 @@ public class MainActivity extends AppCompatActivity
             }
             return resul;
         }
+    }
+
+    class ValidarLogin extends AsyncTask<String, Void, String>{
+        @Override
+        protected String doInBackground(String... strings) {
+            String resfull="";
+            SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+            ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+            nameValuePairs.add(new BasicNameValuePair("id_usuario", da.getString("p_idUsuario",null)));
+            nameValuePairs.add(new BasicNameValuePair("id_dispositivo", da.getString("p_idmovil",null)));
+            try {
+                HttpClient httpclient = new DefaultHttpClient();
+                HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/val_login");
+                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
+                HttpResponse response = httpclient.execute(httppost);
+                HttpEntity entity = response.getEntity();
+                data = EntityUtils.toString(entity);
+                Log.e("CERRAR", data);
+                JSONObject obj= new JSONObject(data);
+                String  res=obj.getString("respuesta");
+                resfull = res;
+            } catch (Exception e) {
+                Log.e("log_tag", "Error in http connection " + e.toString());
+                resfull = "";
+            }
+            return resfull;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+
+            if(s.equals("cerrada")) {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                alertDialogBuilder.setTitle("PortoAguas");
+                alertDialogBuilder.setIcon(getDrawable(R.drawable.ic_portoaguas_2));
+                alertDialogBuilder
+                        .setMessage("Su Sesión se ha cerrado ¡Vuelva a iniciar sesión!")
+                        .setCancelable(false)
+                        .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                StyleableToast.makeText(MainActivity.this, "Redireccionando a la actividad....", Toast.LENGTH_LONG, R.style.StyledToastLoad).show();
+                                SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+                                da.edit().clear().commit();
+                                Intent inte = new Intent(MainActivity.this, loginActivity.class);
+                                startActivity(inte);
+                                finish();
+                            }
+                        });
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+            }
+        }
+
     }
 }
