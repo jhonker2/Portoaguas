@@ -256,7 +256,7 @@ public class MainActivity extends AppCompatActivity
     // FUNCIONES PARA LOCALIZAR DISPOSTIVO
     private void updateLocationUI() {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String URL= "http://192.168.137.1:8090/portal-portoaguas/public/MovimientosDispositivos";
+        String URL= "http://" + JSON.ipserver + "/MovimientosDispositivos";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
