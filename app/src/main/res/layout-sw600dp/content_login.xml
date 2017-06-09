@@ -51,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:hint="Usuario"
-                android:inputType="textCapCharacters"
+                android:inputType="number"
                 android:padding="20dp"
                 android:singleLine="true" />
         </android.support.design.widget.TextInputLayout>

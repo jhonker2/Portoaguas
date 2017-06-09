@@ -5,6 +5,6 @@ package utils;
  */
 
 public class JSON {
-    public static String ipserver="186.42.226.114:8090/portal-portoaguas/public";
+    public static String ipserver="192.168.137.1:8090/portal-portoaguas/public";
 
 }

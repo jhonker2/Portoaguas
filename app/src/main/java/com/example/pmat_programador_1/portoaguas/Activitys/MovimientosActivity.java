@@ -200,7 +200,9 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
                                     public void onProgress(UploadInfo uploadInfo) {}
 
                                     @Override
-                                    public void onError(UploadInfo uploadInfo, Exception e) {}
+                                    public void onError(UploadInfo uploadInfo, Exception e) {
+
+                                    }
 
                                     @Override
                                     public void onCompleted(UploadInfo uploadInfo, ServerResponse serverResponse) {

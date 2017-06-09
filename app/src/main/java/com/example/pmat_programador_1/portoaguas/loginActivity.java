@@ -103,7 +103,7 @@ public class loginActivity extends AppCompatActivity {
     }
     public Boolean isOnlineNet(){
         try {
-            Process p = Runtime.getRuntime().exec("ping -c 1 192.168.137.1");
+            Process p = Runtime.getRuntime().exec("ping -c 1 186.42.226.114");
             int val = p.waitFor();
             boolean reachable = (val == 0);
             return  reachable;

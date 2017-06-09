@@ -11,14 +11,15 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
+import com.esri.android.runtime.ArcGISRuntime;
+/*import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
 import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
 import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.MapView;
-import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
+import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;*/
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -48,21 +49,21 @@ public class ArsGisActivity extends AppCompatActivity {
     //GraphicsLayer mGraphicsOverlay = new GraphicsLayer();
     public ArrayList<Puntos> item = new ArrayList<Puntos>();
     CoordinateConversion obj = new CoordinateConversion();
-    MapView mMapView;
-    GraphicsOverlay mGraphicsOverlay;
+   // MapView mMapView;
+    //GraphicsOverlay mGraphicsOverlay;
     //GraphicsLayer graphicsLayer;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-       // ArcGISRuntime.setClientId("gn1VHfaow2NXi0H0");
-        ArcGISRuntimeEnvironment.setLicense("runtimelite,1000,rud4711010970,none,5H80TK8ELBC0A1GJH168");
+        ArcGISRuntime.setClientId("gn1VHfaow2NXi0H0");
+        //ArcGISRuntimeEnvironment.setLicense("runtimelite,1000,rud4711010970,none,5H80TK8ELBC0A1GJH168");
         setContentView(R.layout.map_arsgis);
         //mMapView = (MapView) findViewById(R.id.map);
-        mMapView = (MapView) findViewById(R.id.mapView);
+        //mMapView = (MapView) findViewById(R.id.mapView);
 
-        ArcGISMap map = new ArcGISMap(Basemap.Type.TOPOGRAPHIC, -1.055389, -80.456773, 15);
+        //ArcGISMap map = new ArcGISMap(Basemap.Type.TOPOGRAPHIC, -1.055389, -80.456773, 15);
 
-        mMapView.setMap(map);
+        //mMapView.setMap(map);
 
         new LoadPuntos().execute();
         // create an initial viewpoint using an envelope (of two points, bottom left and top right)
@@ -81,7 +82,7 @@ public class ArsGisActivity extends AppCompatActivity {
     }
     @Override
     protected void onPause() {
-        mMapView.pause();
+       // mMapView.pause();
         super.onPause();
     }
     public class LoadPuntos extends AsyncTask<String, String, String> {
@@ -120,7 +121,7 @@ public class ArsGisActivity extends AppCompatActivity {
 
 
 
-
+/*
                 mGraphicsOverlay = new GraphicsOverlay();
                 mMapView.getGraphicsOverlays().add(mGraphicsOverlay);
                 //ArcGISMap map = new ArcGISMap(Basemap.Type.STREETS_NIGHT_VECTOR, -1.055389, -80.456773, 11);
@@ -144,7 +145,7 @@ public class ArsGisActivity extends AppCompatActivity {
                         mGraphicsOverlay.getGraphics().add(pinStarBlueGraphic);
                     }
                 });
-
+*/
 
             }
 
@@ -179,15 +180,21 @@ public class ArsGisActivity extends AppCompatActivity {
             for (int index = 0; index < obj.length(); index++) {
                 JSONObject jsonObject = obj.getJSONObject(index);
                 Long idtramitejson          = jsonObject.getLong("id_tramite");
+                Long id_tarea_tramitejson   = jsonObject.getLong("id_tarea_tramite");
                 Long numeroCuentejson       = jsonObject.getLong("numero_cuenta");
                 Long codClientejson         = jsonObject.getLong("cod_cliente");
+                Long codPrediojson          = jsonObject.getLong("cod_predio");
                 Double latitudjson          = jsonObject.getDouble("latitud");
                 Double longitudjson         = jsonObject.getDouble("longitud");
-                Long deuda_portoaguasjson   = jsonObject.getLong("deuda_portoagua");
+                Double deuda_portoaguasjson = jsonObject.getDouble("deuda_portoagua");
                 Long mes_deudajson          = jsonObject.getLong("mes_deuda");
-                Long codMedidorjson         = jsonObject.getLong("codigo_medidor");
+                String codMedidorjson         = jsonObject.getString("codigo_medidor");
                 String serieMedidorjson     = jsonObject.getString("serie_medidor");
-               // item.add(new Puntos(serieMedidorjson,latitudjson,longitudjson,deuda_portoaguasjson,codMedidorjson,idtramitejson,numeroCuentejson,codClientejson,mes_deudajson,codMedidorjson));
+                String usuarioOficialjson     = jsonObject.getString("usuario_oficial");
+                String tipotramitejson      = jsonObject.getString("tipo_tramite");
+                String clientejson          = jsonObject.getString("CLIENTE");
+                item.add(new Puntos(idtramitejson,id_tarea_tramitejson,numeroCuentejson,codClientejson,codPrediojson,mes_deudajson,latitudjson,longitudjson,deuda_portoaguasjson,codMedidorjson,serieMedidorjson,"I",usuarioOficialjson,tipotramitejson,clientejson));
+
             }
         } catch (JSONException e) {
             // TODO Auto-generated catch block

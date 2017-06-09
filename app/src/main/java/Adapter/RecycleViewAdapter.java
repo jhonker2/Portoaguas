@@ -48,6 +48,7 @@ import static com.example.pmat_programador_1.portoaguas.MapsActivity.total;
     public RecycleViewAdapter(Context context,ArrayList<Rubros> rubros  ){
         this.items=rubros;
         this.mContext = context;
+        this.detall.clear();
     }
 
 
@@ -71,6 +72,7 @@ import static com.example.pmat_programador_1.portoaguas.MapsActivity.total;
                 listObjeto=datos;
                 min.setOnClickListener(this);
                 plus.setOnClickListener(this);
+
 
                 this.cant.addTextChangedListener(new TextWatcher() {
                     @Override

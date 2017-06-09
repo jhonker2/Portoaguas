@@ -22,6 +22,7 @@ public class TramitesDB extends SQLiteOpenHelper {
         public static final String TABLA="tramites";
         public static final String TABLA_MOVIMIENTOS = "movimientos";
         public static final String TABLA_MAXTRAMITE="Ultimo_tramites";
+        public static final String TABLA_TRAB_MOV="trab_mov";
 
 
         public static final String ID="id";
@@ -38,12 +39,21 @@ public class TramitesDB extends SQLiteOpenHelper {
         public static final String SERIE_MEDIDOR="serie_medidor";
         public static final String ESTADO_TRAMITE="estado_tramite";
         public static final String TIPO_TRAMITE="tipo_tramite";
+        public static final String CLIENTE="cliente";
+
 
         public static final String IMAGEN = "imagen";
         public static final String OBSERVACION = "observacion";
         public static final String ESTADO = "estado";
 
         public static final String USUARIO_OFICIAL="usuario_oficial";
+
+        public static final String LAT_REG_TRAB = "lat_reg_trab";
+        public static final String LONG_REG_TRAB = "long_reg_trab";
+        public static final String SAL_ABIL = "sal_abil";
+        public static final String TOTAL_MOV = "total_mov";
+        public static final String TABLA_INFO = "tabla";
+
 
 
 
@@ -52,6 +62,17 @@ public class TramitesDB extends SQLiteOpenHelper {
         private static final String REAL_TYPE=" REAL";
 
         private static final String COMMA_SEP=",";
+         private static final String CREAR_TABLA_TRAB_MOV=
+                 "CREATE TABLE "+ Datos_tramites.TABLA_TRAB_MOV+"("+
+                         Datos_tramites.ID +" INTEGER PRIMARY KEY AUTOINCREMENT,"+
+                         Datos_tramites.LAT_REG_TRAB+TEXT_TYPE+COMMA_SEP+
+                         Datos_tramites.LONG_REG_TRAB+TEXT_TYPE+COMMA_SEP+
+                         Datos_tramites.ID_TAREA_TRAMITE+TEXT_TYPE+COMMA_SEP+
+                         Datos_tramites.OBSERVACION+TEXT_TYPE+COMMA_SEP+
+                         Datos_tramites.SAL_ABIL+TEXT_TYPE+COMMA_SEP+
+                         Datos_tramites.TOTAL_MOV+TEXT_TYPE+COMMA_SEP+
+                         Datos_tramites.TABLA_INFO+TEXT_TYPE+" )";
+
 
         private static final String CREAR_TABLA_MAXTRAMITES=
                 "CREATE TABLE "+ Datos_tramites.TABLA_MAXTRAMITE +" ("+
@@ -77,6 +98,7 @@ public class TramitesDB extends SQLiteOpenHelper {
                             Datos_tramites.SERIE_MEDIDOR+TEXT_TYPE+COMMA_SEP+
                             Datos_tramites.ESTADO_TRAMITE+TEXT_TYPE+COMMA_SEP+
                             Datos_tramites.TIPO_TRAMITE+TEXT_TYPE+COMMA_SEP+
+                            Datos_tramites.CLIENTE+TEXT_TYPE+COMMA_SEP+
                             Datos_tramites.USUARIO_OFICIAL+TEXT_TYPE+" )";
         private static final String CREAR_TABLA_MOVIMIENTO=
                 "CREATE TABLE "+ Datos_tramites.TABLA_MOVIMIENTOS +" ("+
@@ -99,6 +121,7 @@ public class TramitesDB extends SQLiteOpenHelper {
         db.execSQL(Datos_tramites.CREAR_TABLA_TRAMITES);
         db.execSQL(Datos_tramites.CREAR_TABLA_MOVIMIENTO);
         db.execSQL(Datos_tramites.CREAR_TABLA_MAXTRAMITES);
+        db.execSQL(Datos_tramites.CREAR_TABLA_TRAB_MOV);
     }
 
     @Override

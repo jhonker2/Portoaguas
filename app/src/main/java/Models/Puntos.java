@@ -9,7 +9,7 @@ import android.content.ContentValues;
 public class Puntos {
     public long id_tramite,id_tarea_tramite,numero_cuenta,codigo_cliente,codigo_predio,mes_deuda;
     public double latitud,longitud,deuda_portoagua;
-    public String codigo_medidor,serie_medidor,estado_tramite,usuario_oficial,tipo_tramite;
+    public String codigo_medidor,serie_medidor,estado_tramite,usuario_oficial,tipo_tramite,cliente;
 
 
     public String getUsuario_oficial() {
@@ -124,6 +124,14 @@ public class Puntos {
         this.tipo_tramite = tipo_tramite;
     }
 
+    public String getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(String cliente) {
+        this.cliente = cliente;
+    }
+
     public Puntos(long id_tramite, long id_tarea_tramite, long numero_cuenta, long codigo_cliente, long codigo_predio, long mes_deuda, double latitud, double longitud, double deuda_portoagua, String codigo_medidor, String serie_medidor) {
         this.id_tramite = id_tramite;
         this.id_tarea_tramite = id_tarea_tramite;
@@ -137,7 +145,7 @@ public class Puntos {
         this.codigo_medidor = codigo_medidor;
         this.serie_medidor = serie_medidor;
     }
-    public Puntos(long id_tramite, long id_tarea_tramite, long numero_cuenta, long codigo_cliente, long codigo_predio, long mes_deuda, double latitud, double longitud, double deuda_portoagua, String codigo_medidor, String serie_medidor,String estado_tramite, String usuario_oficial,String tipo_tramite) {
+    public Puntos(long id_tramite, long id_tarea_tramite, long numero_cuenta, long codigo_cliente, long codigo_predio, long mes_deuda, double latitud, double longitud, double deuda_portoagua, String codigo_medidor, String serie_medidor,String estado_tramite, String usuario_oficial,String tipo_tramite,String cliente) {
         this.id_tramite = id_tramite;
         this.id_tarea_tramite = id_tarea_tramite;
         this.numero_cuenta = numero_cuenta;
@@ -152,5 +160,6 @@ public class Puntos {
         this.estado_tramite= estado_tramite;
         this.usuario_oficial=usuario_oficial;
         this.tipo_tramite=tipo_tramite;
+        this.cliente=cliente;
     }
 }
