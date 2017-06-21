@@ -3,12 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <group android:checkableBehavior="single">
-        <item android:id="@+id/nav_gallery"
+        <!--<item android:id="@+id/nav_gallery"
             android:icon="@drawable/ic_portoaguas_01"
             app:actionViewClass="android.widget.TextView"
-            android:title="Corte y Reconexión" />
-        <item android:id="@+id/nav_slideshow" android:icon="@drawable/map_marker"
-            android:title="MapBox" />
+            android:title="Corte y Reconexión" />-->
+        <item android:id="@+id/nav_slideshow"
+            android:icon="@drawable/ic_portoaguas_01"
+            app:actionViewClass="android.widget.TextView"
+            android:title="Corte y Reconexion" />
         <!--<item android:id="@+id/Position" android:icon="@drawable/map_marker"-->
             <!--android:title="Mi Ubicacion" />-->
 
@@ -16,8 +18,8 @@
 
     <item android:title="Communicate">
         <menu>
-            <item android:id="@+id/nav_manage" android:icon="@drawable/ic_menu_manage"
-                android:title="Configurar" />
+           <!-- <item android:id="@+id/nav_manage" android:icon="@drawable/ic_menu_manage"
+                android:title="Configurar" />-->
             <item android:id="@+id/nav_share" android:icon="@drawable/database"
                 android:title="Datos no Enviados" />
             <item android:id="@+id/nav_send" android:icon="@drawable/exit_to_app"

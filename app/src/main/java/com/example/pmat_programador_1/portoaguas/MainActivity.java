@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity
         txtCargo    = (TextView) navHeaderView.findViewById(R.id.textCargo);
         txtNombre.setText(da.getString("p_nombreU",null));
         txtCargo.setText(da.getString("p_cargoU",null));
-        numero_tramites =(TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_gallery));
+        numero_tramites =(TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_slideshow));
         initializeCountDrawer();
 
         new ValidarLogin().execute();
@@ -273,18 +273,14 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_gallery) {
+       /* if (id == R.id.nav_gallery) {
             Intent inte = new Intent(MainActivity.this, MapsActivity.class);
             startActivity(inte);
 
-        } else if (id == R.id.nav_slideshow) {
+        } else*/ if (id == R.id.nav_slideshow) {
             Intent inte = new Intent(MainActivity.this,  com.example.pmat_programador_1.portoaguas.Activitys.MapsBox.class);
             startActivity(inte);
-        }  else if (id == R.id.nav_manage) {
-            Intent inte = new Intent(MainActivity.this, com.example.pmat_programador_1.portoaguas.Activitys.MainActivity.class);
-            startActivity(inte);
-
-        }else if (id == R.id.nav_share) {
+        }  else if (id == R.id.nav_share) {
             Intent inte = new Intent(MainActivity.this, MovimientosActivity.class);
             startActivity(inte);
         } /*else if (id == R.id.Position) {

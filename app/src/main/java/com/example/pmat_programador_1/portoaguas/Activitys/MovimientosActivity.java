@@ -110,7 +110,7 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
         txtCargo    = (TextView) navHeaderView.findViewById(R.id.textCargo);
         txtNombre.setText(da.getString("p_nombreU",null));
         txtCargo.setText(da.getString("p_cargoU",null));
-        numero_tramites =(TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_gallery));
+        numero_tramites =(TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_slideshow));
 
         /*if(items.size()==0){
             StyleableToast.makeText(MovimientosActivity.this, "Todas sus cortes y Reconeccion han sido enviado!" , Toast.LENGTH_SHORT, R.style.StyledToast).show();
@@ -205,19 +205,15 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_gallery) {
+        /*if (id == R.id.nav_gallery) {
             Intent inte = new Intent(this, MapsActivity.class);
             startActivity(inte);
 
-        } /*else if (id == R.id.nav_slideshow) {
-            Intent inte = new Intent(MainActivity.this, ArsGisActivity.class);
+        } else*/ if (id == R.id.nav_slideshow) {
+            Intent inte = new Intent(this, com.example.pmat_programador_1.portoaguas.Activitys.MapsBox.class);
             startActivity(inte);
 
-        } */ else if (id == R.id.nav_manage) {
-            /*Intent inte = new Intent(this, com.example.pmat_programador_1.portoaguas.Activitys.MainActivity.class);
-            startActivity(inte);*/
-
-        }else if (id == R.id.nav_share) {
+        } else if (id == R.id.nav_share) {
             Intent inte = new Intent(this, MovimientosActivity.class);
             startActivity(inte);
         } /*else if (id == R.id.Position) {
@@ -289,6 +285,7 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
                                                 System.out.println("archivo no eliminado" + items.get(finalX).getImage());
                                             }
                                         }*/
+                                        Log.e("Response Upload", serverResponse.toString());
                                         Toast.makeText(MovimientosActivity.this,"Imagen subida exitosamente.",Toast.LENGTH_SHORT).show();
                                     }
 

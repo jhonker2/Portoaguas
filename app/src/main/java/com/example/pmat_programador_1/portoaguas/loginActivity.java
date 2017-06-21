@@ -117,9 +117,6 @@ public class loginActivity extends AppCompatActivity {
 
     class RegistrarDispositivos extends AsyncTask<String, Void, String> {
         private ProgressDialog pDialog;
-
-
-
         @Override
         protected void onPreExecute() {
             super.onPreExecute();

@@ -63,6 +63,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.pmat_programador_1.portoaguas.Activitys.MapsBox;
 import com.example.pmat_programador_1.portoaguas.Activitys.MovimientosActivity;
 import com.example.pmat_programador_1.portoaguas.Activitys.locationActivity;
 import com.google.android.gms.common.ConnectionResult;
@@ -239,7 +240,7 @@ public class MapsActivity extends AppCompatActivity
         txtCargo    = (TextView) navHeaderView.findViewById(R.id.textCargo);
         txtNombre.setText(da.getString("p_nombreU",null));
         txtCargo.setText(da.getString("p_cargoU",null));
-        numero_tramites =(TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_gallery));
+        numero_tramites =(TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_slideshow));
         initializeCountDrawer();
 
         if(!isOnlineNet()){
@@ -360,7 +361,7 @@ public class MapsActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_map) {
+        /*if (id == R.id.action_map) {
             //finish();
             //startActivity(getIntent());
             new donwloadFile().execute();
@@ -375,8 +376,8 @@ public class MapsActivity extends AppCompatActivity
                 //Deletekml(klmfile);
                 layer.removeLayerFromMap();
                 active=true;
-            }
-        }
+            }*/
+        //}
 
         return super.onOptionsItemSelected(item);
     }
@@ -386,16 +387,14 @@ public class MapsActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_gallery) {
+        /*if (id == R.id.nav_gallery) {
             /*Intent inte = new Intent(MapsActivity.this, MapsActivity.class);
-            startActivity(inte);*/
-
-        } /*else if (id == R.id.nav_slideshow) {
-            Intent inte = new Intent(MainActivity.this, ArsGisActivity.class);
             startActivity(inte);
-        } */ else if (id == R.id.nav_manage) {
 
-        }else if (id == R.id.nav_share) {
+        } else */if (id == R.id.nav_slideshow) {
+            Intent inte = new Intent(this, MapsBox.class);
+            startActivity(inte);
+        } else if (id == R.id.nav_share) {
             Intent inte = new Intent(MapsActivity.this, MovimientosActivity.class);
             startActivity(inte);
         } /*else if (id == R.id.Position) {

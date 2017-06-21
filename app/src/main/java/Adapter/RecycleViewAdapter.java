@@ -28,7 +28,7 @@ import Models.Detalles;
 import Models.Rubros;
 import Models.SpinnerCant;
 
-import static com.example.pmat_programador_1.portoaguas.MapsActivity.total;
+import static com.example.pmat_programador_1.portoaguas.Activitys.MapsBox.total;
 
 /**
  * Created by PMAT-PROGRAMADOR_1 on 13/04/2017.

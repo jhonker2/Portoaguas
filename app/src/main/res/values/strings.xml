@@ -11,6 +11,6 @@
     <string name="title_activity_geo">GeoActivity</string>
     <string name="title_activity_login">PortoAguas EP.</string>
     <string name="action_map">Filtar</string>
-    <string name="title_activity_location">locationActivity</string>
+    <string name="title_activity_location">PortoAguas EP.</string>
     <string name="access_token">pk.eyJ1IjoiamhvbnkyNyIsImEiOiJjajQ0ZDBrc3kwMHVrMzN1YnAybGMzY2pxIn0.m6oCm21xzIXCVTHN9d7stA</string>
 </resources>
