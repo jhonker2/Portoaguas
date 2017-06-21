@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <group android:checkableBehavior="single">
-        <item android:id="@+id/nav_gallery" android:icon="@drawable/ic_portoaguas_01"
+        <item android:id="@+id/nav_gallery"
+            android:icon="@drawable/ic_portoaguas_01"
+            app:actionViewClass="android.widget.TextView"
             android:title="Corte y Reconexión" />
         <item android:id="@+id/nav_slideshow" android:icon="@drawable/map_marker"
-            android:title="Mapa ArsGIS" />
+            android:title="MapBox" />
         <!--<item android:id="@+id/Position" android:icon="@drawable/map_marker"-->
             <!--android:title="Mi Ubicacion" />-->
 

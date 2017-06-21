@@ -25,10 +25,15 @@ android {
             debuggable true
         }
     }
+    productFlavors {
+    }
+}
+repositories {
+    mavenCentral()
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
@@ -49,10 +54,12 @@ dependencies {
     compile 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
     compile 'com.android.volley:volley:1.0.0'
 
-
     // Libreria para subir archivos al servidor https://jonathanmelgoza.com/blog/subir-archivos-a-un-servidor-desde-android/
     compile 'net.gotev:uploadservice:3.0'
     compile 'com.google.firebase:firebase-core:9.0.0'
     compile 'com.google.firebase:firebase-messaging:9.0.0'
+    compile('com.mapbox.mapboxsdk:mapbox-android-sdk:5.0.2@aar') {
+        transitive = true
     }
+}
 apply plugin: 'com.google.gms.google-services'

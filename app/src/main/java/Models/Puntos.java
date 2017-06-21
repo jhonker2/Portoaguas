@@ -9,7 +9,7 @@ import android.content.ContentValues;
 public class Puntos {
     public long id_tramite,id_tarea_tramite,numero_cuenta,codigo_cliente,codigo_predio,mes_deuda;
     public double latitud,longitud,deuda_portoagua;
-    public String codigo_medidor,serie_medidor,estado_tramite,usuario_oficial,tipo_tramite,cliente;
+    public String codigo_medidor,serie_medidor,estado_tramite,usuario_oficial,tipo_tramite,cliente,estado_medidor;
 
 
     public String getUsuario_oficial() {
@@ -132,6 +132,14 @@ public class Puntos {
         this.cliente = cliente;
     }
 
+    public String getEstado_medidor() {
+        return estado_medidor;
+    }
+
+    public void setEstado_medidor(String estado_medidor) {
+        this.estado_medidor = estado_medidor;
+    }
+
     public Puntos(long id_tramite, long id_tarea_tramite, long numero_cuenta, long codigo_cliente, long codigo_predio, long mes_deuda, double latitud, double longitud, double deuda_portoagua, String codigo_medidor, String serie_medidor) {
         this.id_tramite = id_tramite;
         this.id_tarea_tramite = id_tarea_tramite;
@@ -145,7 +153,7 @@ public class Puntos {
         this.codigo_medidor = codigo_medidor;
         this.serie_medidor = serie_medidor;
     }
-    public Puntos(long id_tramite, long id_tarea_tramite, long numero_cuenta, long codigo_cliente, long codigo_predio, long mes_deuda, double latitud, double longitud, double deuda_portoagua, String codigo_medidor, String serie_medidor,String estado_tramite, String usuario_oficial,String tipo_tramite,String cliente) {
+    public Puntos(long id_tramite, long id_tarea_tramite, long numero_cuenta, long codigo_cliente, long codigo_predio, long mes_deuda, double latitud, double longitud, double deuda_portoagua, String codigo_medidor, String serie_medidor,String estado_tramite, String usuario_oficial,String tipo_tramite,String cliente, String estado_medidor) {
         this.id_tramite = id_tramite;
         this.id_tarea_tramite = id_tarea_tramite;
         this.numero_cuenta = numero_cuenta;
@@ -161,5 +169,6 @@ public class Puntos {
         this.usuario_oficial=usuario_oficial;
         this.tipo_tramite=tipo_tramite;
         this.cliente=cliente;
+        this.estado_medidor=estado_medidor;
     }
 }

@@ -1,16 +1,12 @@
-package com.example.pmat_programador_1.portoaguas;
+package com.example.pmat_programador_1.portoaguas.Activitys;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -23,17 +19,12 @@ import android.location.Location;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
@@ -41,12 +32,12 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -56,39 +47,25 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.NetworkResponse;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-import com.example.pmat_programador_1.portoaguas.Activitys.MovimientosActivity;
-import com.example.pmat_programador_1.portoaguas.Activitys.locationActivity;
+import com.example.pmat_programador_1.portoaguas.MapsActivity;
+import com.example.pmat_programador_1.portoaguas.R;
+import com.example.pmat_programador_1.portoaguas.loginActivity;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.maps.android.kml.KmlLayer;
+import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.Marker;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.maps.MapView;
+import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.muddzdev.styleabletoastlibrary.StyleableToast;
 
 import org.apache.http.HttpEntity;
@@ -101,51 +78,33 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.util.ByteArrayBuffer;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
-import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import Adapter.RecycleViewAdapter;
 import Models.Puntos;
 import Models.Rubros;
-import sqlit.Movimiento;
 import sqlit.MovimientoHelper;
-import sqlit.Tramites;
 import sqlit.TramitesDB;
-import utils.Constants;
 import utils.CoordinateConversion;
 import utils.JSON;
 
 import static Adapter.RecycleViewAdapter.detall;
 
-
-public class MapsActivity extends AppCompatActivity
-        implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks,
+public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status> {
-    public GoogleMap mMap;
+    private MapView mapView;
+    private MapboxMap map;
+
     private EditText lect, comentario;
     public static TextView total, cuenta, meses, deuda,textMeses,textDeuda,txt_reclamo,txtidtramite,txtcliente,txt_serieMedidor, txt_estadoMedidor;
     private Button btnSaveCliente;
@@ -198,33 +157,18 @@ public class MapsActivity extends AppCompatActivity
     public File klmfile2;
     private TextView txtNombre, txtCargo,numero_tramites;
     public String resuld;
-
-
-
+    AlertDialog alert = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
+        Mapbox.getInstance(this, getString(R.string.access_token));
+        setContentView(R.layout.activity_maps_box);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
-        if (status == ConnectionResult.SUCCESS) {
-            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.map);
-            mapFragment.getMapAsync(this);
-        } else {
-          /*  Dialog dialog= GooglePlayServicesUtil.getErrorDialog(status, (Activity) getApplicationContext(),10);
-            dialog.show();*/
-        }
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
-        movimientoHelper = new MovimientoHelper(MapsActivity.this);
+        mapView = (MapView) findViewById(R.id.mapview);
+        mapView.onCreate(savedInstanceState);
+        movimientoHelper = new MovimientoHelper(MapsBox.this);
         objDB = new TramitesDB(getApplicationContext());
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_3);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -232,6 +176,13 @@ public class MapsActivity extends AppCompatActivity
         toggle.syncState();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view_3);
         navigationView.setNavigationItemSelectedListener(this);
+
+        mapView.getMapAsync(new com.mapbox.mapboxsdk.maps.OnMapReadyCallback() {
+            @Override
+            public void onMapReady(MapboxMap mapboxMap) {
+                map=mapboxMap;
+            }
+        });
 
         View navHeaderView = navigationView.getHeaderView(0);
         SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
@@ -241,9 +192,8 @@ public class MapsActivity extends AppCompatActivity
         txtCargo.setText(da.getString("p_cargoU",null));
         numero_tramites =(TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_gallery));
         initializeCountDrawer();
-
         if(!isOnlineNet()){
-            Toast.makeText(MapsActivity.this,"No hay conexion con el servidor Portoaguas los datos se almacenaran internamente",Toast.LENGTH_LONG).show();
+            Toast.makeText(MapsBox.this,"No hay conexion con el servidor Portoaguas los datos se almacenaran internamente",Toast.LENGTH_LONG).show();
 
         }else {
             SQLiteDatabase db = objDB.getReadableDatabase();
@@ -254,53 +204,6 @@ public class MapsActivity extends AppCompatActivity
             if (c.moveToFirst()) {
                 do {
                     new RegistrarMovimiento_2().execute(c.getString(1),c.getString(2),c.getString(3),c.getString(4),c.getString(5),c.getString(6),c.getString(7));
-                   /* RequestQueue queue = Volley.newRequestQueue(this);
-                    String URL = "http://" + JSON.ipserver + "/call_tramite";
-                    StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            Log.e("TRAB-MOV", "Datos del corte subido correctamente - " + c.getString(2));
-
-                            //REINICIAMOS LA ACTIVIDAD
-                            //finish();
-                            // startActivity(getIntent());
-                            SQLiteDatabase DB = objDB.getWritableDatabase();
-                            String Selection = TramitesDB.Datos_tramites.ID_TAREA_TRAMITE + "=?";
-                            String[] argsel = {c.getString(2)};
-                            int valor = DB.delete(TramitesDB.Datos_tramites.TABLA_TRAB_MOV, Selection, argsel);
-                            if (valor != 1) {
-                                Log.e("DELETE TRABAJO MOVIMIENTO LOCAL", "ERROR AL ELIMINAR EL CORTE ");
-                            } else {
-                                Log.e("DELETE TRABAJO MOVIMIENTO LOCAL", "DATOS ELIMINADOS FINALIZADO");
-
-                            }
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.e("Response", "Error al conectar o en los datos");
-                        }
-                    }) {
-                        @Override
-                        protected Map<String, String> getParams() {
-                            SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
-
-                            Map<String, String> params = new HashMap<String, String>();
-                            params.put("id_dispositivo", Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID));
-                            params.put("lat_reg_trab", c.getString(0));
-                            params.put("long_reg_trab", c.getString(1));
-                            params.put("id_tarea_tramite", c.getString(2));
-                            params.put("observacion", c.getString(3));
-                            params.put("sal_abil", c.getString(4));
-                            params.put("total_mov", c.getString(5));
-                            params.put("tabla", c.getString(6));
-                            params.put("cedula", dato.getString("p_idUsuario", null));
-
-                            return params;
-                        }
-                    };
-                    queue.add(stringRequest);*/
-
                 } while (c.moveToNext());
                 finish();
                 startActivity(getIntent());
@@ -310,23 +213,12 @@ public class MapsActivity extends AppCompatActivity
         }
         new LoadPuntos().execute();
 
-
-        /* ********************* geolocalizacion **********************/
-
-        // Establecer punto de entrada para la API de ubicación
-        buildGoogleApiClient();
-
-        // Crear configuración de peticiones
-        createLocationRequest();
-
-        // Crear opciones de peticiones
-        buildLocationSettingsRequest();
-
-        // Verificar ajustes de ubicación actuales
-        checkLocationSettings();
-        /* ****************************/
     }
-    AlertDialog alert = null;
+
+    /*
+    *
+    *   funciones personales
+    * */
     private void initializeCountDrawer(){
         numero_tramites.setGravity(Gravity.CENTER_VERTICAL);
         numero_tramites.setTypeface(null, Typeface.BOLD);
@@ -338,404 +230,13 @@ public class MapsActivity extends AppCompatActivity
             numero_tramites.setText("(" + String.valueOf(val) + ")");
         }
     }
-
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_3);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_map, menu);
-        return true;
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_map) {
-            //finish();
-            //startActivity(getIntent());
-            new donwloadFile().execute();
-            //loadkml(klmfile2);
-        }else if(id == R.id.predios){
-            klmfile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Portoaguas/B-183.kml");
-            if(active==true) {
-                //klmfile2= new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Portoaguas/portoagua_2.kml");
-                loadkml(klmfile);
-                active=false;
-            }else{
-                //Deletekml(klmfile);
-                layer.removeLayerFromMap();
-                active=true;
-            }
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_gallery) {
-            /*Intent inte = new Intent(MapsActivity.this, MapsActivity.class);
-            startActivity(inte);*/
-
-        } /*else if (id == R.id.nav_slideshow) {
-            Intent inte = new Intent(MainActivity.this, ArsGisActivity.class);
-            startActivity(inte);
-        } */ else if (id == R.id.nav_manage) {
-
-        }else if (id == R.id.nav_share) {
-            Intent inte = new Intent(MapsActivity.this, MovimientosActivity.class);
-            startActivity(inte);
-        } /*else if (id == R.id.Position) {
-            Intent inte = new Intent(MainActivity.this, locationActivity.class);
-            startActivity(inte);
-        } */else if (id == R.id.nav_send) {
-           /* Intent inte = new Intent(MapsActivity.this, loginActivity.class);
-            startActivity(inte);
-            finish();*/
-            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Esta seguro de salir del sistema?")
-                    .setCancelable(false)
-                    .setPositiveButton("Si", new DialogInterface.OnClickListener() {
-                        public void onClick(@SuppressWarnings("unused")
-                                            final DialogInterface dialog, @SuppressWarnings("unused")
-                                            final int id) {
-                            new CerrarSesion().execute();
-                        }
-                    })
-                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                        public void onClick(final DialogInterface dialog, @SuppressWarnings("unused")
-                        final int id) {
-                        }
-                    });
-            alert = builder.create();
-            alert.show();
-
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_3);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
-
-
-
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private void loadkml(File file){
-        try(InputStream inputStream = new FileInputStream(file)){
-
-            layer = new KmlLayer(mMap, inputStream,getApplicationContext());
-            layer.addLayerToMap();
-
-        }catch (FileNotFoundException e){
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (XmlPullParserException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    @TargetApi(Build.VERSION_CODES.KITKAT)
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private void Deletekml(File file){
-        try(InputStream inputStream = new FileInputStream(file)){
-
-            layer = new KmlLayer(mMap, inputStream,getApplicationContext());
-            layer.removeLayerFromMap();
-
-        }catch (FileNotFoundException e){
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (XmlPullParserException e) {
-            e.printStackTrace();
-        }
-    }
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-    }
-
-    /*
-    Funcion para Capturar una fotografia
-     */
-    private void createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName =cuenta.getText().toString()+"_"+timeStamp;
-        foto = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Portoaguas/" + imageFileName + ".jpg";
-        File storageDir2 = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Portoaguas");
-        storageDir = new File(foto);
-        if (!storageDir2.exists()) {
-            if (!storageDir2.mkdirs()) {
-                Log.d("Portoaguas", "failed to create directory");
-            }
-        }
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        output = Uri.fromFile(storageDir);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, output);
-        startActivityForResult(intent, 1);
-    }
-
-    /*
-    Funcion onActivityResult Para mostrar la foto capturada en un imagenview
-     */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // super.onActivityResult(requestCode, resultCode, data);
-        ContentResolver cr = this.getContentResolver();
-        Bitmap bit = null;
-
-        try {
-            bit = android.provider.MediaStore.Images.Media.getBitmap(cr, output);
-            int rotate = 0;
-            ExifInterface exif = new ExifInterface(
-                    storageDir.getAbsolutePath());
-            int orientation = exif.getAttributeInt(
-                    ExifInterface.TAG_ORIENTATION,
-                    ExifInterface.ORIENTATION_NORMAL);
-
-            switch (orientation) {
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    rotate = 270;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    rotate = 180;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    rotate = 90;
-                    break;
-            }
-            Matrix matrix = new Matrix();
-            matrix.postRotate(rotate);
-            bit = Bitmap.createBitmap(bit, 0, 0, bit.getWidth(), bit.getHeight(), matrix, true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        img.setImageBitmap(bit);
-    }
-
-
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        processLastLocation();
-        // Iniciamos las actualizaciones de ubicación
-        startLocationUpdates();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.d(TAG, "Conexión suspendida");
-        mGoogleApiClient.connect();
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Toast.makeText(
-                this,
-                "Error de conexión con el código:" + connectionResult.getErrorCode(),
-                Toast.LENGTH_LONG)
-                .show();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mGoogleApiClient.connect();
-
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mGoogleApiClient.disconnect();
-    }
-
-    @Override
-    public void onResult(@NonNull Status status) {
-        if (status.isSuccess()) {
-            Log.d(TAG, "Detección de actividad iniciada");
-
-        } else {
-            Log.e(TAG, "Error al iniciar/remover la detección de actividad: "
-                    + status.getStatusMessage());
-        }
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        Log.d(TAG, String.format("Nueva ubicación: (%s, %s)",
-                location.getLatitude(), location.getLongitude()));
-        mLastLocation = location;
-        updateLocationUI();
-    }
-
-    private void processLastLocation() {
-        getLastLocation();
-        if (mLastLocation != null) {
-            //updateLocationUI();
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    private void getLastLocation() {
-        if (isLocationPermissionGranted()) {
-            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        } else {
-            manageDeniedPermission();
-        }
-    }
-
-    private void updateLocationUI() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String URL= "http://" + JSON.ipserver + "/MovimientosDispositivos";
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                Log.e("MOVIMIENTOS DISPOSITIVO", response);
-
-            }
-        },new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e("Response","Error a almacenar la posicion del usuario");
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() {
-                SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
-
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("id_dispositivo",Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID));
-                params.put("latitud", String.valueOf(mLastLocation.getLatitude()));
-                params.put("longitud",  String.valueOf(mLastLocation.getLongitude()));
-                params.put("cedula", dato.getString("p_idUsuario", null) );
-
-                return params;
-            }
-        };
-        queue.add(stringRequest);
-    }
-
-    @SuppressLint("MissingPermission")
-    private void startLocationUpdates() {
-        if (isLocationPermissionGranted()) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        } else {
-            manageDeniedPermission();
-        }
-    }
-
-    private void manageDeniedPermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)) {
-        } else {
-            ActivityCompat.requestPermissions(
-                    this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_LOCATION);
-        }
-    }
-
-    private void buildLocationSettingsRequest() {
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
-        builder.addLocationRequest(mLocationRequest)
-                .setAlwaysShow(true);
-        mLocationSettingsRequest = builder.build();
-    }
-
-    private void checkLocationSettings() {
-        PendingResult<LocationSettingsResult> result =
-                LocationServices.SettingsApi.checkLocationSettings(
-                        mGoogleApiClient, mLocationSettingsRequest
-                );
-
-        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-            @Override
-            public void onResult(@NonNull LocationSettingsResult result) {
-                Status status = result.getStatus();
-
-                switch (status.getStatusCode()) {
-                    case LocationSettingsStatusCodes.SUCCESS:
-                        Log.d(TAG, "Los ajustes de ubicación satisfacen la configuración.");
-                        startLocationUpdates();
-                        break;
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        try {
-                            Log.d(TAG, "Los ajustes de ubicación no satisfacen la configuración. " +
-                                    "Se mostrará un diálogo de ayuda.");
-                            status.startResolutionForResult(
-                                    MapsActivity.this,
-                                    REQUEST_CHECK_SETTINGS);
-                        } catch (IntentSender.SendIntentException e) {
-                            Log.d(TAG, "El Intent del diálogo no funcionó.");
-                            // Sin operaciones
-                        }
-                        break;
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        Log.d(TAG, "Los ajustes de ubicación no son apropiados.");
-                        break;
-
-                }
-            }
-        });
-    }
-
-    private synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .addApi(ActivityRecognition.API)
-                .enableAutoManage(this, this)
-                .build();
-    }
-
-    private void createLocationRequest() {
-        mLocationRequest = new LocationRequest()
-                .setInterval(Constants.UPDATE_INTERVAL)
-                .setFastestInterval(Constants.UPDATE_FASTEST_INTERVAL)
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-    }
-
-    private boolean isLocationPermissionGranted() {
-        int permission = ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION);
-        return permission == PackageManager.PERMISSION_GRANTED;
-    }
-
     //FUNCION PARA OBTENER DATOS
     public class LoadPuntos extends AsyncTask<String, String, String> {
         private ProgressDialog pDialog;
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            pDialog = new ProgressDialog(MapsActivity.this);
+            pDialog = new ProgressDialog(MapsBox.this);
             pDialog.setMessage("Cargando Cortes...");
             pDialog.setIndeterminate(false);
             pDialog.setCancelable(false);
@@ -755,16 +256,16 @@ public class MapsActivity extends AppCompatActivity
 
         @Override
         protected String doInBackground(String... strings) {
-                try {
-                    //Log.e("TOTAL PUNTOS DB", String.valueOf(Total_tramitesDB()));
-                    //Log.e("TOTAL PUNTOS SQLITE", String.valueOf(Total_tramitesSQLITE()));
-                    //Log.e("MAX PUNTO DB", String.valueOf(id_tramite_DB));
-                    item.clear();
-                    if (Total_tramitesSQLITE() == 0) {
-                        item = getPuntos();//CONSULTA A LA BASE DE DATOS  LOS PUNTOSD
-                    } else {
-                        //Log.e("MAX PUNTO SQLITE", String.valueOf(Max_tramiteSQLITE()));
-                        if (Max_tramiteSQLITE() < id_tramite_DB) {// preguntamos si el maximo idtramite de sql es menor al id_trtamite de la BASE
+            try {
+                //Log.e("TOTAL PUNTOS DB", String.valueOf(Total_tramitesDB()));
+                //Log.e("TOTAL PUNTOS SQLITE", String.valueOf(Total_tramitesSQLITE()));
+                //Log.e("MAX PUNTO DB", String.valueOf(id_tramite_DB));
+                item.clear();
+                if (Total_tramitesSQLITE() == 0) {
+                    item = getPuntos();//CONSULTA A LA BASE DE DATOS  LOS PUNTOSD
+                } else {
+                    //Log.e("MAX PUNTO SQLITE", String.valueOf(Max_tramiteSQLITE()));
+                    if (Max_tramiteSQLITE() < id_tramite_DB) {// preguntamos si el maximo idtramite de sql es menor al id_trtamite de la BASE
                         //Consultar los puntos nuevos
                         item = getNextsPuntos(Max_tramiteSQLITE());
                         // item = recuperarTramites();
@@ -773,7 +274,7 @@ public class MapsActivity extends AppCompatActivity
                         }
                     } else if(Max_tramiteSQLITE()==0){
 
-                        }else{
+                    }else{
                         item = recuperarTramites();
                         if (item.size() == 0) {
                             item = getPuntos();
@@ -782,9 +283,9 @@ public class MapsActivity extends AppCompatActivity
                 }
 
 
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
             return null;
         } //Fin del doInBackround
 
@@ -792,22 +293,22 @@ public class MapsActivity extends AppCompatActivity
         protected void onPostExecute(String s) {
             pDialog.dismiss();
 
-            mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-            mMap.setBuildingsEnabled(true);
-            mMap.setIndoorEnabled(true);
-            if (ContextCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
+            //map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+           // mMap.setBuildingsEnabled(true);
+            //mMap.setIndoorEnabled(true);
+            if (ContextCompat.checkSelfPermission(MapsBox.this, Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
-                mMap.setMyLocationEnabled(true);
+                //mMap.setMyLocationEnabled(true);
             } else {
                 // Show rationale and request permission.
             }
-            UiSettings uiSettings = mMap.getUiSettings();
-            uiSettings.setZoomControlsEnabled(true);
+            //UiSettings uiSettings = mMap.getUiSettings();
+            //uiSettings.setZoomControlsEnabled(true);
             LatLng sydney;
             if(item.size()==0){
                 LatLng sydney2= new LatLng(-1.035966, -80.464269);
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney2,new Float(15)));
-                StyleableToast.makeText(MapsActivity.this, "No contiene puntos de corte en su mapa comuniquese con la central para que se le asignen mas puntos de corte....", Toast.LENGTH_LONG, R.style.StyledToastError).show();
+                //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney2,new Float(15)));
+                StyleableToast.makeText(MapsBox.this, "No contiene puntos de corte en su mapa comuniquese con la central para que se le asignen mas puntos de corte....", Toast.LENGTH_LONG, R.style.StyledToastError).show();
 
             }else {
 
@@ -825,26 +326,28 @@ public class MapsActivity extends AppCompatActivity
                             double lati = item.get(i).getLatitud();
                             double longLat = item.get(i).getLongitud();
                             double[] ltn = obj.utm2LatLon("17 M " + longLat + " " + lati);
-                            float zoomlevel = 19;
+                           // float zoomlevel = 19;
                             sydney = new LatLng(ltn[0], ltn[1]);
-
-                                Marker melbourne = mMap.addMarker(new MarkerOptions()
+                            map.addMarker(new MarkerOptions()
+                                    .position(new LatLng(ltn[0],  ltn[1]))
+                                    .title("CORTE / Cuenta: " + String.valueOf(item.get(i).getNumero_cuenta()))
+                                    .snippet("Serie M.: "+item.get(i).getSerie_medidor()+" Meses: " + item.get(i).getMes_deuda() + " Deuda: " + Math.rint(item.get(i).getDeuda_portoagua() * 100) / 100));
+                            /*Marker melbourne = mMap.addMarker(new MarkerOptions()
                                     .position(sydney)
                                     .title("CORTE / Cuenta: " + String.valueOf(item.get(i).getNumero_cuenta()))
                                     .snippet("Serie M.: "+item.get(i).getSerie_medidor()+" Meses: " + item.get(i).getMes_deuda() + " Deuda: " + Math.rint(item.get(i).getDeuda_portoagua() * 100) / 100)
-                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.blank_1)));
-                                melbourne.showInfoWindow();
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, zoomlevel));
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.blank_1)));*/
+                           // melbourne.showInfoWindow();
+                           // mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, zoomlevel));
                         }else if(item.get(i).getEstado_tramite().equals("F")){
 
                         }
                     }
                 }
             }
-
-            mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            map.setOnInfoWindowClickListener(new MapboxMap.OnInfoWindowClickListener() {
                 @Override
-                public void onInfoWindowClick(Marker marker) {
+                public boolean onInfoWindowClick(@NonNull Marker marker) {
                     final ArrayList rubros = new ArrayList();
                     rubros.add(new Rubros("65","RECONEXION CON EXCAVADORA EN TIERRAAPERTURA MANUAL DE ZANJA","6", "78"));
                     rubros.add(new Rubros("66","RECONEXION CON EXCAVADORA MANUAL DE ZANJA EN AREA CON H.S","13", "79"));
@@ -864,7 +367,7 @@ public class MapsActivity extends AppCompatActivity
                     rubros.add(new Rubros("156", "CORTE EN TUBERIA", "4","130"));
                     rubros.add(new Rubros("53", "ENTREGA AVISO NOTIFICACION", "1.75","66"));
 
-                    AlertDialog.Builder buil = new AlertDialog.Builder(MapsActivity.this);
+                    AlertDialog.Builder buil = new AlertDialog.Builder(MapsBox.this);
                     final View mView = getLayoutInflater().inflate(R.layout.storepunto, null);
 
                     comentario      = (EditText) mView.findViewById(R.id.t_comentario);
@@ -884,10 +387,10 @@ public class MapsActivity extends AppCompatActivity
                     txtcliente      = (TextView) mView.findViewById(R.id.txt_cliente);
                     txt_serieMedidor = (TextView) mView.findViewById(R.id.txt_serieMedidor);
                     txt_estadoMedidor = (TextView) mView.findViewById(R.id.estado_medidor);
-                    lManager = new LinearLayoutManager(MapsActivity.this, LinearLayoutManager.HORIZONTAL, false);
+                    lManager = new LinearLayoutManager(MapsBox.this, LinearLayoutManager.HORIZONTAL, false);
                     recycler.setHasFixedSize(true);
                     recycler.setLayoutManager(lManager);
-                    adapter = new RecycleViewAdapter(MapsActivity.this, rubros);
+                    adapter = new RecycleViewAdapter(MapsBox.this, rubros);
                     adapter.notifyDataSetChanged();
                     recycler.setAdapter(adapter);
                     //recycler.setNestedScrollingEnabled(true);
@@ -1036,7 +539,7 @@ public class MapsActivity extends AppCompatActivity
                                         Log.e("SQLITE SAVE","ERRORguardados");
                                     }else {
                                         Log.e("SQLITE SAVE", "Datos guardados");
-                                        StyleableToast.makeText(MapsActivity.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
+                                        StyleableToast.makeText(MapsBox.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
                                         SQLiteDatabase db1= objDB.getWritableDatabase();
                                         ContentValues valores2 =  new ContentValues();
                                         valores2.put(TramitesDB.Datos_tramites.ID_TAREA_TRAMITE,String.valueOf(id_tarea_tra));
@@ -1063,11 +566,11 @@ public class MapsActivity extends AppCompatActivity
                             /*
                             *******************************CONSULTAR SI EXISTEN NUEVOS `PUNTOS ******
                              */
-                                //NULL
+                                            //NULL
                             /*
                             **************************************************************
                             */
-                            alertDialog.dismiss();
+                                            alertDialog.dismiss();
 
                                             //REINICIAMOS LA ACTIVIDAD
                                             finish();
@@ -1077,22 +580,22 @@ public class MapsActivity extends AppCompatActivity
                                     }
                                 }
                             }else{
-                            String Observacion = comentario.getText().toString();
-                            if (Observacion.equals("")) {
-                                comentario.setError("Debe ingresar una observación");
-                            } else {
+                                String Observacion = comentario.getText().toString();
+                                if (Observacion.equals("")) {
+                                    comentario.setError("Debe ingresar una observación");
+                                } else {
                             /*
                             LATITUD Y LONGITUD EN UTM PARA ENVIAR
                              */
-                                latitud_r = mLastLocation.getLatitude();
-                                logintud_r = mLastLocation.getLongitude();
-                                String UTM = obj.latLon2UTM(latitud_r, logintud_r);
-                                String[] _utm = UTM.split(" ");
-                                double easting = Double.parseDouble(_utm[2]);
-                                double northing = Double.parseDouble(_utm[3]);
-                                Log.e("UTM", String.valueOf(easting) + " " + String.valueOf(northing));
+                                    latitud_r = mLastLocation.getLatitude();
+                                    logintud_r = mLastLocation.getLongitude();
+                                    String UTM = obj.latLon2UTM(latitud_r, logintud_r);
+                                    String[] _utm = UTM.split(" ");
+                                    double easting = Double.parseDouble(_utm[2]);
+                                    double northing = Double.parseDouble(_utm[3]);
+                                    Log.e("UTM", String.valueOf(easting) + " " + String.valueOf(northing));
 
-                                //////////////////////////////////////////
+                                    //////////////////////////////////////////
                             /*
                             SAL_ABIL PARA ENVIAR
                             PATRON
@@ -1103,71 +606,71 @@ public class MapsActivity extends AppCompatActivity
                               R.          PRO        UNI
                              */
 
-                                String patron = "";
-                                JSONArray tabla = new JSONArray();
-                                for (int x = 0; x < detall.size(); x++) {
-                                    JSONObject pc = new JSONObject();
+                                    String patron = "";
+                                    JSONArray tabla = new JSONArray();
+                                    for (int x = 0; x < detall.size(); x++) {
+                                        JSONObject pc = new JSONObject();
 
-                                    if (detall.get(x).getCantidad().equals("0")) {
+                                        if (detall.get(x).getCantidad().equals("0")) {
 
-                                    } else {
-                                        patron = patron + detall.get(x).getCodigo() + "@@" + detall.get(x).getCod_prod() + "@@" + detall.get(x).getPrecio() + "@@" + detall.get(x).getCantidad() + "||";
-                                        try {
-                                            pc.put("Cod_rubro", detall.get(x).getCodigo());
-                                            pc.put("Cod_prod", detall.get(x).getCod_prod());
-                                            pc.put("v_unit", detall.get(x).getPrecio());
-                                            pc.put("cant", detall.get(x).getCantidad());
-                                            tabla.put(pc);
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
+                                        } else {
+                                            patron = patron + detall.get(x).getCodigo() + "@@" + detall.get(x).getCod_prod() + "@@" + detall.get(x).getPrecio() + "@@" + detall.get(x).getCantidad() + "||";
+                                            try {
+                                                pc.put("Cod_rubro", detall.get(x).getCodigo());
+                                                pc.put("Cod_prod", detall.get(x).getCod_prod());
+                                                pc.put("v_unit", detall.get(x).getPrecio());
+                                                pc.put("cant", detall.get(x).getCantidad());
+                                                tabla.put(pc);
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
                                         }
                                     }
-                                }
-                                int length = patron.length();
-                                String _patron = "";
-                                if (patron.endsWith("||")) {
-                                    Log.e("Patron", patron.substring(0, length - 2));
-                                    _patron = patron.substring(0, length - 2);
-                                } else {
-                                    Log.e("Patron", patron);
-                                    _patron = patron;
-                                }
-                                /////////////////////////////////////////////
+                                    int length = patron.length();
+                                    String _patron = "";
+                                    if (patron.endsWith("||")) {
+                                        Log.e("Patron", patron.substring(0, length - 2));
+                                        _patron = patron.substring(0, length - 2);
+                                    } else {
+                                        Log.e("Patron", patron);
+                                        _patron = patron;
+                                    }
+                                    /////////////////////////////////////////////
 
                             /*
                                 TOTAL MOVIMIENTO
                              */
-                                double total_ = 0;
-                                if (total.getText().toString().equals("") || total.getText().toString().equals(0)) {
-                                    total_ = 0;
-                                } else {
-                                    total_ = Double.parseDouble(total.getText().toString());
-                                }
-                                Log.e("TOTAL", String.valueOf(total_));
+                                    double total_ = 0;
+                                    if (total.getText().toString().equals("") || total.getText().toString().equals(0)) {
+                                        total_ = 0;
+                                    } else {
+                                        total_ = Double.parseDouble(total.getText().toString());
+                                    }
+                                    Log.e("TOTAL", String.valueOf(total_));
 
 
-                                ////////////////////////////////
+                                    ////////////////////////////////
                             /*
                                 ID_TRAMITE Y ID_TAREA_TRAMITE
                              */
-                                long idtrami = 0, id_tarea_tra = 0;
-                                for (int xx = 0; xx < item.size(); xx++) {
-                                    if (item.get(xx).getNumero_cuenta() == Long.parseLong(cuenta.getText().toString())) {
-                                        idtrami = item.get(xx).getId_tramite();
-                                        id_tarea_tra = item.get(xx).getId_tarea_tramite();
+                                    long idtrami = 0, id_tarea_tra = 0;
+                                    for (int xx = 0; xx < item.size(); xx++) {
+                                        if (item.get(xx).getNumero_cuenta() == Long.parseLong(cuenta.getText().toString())) {
+                                            idtrami = item.get(xx).getId_tramite();
+                                            id_tarea_tra = item.get(xx).getId_tarea_tramite();
+                                        }
                                     }
-                                }
 
-                                Log.e("ID_TRAMITE", String.valueOf(idtrami) + " " + String.valueOf(id_tarea_tra));
+                                    Log.e("ID_TRAMITE", String.valueOf(idtrami) + " " + String.valueOf(id_tarea_tra));
 
-                                ///////////////////////////////////////
+                                    ///////////////////////////////////////
 
-                                //Metodo para almacenar el movimiento en el mapa
-                                new RegistrarMovimiento().execute(String.valueOf(easting), String.valueOf(northing), String.valueOf(Observacion), String.valueOf(total_), _patron, String.valueOf(id_tarea_tra), tabla.toString());
+                                    //Metodo para almacenar el movimiento en el mapa
+                                    new RegistrarMovimiento().execute(String.valueOf(easting), String.valueOf(northing), String.valueOf(Observacion), String.valueOf(total_), _patron, String.valueOf(id_tarea_tra), tabla.toString());
 
-                            }// fin del if de observacion
-                        }
-                        detall.clear();
+                                }// fin del if de observacion
+                            }
+                            detall.clear();
                         }
 
                     });
@@ -1181,9 +684,16 @@ public class MapsActivity extends AppCompatActivity
                             new Act_Deuda().execute(cuenta2);
                         }
                     }); // Fin de btn_deuda
-
+                    return false;
                 }
             });
+            /*map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                @Override
+                public void onInfoWindowClick(Marker marker) {
+
+
+                }
+            });*/
         }
     }
 
@@ -1200,6 +710,95 @@ public class MapsActivity extends AppCompatActivity
         }
         return false;
     }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_3);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_gallery) {
+            /*Intent inte = new Intent(MapsActivity.this, MapsActivity.class);
+            startActivity(inte);*/
+
+        } /*else if (id == R.id.nav_slideshow) {
+            Intent inte = new Intent(MainActivity.this, ArsGisActivity.class);
+            startActivity(inte);
+        } */ else if (id == R.id.nav_manage) {
+
+        }else if (id == R.id.nav_share) {
+            Intent inte = new Intent(MapsBox.this, MovimientosActivity.class);
+            startActivity(inte);
+        } /*else if (id == R.id.Position) {
+            Intent inte = new Intent(MainActivity.this, locationActivity.class);
+            startActivity(inte);
+        } */else if (id == R.id.nav_send) {
+           /* Intent inte = new Intent(MapsActivity.this, loginActivity.class);
+            startActivity(inte);
+            finish();*/
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Esta seguro de salir del sistema?")
+                    .setCancelable(false)
+                    .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                        public void onClick(@SuppressWarnings("unused")
+                                            final DialogInterface dialog, @SuppressWarnings("unused")
+                                            final int id) {
+                            new CerrarSesion().execute();
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(final DialogInterface dialog, @SuppressWarnings("unused")
+                        final int id) {
+                        }
+                    });
+            alert = builder.create();
+            alert.show();
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_3);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onResult(@NonNull Status status) {
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
+    }
+
     /*
     FUNCION LOADMAXTRAMITE PERMITE CREA UN HILO PARA LLAMAR A
     LA FUNCION MAX_TRAMITEDB
@@ -1210,7 +809,7 @@ public class MapsActivity extends AppCompatActivity
         @Override
         protected String doInBackground(String... strings) {
             try {
-               id_tramite_DB=Max_tramiteDB();
+                id_tramite_DB=Max_tramiteDB();
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -1263,7 +862,7 @@ public class MapsActivity extends AppCompatActivity
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            pDialog = new ProgressDialog(MapsActivity.this);
+            pDialog = new ProgressDialog(MapsBox.this);
             pDialog.setMessage("Enviando Datos a la Central...");
             pDialog.setIndeterminate(false);
             pDialog.setCancelable(false);
@@ -1275,30 +874,30 @@ public class MapsActivity extends AppCompatActivity
             pDialog.dismiss();
 
             if (aBoolean) {
-                StyleableToast.makeText(MapsActivity.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
+                StyleableToast.makeText(MapsBox.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
                 alertDialog.dismiss();
-                    SQLiteDatabase db= objDB.getWritableDatabase();
-                    ContentValues valores1 =  new ContentValues();
-                    valores1.put(TramitesDB.Datos_tramites.ID_TAREA_TRAMITE,data);
-                    valores1.put(TramitesDB.Datos_tramites.IMAGEN,foto);
-                    valores1.put(TramitesDB.Datos_tramites.OBSERVACION,comentario.getText().toString());
-                    valores1.put(TramitesDB.Datos_tramites.ESTADO,"S");
-                    Long id_Guardar=db.insert(TramitesDB.Datos_tramites.TABLA_MOVIMIENTOS,null,valores1);
-                        if(id_Guardar==-1){
-                            Log.e("SQLITE SAVE","ERRORguardados");
-                        }else{
-                            Log.e("SQLITE SAVE","Datos guardados");
+                SQLiteDatabase db= objDB.getWritableDatabase();
+                ContentValues valores1 =  new ContentValues();
+                valores1.put(TramitesDB.Datos_tramites.ID_TAREA_TRAMITE,data);
+                valores1.put(TramitesDB.Datos_tramites.IMAGEN,foto);
+                valores1.put(TramitesDB.Datos_tramites.OBSERVACION,comentario.getText().toString());
+                valores1.put(TramitesDB.Datos_tramites.ESTADO,"S");
+                Long id_Guardar=db.insert(TramitesDB.Datos_tramites.TABLA_MOVIMIENTOS,null,valores1);
+                if(id_Guardar==-1){
+                    Log.e("SQLITE SAVE","ERRORguardados");
+                }else{
+                    Log.e("SQLITE SAVE","Datos guardados");
                             /*
                             ACTUALIZAR PUNTO EL ESTADO SQLITE
                             */
-                            SQLiteDatabase bd = objDB.getWritableDatabase();
-                            ContentValues valores = new ContentValues();
-                            valores.put(TramitesDB.Datos_tramites.ESTADO_TRAMITE,"E");
-                            String [] argsel = {data};
-                            String Selection = TramitesDB.Datos_tramites.ID_TAREA_TRAMITE+"=?";
-                            int count = bd.update(TramitesDB.Datos_tramites.TABLA,
+                    SQLiteDatabase bd = objDB.getWritableDatabase();
+                    ContentValues valores = new ContentValues();
+                    valores.put(TramitesDB.Datos_tramites.ESTADO_TRAMITE,"E");
+                    String [] argsel = {data};
+                    String Selection = TramitesDB.Datos_tramites.ID_TAREA_TRAMITE+"=?";
+                    int count = bd.update(TramitesDB.Datos_tramites.TABLA,
                             valores,Selection,argsel);
-                            Log.e("UPDATE", String.valueOf(count));
+                    Log.e("UPDATE", String.valueOf(count));
 
                             /*
                             *******************************CONSULTAR SI EXISTEN NUEVOS `PUNTOS ******
@@ -1307,14 +906,14 @@ public class MapsActivity extends AppCompatActivity
                             /*
                             **************************************************************
                             */
-                            //REINICIAMOS LA ACTIVIDAD
-                            finish();
-                            startActivity(getIntent());
-                            //*********************************************************
-                        }
+                    //REINICIAMOS LA ACTIVIDAD
+                    finish();
+                    startActivity(getIntent());
+                    //*********************************************************
+                }
 
             } else {
-                StyleableToast.makeText(MapsActivity.this, "Error al realizar la transacción!", Toast.LENGTH_SHORT, R.style.StyledToastError).show();
+                StyleableToast.makeText(MapsBox.this, "Error al realizar la transacción!", Toast.LENGTH_SHORT, R.style.StyledToastError).show();
 
             }
         }
@@ -1361,7 +960,7 @@ public class MapsActivity extends AppCompatActivity
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            pDialog = new ProgressDialog(MapsActivity.this);
+            pDialog = new ProgressDialog(MapsBox.this);
             pDialog.setMessage("Enviando Datos a la Central...");
             pDialog.setIndeterminate(false);
             pDialog.setCancelable(false);
@@ -1381,17 +980,17 @@ public class MapsActivity extends AppCompatActivity
                     Log.e("DELETE TRAB_MOV LOCAL", "ERROR AL ELIMINAR EL CORTE ");
                 } else {
                     alertDialog.dismiss();
-                    StyleableToast.makeText(MapsActivity.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
+                    StyleableToast.makeText(MapsBox.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
                     Log.e("DELETE TRAB_MOV LOCAL", "DATOS ELIMINADOS FINALIZADO");
                 }
-                    //REINICIAMOS LA ACTIVIDAD
-                   // finish();
-                   // startActivity(getIntent());
-                    //*********************************************************
+                //REINICIAMOS LA ACTIVIDAD
+                // finish();
+                // startActivity(getIntent());
+                //*********************************************************
 
 
             } else {
-                StyleableToast.makeText(MapsActivity.this, "Error al realizar la transacción!", Toast.LENGTH_SHORT, R.style.StyledToastError).show();
+                StyleableToast.makeText(MapsBox.this, "Error al realizar la transacción!", Toast.LENGTH_SHORT, R.style.StyledToastError).show();
 
             }
         }
@@ -1412,8 +1011,8 @@ public class MapsActivity extends AppCompatActivity
         }else {
             do{
                 lista_tramites.add(new Puntos(c.getLong(0),c.getLong(1),c.getLong(2),c.getLong(3),
-                    c.getLong(4),c.getLong(5),c.getDouble(6),c.getDouble(7),c.getFloat(8),
-                    c.getString(9),c.getString(10),c.getString(11),c.getString(12),c.getString(13),c.getString(14),c.getString(15)));
+                        c.getLong(4),c.getLong(5),c.getDouble(6),c.getDouble(7),c.getFloat(8),
+                        c.getString(9),c.getString(10),c.getString(11),c.getString(12),c.getString(13),c.getString(14),c.getString(15)));
             } while(c.moveToNext());
         }
         return lista_tramites;
@@ -1429,7 +1028,7 @@ public class MapsActivity extends AppCompatActivity
         String[] valores_recuperar = {"max(id_tramite)"};
         Cursor c = db.query("tramites", valores_recuperar,
                 "estado_tramite=?", new String[]{"I"}, null, null, null, null);
-       // c.moveToFirst();
+        // c.moveToFirst();
         if(c.moveToFirst()){
             do {
                 if(c.getString(0)==null){
@@ -1450,20 +1049,20 @@ public class MapsActivity extends AppCompatActivity
     public int Total_tramitesSQLITE(){
         int total_tra_sqlite=0;
 
-            SQLiteDatabase db = objDB.getReadableDatabase();
-            String[] valores_recuperar = {"id_tramite", "id_tarea_tramite"};
-            Cursor c = db.query("tramites", valores_recuperar,
-                    null, null, null, null, null, null);
-            c.moveToFirst();
-            if(c.getCount()==0){
+        SQLiteDatabase db = objDB.getReadableDatabase();
+        String[] valores_recuperar = {"id_tramite", "id_tarea_tramite"};
+        Cursor c = db.query("tramites", valores_recuperar,
+                null, null, null, null, null, null);
+        c.moveToFirst();
+        if(c.getCount()==0){
 
-            }else {
-                do {
-                   total_tra_sqlite++;
-                } while (c.moveToNext());
-            }
-            db.close();
-            c.close();
+        }else {
+            do {
+                total_tra_sqlite++;
+            } while (c.moveToNext());
+        }
+        db.close();
+        c.close();
 
         return total_tra_sqlite;
     }
@@ -1473,7 +1072,7 @@ public class MapsActivity extends AppCompatActivity
       QUE EXISTE EN LA BASE DE DATOS PRINCIPAL
      */
     public int Max_tramiteDB() throws  ParseException{
-       int max_tramite=0;
+        int max_tramite=0;
         SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
         ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
         nameValuePairs.add(new BasicNameValuePair("cedula",dato.getString("p_idUsuario", null) ));
@@ -1484,16 +1083,16 @@ public class MapsActivity extends AppCompatActivity
             HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/maxTramite");
             httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
             HttpResponse response = httpclient.execute(httppost);
-                HttpEntity entity = response.getEntity();
-                values = EntityUtils.toString(entity);
-                JSONArray obj = new JSONArray(values);
-                for (int index = 0; index < obj.length(); index++) {
-                    JSONObject jsonObject = obj.getJSONObject(index);
-                    String usuario_oficialjson = jsonObject.getString("usuario_oficial");
-                    int id_tramitejson = jsonObject.getInt("id_tramite");
-                    Log.e("Return Maxtramite", usuario_oficialjson + ' ' + id_tramitejson);
-                    max_tramite = id_tramitejson;
-                }
+            HttpEntity entity = response.getEntity();
+            values = EntityUtils.toString(entity);
+            JSONArray obj = new JSONArray(values);
+            for (int index = 0; index < obj.length(); index++) {
+                JSONObject jsonObject = obj.getJSONObject(index);
+                String usuario_oficialjson = jsonObject.getString("usuario_oficial");
+                int id_tramitejson = jsonObject.getInt("id_tramite");
+                Log.e("Return Maxtramite", usuario_oficialjson + ' ' + id_tramitejson);
+                max_tramite = id_tramitejson;
+            }
 
         } catch (JSONException e) {
             // TODO Auto-generated catch block
@@ -1572,55 +1171,55 @@ public class MapsActivity extends AppCompatActivity
                     } while(c.moveToNext());
                 }
                 for (int index = 0; index < obj.length(); index++) {
-                JSONObject jsonObject = obj.getJSONObject(index);
-                Long idtramitejson = jsonObject.getLong("id_tramite");
-                Long id_tarea_tramitejson = jsonObject.getLong("id_tarea_tramite");
-                Long numeroCuentejson = jsonObject.getLong("numero_cuenta");
-                Long codClientejson = jsonObject.getLong("cod_cliente");
-                Long codPrediojson = jsonObject.getLong("cod_predio");
-                Double latitudjson = jsonObject.getDouble("latitud");
-                Double longitudjson = jsonObject.getDouble("longitud");
-                Double deuda_portoaguasjson = jsonObject.getDouble("deuda_portoagua");
-                Long mes_deudajson = jsonObject.getLong("mes_deuda");
-                String codMedidorjson = jsonObject.getString("codigo_medidor");
-                String serieMedidorjson = jsonObject.getString("serie_medidor");
-                String usuarioOficialjson = jsonObject.getString("usuario_oficial");
-                String tipotramitejson = jsonObject.getString("tipo_tramite");
-                String clientejson     = jsonObject.getString("CLIENTE");
-                String estado_medidorjson     = jsonObject.getString("estado_medidor");
-                item.add(new Puntos(idtramitejson, id_tarea_tramitejson, numeroCuentejson, codClientejson, codPrediojson, mes_deudajson, latitudjson, longitudjson, deuda_portoaguasjson, codMedidorjson, serieMedidorjson, "I",usuarioOficialjson,tipotramitejson,clientejson,estado_medidorjson));
-                SQLiteDatabase db1 = objDB.getWritableDatabase();
-                ContentValues valores = new ContentValues();
-                valores.put(TramitesDB.Datos_tramites.ID_TRAMITE, idtramitejson);
-                valores.put(TramitesDB.Datos_tramites.ID_TAREA_TRAMITE, id_tarea_tramitejson);
-                valores.put(TramitesDB.Datos_tramites.NUMERO_CUENTA, numeroCuentejson);
-                valores.put(TramitesDB.Datos_tramites.COD_CLIENTE, codClientejson);
-                valores.put(TramitesDB.Datos_tramites.COD_PREDIO, codPrediojson);
-                valores.put(TramitesDB.Datos_tramites.LATITUD, latitudjson);
-                valores.put(TramitesDB.Datos_tramites.LONGITUD, longitudjson);
-                valores.put(TramitesDB.Datos_tramites.DEUDA_PORTOAGUAS, deuda_portoaguasjson);
-                valores.put(TramitesDB.Datos_tramites.MES_DEUDA, mes_deudajson);
-                valores.put(TramitesDB.Datos_tramites.COD_MEDIDOR, codMedidorjson);
-                valores.put(TramitesDB.Datos_tramites.SERIE_MEDIDOR, serieMedidorjson);
-                valores.put(TramitesDB.Datos_tramites.ESTADO_TRAMITE, "I");
-                valores.put(TramitesDB.Datos_tramites.USUARIO_OFICIAL,usuarioOficialjson);
-                valores.put(TramitesDB.Datos_tramites.TIPO_TRAMITE,tipotramitejson);
-                valores.put(TramitesDB.Datos_tramites.CLIENTE,clientejson);
-                valores.put(TramitesDB.Datos_tramites.ESTADO_MEDIDOR,estado_medidorjson);
-                Long id_Guardar = db1.insert(TramitesDB.Datos_tramites.TABLA, null, valores);
-                if (id_Guardar == -1) {
-                    //StyleableToast.makeText(MapsActivity.this, "Error al guardar los cortes con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
-                    Log.e("SQLITE SAVE", "ERRORguardados");
-                    //alertDialog.dismiss();
-                } else {
-                    // StyleableToast.makeText(MapsActivity.this, "Datos almacenados con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
-                    Log.e("SQLITE SAVE", "Datos guardados");
-                    //alertDialog.dismiss();
+                    JSONObject jsonObject = obj.getJSONObject(index);
+                    Long idtramitejson = jsonObject.getLong("id_tramite");
+                    Long id_tarea_tramitejson = jsonObject.getLong("id_tarea_tramite");
+                    Long numeroCuentejson = jsonObject.getLong("numero_cuenta");
+                    Long codClientejson = jsonObject.getLong("cod_cliente");
+                    Long codPrediojson = jsonObject.getLong("cod_predio");
+                    Double latitudjson = jsonObject.getDouble("latitud");
+                    Double longitudjson = jsonObject.getDouble("longitud");
+                    Double deuda_portoaguasjson = jsonObject.getDouble("deuda_portoagua");
+                    Long mes_deudajson = jsonObject.getLong("mes_deuda");
+                    String codMedidorjson = jsonObject.getString("codigo_medidor");
+                    String serieMedidorjson = jsonObject.getString("serie_medidor");
+                    String usuarioOficialjson = jsonObject.getString("usuario_oficial");
+                    String tipotramitejson = jsonObject.getString("tipo_tramite");
+                    String clientejson     = jsonObject.getString("CLIENTE");
+                    String estado_medidorjson     = jsonObject.getString("estado_medidor");
+                    item.add(new Puntos(idtramitejson, id_tarea_tramitejson, numeroCuentejson, codClientejson, codPrediojson, mes_deudajson, latitudjson, longitudjson, deuda_portoaguasjson, codMedidorjson, serieMedidorjson, "I",usuarioOficialjson,tipotramitejson,clientejson,estado_medidorjson));
+                    SQLiteDatabase db1 = objDB.getWritableDatabase();
+                    ContentValues valores = new ContentValues();
+                    valores.put(TramitesDB.Datos_tramites.ID_TRAMITE, idtramitejson);
+                    valores.put(TramitesDB.Datos_tramites.ID_TAREA_TRAMITE, id_tarea_tramitejson);
+                    valores.put(TramitesDB.Datos_tramites.NUMERO_CUENTA, numeroCuentejson);
+                    valores.put(TramitesDB.Datos_tramites.COD_CLIENTE, codClientejson);
+                    valores.put(TramitesDB.Datos_tramites.COD_PREDIO, codPrediojson);
+                    valores.put(TramitesDB.Datos_tramites.LATITUD, latitudjson);
+                    valores.put(TramitesDB.Datos_tramites.LONGITUD, longitudjson);
+                    valores.put(TramitesDB.Datos_tramites.DEUDA_PORTOAGUAS, deuda_portoaguasjson);
+                    valores.put(TramitesDB.Datos_tramites.MES_DEUDA, mes_deudajson);
+                    valores.put(TramitesDB.Datos_tramites.COD_MEDIDOR, codMedidorjson);
+                    valores.put(TramitesDB.Datos_tramites.SERIE_MEDIDOR, serieMedidorjson);
+                    valores.put(TramitesDB.Datos_tramites.ESTADO_TRAMITE, "I");
+                    valores.put(TramitesDB.Datos_tramites.USUARIO_OFICIAL,usuarioOficialjson);
+                    valores.put(TramitesDB.Datos_tramites.TIPO_TRAMITE,tipotramitejson);
+                    valores.put(TramitesDB.Datos_tramites.CLIENTE,clientejson);
+                    valores.put(TramitesDB.Datos_tramites.ESTADO_MEDIDOR,estado_medidorjson);
+                    Long id_Guardar = db1.insert(TramitesDB.Datos_tramites.TABLA, null, valores);
+                    if (id_Guardar == -1) {
+                        //StyleableToast.makeText(MapsActivity.this, "Error al guardar los cortes con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
+                        Log.e("SQLITE SAVE", "ERRORguardados");
+                        //alertDialog.dismiss();
+                    } else {
+                        // StyleableToast.makeText(MapsActivity.this, "Datos almacenados con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
+                        Log.e("SQLITE SAVE", "Datos guardados");
+                        //alertDialog.dismiss();
+                    }
+
                 }
 
             }
-
-        }
         } catch (JSONException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -1697,7 +1296,7 @@ public class MapsActivity extends AppCompatActivity
                     Log.e("SQLITE SAVE","ERRORguardados");
                     //alertDialog.dismiss();
                 }else{
-                   // StyleableToast.makeText(MapsActivity.this, "Datos almacenados con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
+                    // StyleableToast.makeText(MapsActivity.this, "Datos almacenados con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
                     Log.e("SQLITE SAVE","Datos guardados");
                     //alertDialog.dismiss();
                 }
@@ -1737,7 +1336,7 @@ public class MapsActivity extends AppCompatActivity
                 HttpEntity entity = response.getEntity();
                 values = EntityUtils.toString(entity);
 
-               // Toast.makeText(MapsActivity.this,"Deuda Actualizada", Toast.LENGTH_LONG).show();
+                // Toast.makeText(MapsActivity.this,"Deuda Actualizada", Toast.LENGTH_LONG).show();
                 JSONArray obj = new JSONArray(values);
                 for (int index = 0; index < obj.length(); index++) {
                     JSONObject jsonObject = obj.getJSONObject(index);
@@ -1762,24 +1361,24 @@ public class MapsActivity extends AppCompatActivity
 
         @Override
         protected void onPostExecute(Boolean aBoolean) {
-           if(aBoolean==true){
-               if(Integer.parseInt(facturas_impagos)>0){
-                meses.setTextColor(Color.RED);
-                textMeses.setTextColor(Color.RED);
-                deuda.setTextColor(Color.RED);
-                textDeuda.setTextColor(Color.RED);
-               }else{
-                   meses.setTextColor(Color.GREEN);
-                   textMeses.setTextColor(Color.GREEN);
-                   deuda.setTextColor(Color.GREEN);
-                   textDeuda.setTextColor(Color.GREEN);
-               }
-               deuda.setText(deuda_ac);
-               meses.setText(facturas_impagos);
-               txt_reclamo.setText(reclamo);
-               //txt_estadoMedidor.setText(estadoMedidorBD);
+            if(aBoolean==true){
+                if(Integer.parseInt(facturas_impagos)>0){
+                    meses.setTextColor(Color.RED);
+                    textMeses.setTextColor(Color.RED);
+                    deuda.setTextColor(Color.RED);
+                    textDeuda.setTextColor(Color.RED);
+                }else{
+                    meses.setTextColor(Color.GREEN);
+                    textMeses.setTextColor(Color.GREEN);
+                    deuda.setTextColor(Color.GREEN);
+                    textDeuda.setTextColor(Color.GREEN);
+                }
+                deuda.setText(deuda_ac);
+                meses.setText(facturas_impagos);
+                txt_reclamo.setText(reclamo);
+                //txt_estadoMedidor.setText(estadoMedidorBD);
 
-           }//FIN DEL IF ABOOLEAN
+            }//FIN DEL IF ABOOLEAN
 
         }
     }
@@ -1788,7 +1387,7 @@ public class MapsActivity extends AppCompatActivity
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            pDialog = new ProgressDialog(MapsActivity.this);
+            pDialog = new ProgressDialog(MapsBox.this);
             pDialog.setMessage("Saliendo...");
             pDialog.setIndeterminate(false);
             pDialog.setCancelable(false);
@@ -1801,11 +1400,11 @@ public class MapsActivity extends AppCompatActivity
             if(s.equals("cerrada")){
                 SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
                 da.edit().clear().commit();
-                Intent inte = new Intent(MapsActivity.this, loginActivity.class);
+                Intent inte = new Intent(MapsBox.this, loginActivity.class);
                 startActivity(inte);
                 finish();
             }else if(s.equals("No_cerrada")){
-                StyleableToast.makeText(MapsActivity.this, "Error Al cerrar Sesión intente nuevamente!!", Toast.LENGTH_LONG, R.style.StyledToastError).show();
+                StyleableToast.makeText(MapsBox.this, "Error Al cerrar Sesión intente nuevamente!!", Toast.LENGTH_LONG, R.style.StyledToastError).show();
 
             }
         }
@@ -1836,44 +1435,106 @@ public class MapsActivity extends AppCompatActivity
             return resuld;
         }
     }
+    //************************************
+    @Override
+    public void onStart() {
+        super.onStart();
+        mapView.onStart();
+    }
 
-        public class donwloadFile extends AsyncTask<Void, Void, Void>{
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
 
-            @Override
-            protected Void doInBackground(Void... voids) {
-                try {
-                    byte[] todo = null;
-                    byte[] parte = new byte[1024];
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    URL url = new URL("http://192.168.1.245/portal-portoaguas/public/movimientos/116.kml");
-                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                    con.connect();
-                    int cont =0;
+    @Override
+    public void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
 
-                    while ((cont=con.getInputStream().read(parte)) != -1){
-                        bos.write(parte,0,cont);
-                        bos.flush();
-                    }
-                    todo= bos.toByteArray();
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mapView.onStop();
+    }
 
-                    File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Portoaguas/"+"116.kml");
-                    FileOutputStream fos = new FileOutputStream(file);
-                    BufferedOutputStream bost = new BufferedOutputStream(fos);
-                    bost.write(todo);
-                    bost.close();
-                    Log.e("Desacargado","OK");
-                }catch (Exception ex){
-                    Log.e("Desacargado","Error");
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mapView.onSaveInstanceState(outState);
+    }
 
-                }
-                return null;
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mapView.onDestroy();
+    }
+
+    /*
+  Funcion para Capturar una fotografia
+   */
+    private void createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName =cuenta.getText().toString()+"_"+timeStamp;
+        foto = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/Portoaguas/" + imageFileName + ".jpg";
+        File storageDir2 = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Portoaguas");
+        storageDir = new File(foto);
+        if (!storageDir2.exists()) {
+            if (!storageDir2.mkdirs()) {
+                Log.d("Portoaguas", "failed to create directory");
             }
         }
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        output = Uri.fromFile(storageDir);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, output);
+        startActivityForResult(intent, 1);
+    }
 
+    /*
+    Funcion onActivityResult Para mostrar la foto capturada en un imagenview
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // super.onActivityResult(requestCode, resultCode, data);
+        ContentResolver cr = this.getContentResolver();
+        Bitmap bit = null;
 
+        try {
+            bit = android.provider.MediaStore.Images.Media.getBitmap(cr, output);
+            int rotate = 0;
+            ExifInterface exif = new ExifInterface(
+                    storageDir.getAbsolutePath());
+            int orientation = exif.getAttributeInt(
+                    ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_NORMAL);
+
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    rotate = 270;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    rotate = 180;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    rotate = 90;
+                    break;
+            }
+            Matrix matrix = new Matrix();
+            matrix.postRotate(rotate);
+            bit = Bitmap.createBitmap(bit, 0, 0, bit.getWidth(), bit.getHeight(), matrix, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        img.setImageBitmap(bit);
+    }
 
 }
-
-
-
-

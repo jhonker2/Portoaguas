@@ -98,76 +98,187 @@ import static com.example.pmat_programador_1.portoaguas.MapsActivity.total;
         public void onClick(View v) {
             int pos = getAdapterPosition();
             Rubros ob = items.get(pos);
-            if(v.getId()==min.getId()){
-                String cantidad = cant.getText().toString();
-                    if(cantidad.equals("")){
-                        cantidad="0";
+            if(pos==4) {
+                if (v.getId() == min.getId()) {
+                    String cantidad = cant.getText().toString();
+                    if (cantidad.equals("")) {
+                        cantidad = "0";
                     }
-                int jlh = Integer.valueOf(cantidad);
-                cant.setText(String.valueOf(jlh - 1 >= 0 ? jlh - 1 : 0));
-                if(detall.isEmpty()) {
-                    detall.add(new Detalles(cant.getText().toString(), codigo.getText().toString(), precio.getText().toString(),cod_prod.getText().toString()));
-                }else{
-                    int aux=0;
-                    for (int x=0; x<detall.size(); x++){
-                        if(detall.get(x).getCodigo().equals(codigo.getText())){
-                            detall.set(x,new Detalles(cant.getText().toString(), codigo.getText().toString(),precio.getText().toString(), cod_prod.getText().toString()));
-                            aux++;
+                    int jlh = Integer.valueOf(cantidad);
+                    cant.setText(String.valueOf(jlh - 1 >= 0 ? jlh - 1 : 0));
+                    if (detall.isEmpty()) {
+                        detall.add(new Detalles(cant.getText().toString(), codigo.getText().toString(), precio.getText().toString(), cod_prod.getText().toString()));
+                    } else {
+                        int aux = 0;
+                        for (int x = 0; x < detall.size(); x++) {
+                            if (detall.get(x).getCodigo().equals(codigo.getText())) {
+                                detall.set(x, new Detalles(cant.getText().toString(), codigo.getText().toString(), precio.getText().toString(), cod_prod.getText().toString()));
+                                aux++;
+                            }
+                        }
+                        if (aux == 0) {
+                            detall.add(new Detalles(cant.getText().toString(), codigo.getText().toString(), precio.getText().toString(), cod_prod.getText().toString()));
                         }
                     }
-                    if(aux==0) {
-                        detall.add(new Detalles(cant.getText().toString(), codigo.getText().toString(),precio.getText().toString(), cod_prod.getText().toString()));
+                    //IMPRIMIR TOTAL DE LOS RUBROS
+                    contTotal = 0;
+                    for (int y = 0; y < detall.size(); y++) {
+                        contTotal = contTotal + (Double.parseDouble(detall.get(y).getCantidad()) * Double.parseDouble(detall.get(y).getPrecio()));
+                        total.setText(String.valueOf(contTotal));
                     }
-                }
-                //IMPRIMIR TOTAL DE LOS RUBROS
-                contTotal=0;
-                for (int y=0; y<detall.size(); y++){
-                    contTotal=contTotal+(Double.parseDouble(detall.get(y).getCantidad())*Double.parseDouble(detall.get(y).getPrecio()));
-                    total.setText(String.valueOf(contTotal));
-                }
 
-                for (int x=0 ; x<detall.size(); x++){
-                    if(detall.get(x).getCantidad().equals("0")){
+                    for (int x = 0; x < detall.size(); x++) {
+                        if (detall.get(x).getCantidad().equals("0")) {
 
-                    }else{
-                        Log.e("COL_LIB",detall.get(x).getCodigo()+"@@"+detall.get(x).getCod_prod()+"@@"+detall.get(x).getPrecio()+"@@"+detall.get(x).getCantidad());
-                    }
-                }
-
-            }else{
-                String cantidad = cant.getText().toString();
-                if(cantidad.equals("")){
-                    cantidad="0";
-                }
-                int jlh = Integer.valueOf(cantidad);
-                cant.setText(String.valueOf(jlh+1));
-                if(detall.isEmpty()) {
-                    detall.add(new Detalles(cant.getText().toString(), codigo.getText().toString(), precio.getText().toString(),cod_prod.getText().toString()));
-                }else{
-                    int aux=0;
-                    for (int x=0; x<detall.size(); x++){
-                        if(detall.get(x).getCodigo().equals(codigo.getText())){
-                            detall.set(x,new Detalles(cant.getText().toString(), codigo.getText().toString(),precio.getText().toString(), cod_prod.getText().toString()));
-                            aux++;
+                        } else {
+                            Log.e("COL_LIB", detall.get(x).getCodigo() + "@@" + detall.get(x).getCod_prod() + "@@" + detall.get(x).getPrecio() + "@@" + detall.get(x).getCantidad());
                         }
                     }
-                    if(aux==0) {
-                        detall.add(new Detalles(cant.getText().toString(), codigo.getText().toString(),precio.getText().toString(), cod_prod.getText().toString()));
+
+                } else {
+                    String cantidad = cant.getText().toString();
+                    if (cantidad.equals("")) {
+                        cantidad = "0";
+                    }
+                    int jlh = Integer.valueOf(cantidad);
+                    cant.setText(String.valueOf(jlh + 1));
+                    if (detall.isEmpty()) {
+                        detall.add(new Detalles(cant.getText().toString(), codigo.getText().toString(), precio.getText().toString(), cod_prod.getText().toString()));
+                    } else {
+                        int aux = 0;
+                        for (int x = 0; x < detall.size(); x++) {
+                            if (detall.get(x).getCodigo().equals(codigo.getText())) {
+                                detall.set(x, new Detalles(cant.getText().toString(), codigo.getText().toString(), precio.getText().toString(), cod_prod.getText().toString()));
+                                aux++;
+                            }
+                        }
+                        if (aux == 0) {
+                            detall.add(new Detalles(cant.getText().toString(), codigo.getText().toString(), precio.getText().toString(), cod_prod.getText().toString()));
+                        }
+                    }
+                    //IMPRIMIR TOTAL DE LOS RUBROS
+                    contTotal = 0;
+                    for (int y = 0; y < detall.size(); y++) {
+                        contTotal = contTotal + (Double.parseDouble(detall.get(y).getCantidad()) * Double.parseDouble(detall.get(y).getPrecio()));
+                        total.setText(String.valueOf(contTotal));
+                    }
+
+                    for (int x = 0; x < detall.size(); x++) {
+                        if (detall.get(x).getCantidad().equals("0")) {
+
+                        } else {
+                            Log.e("COL_LIB", detall.get(x).getCodigo() + "@@" + detall.get(x).getCod_prod() + "@@" + detall.get(x).getPrecio() + "@@" + detall.get(x).getCantidad());
+                        }
                     }
                 }
-                //IMPRIMIR TOTAL DE LOS RUBROS
-                contTotal=0;
-                for (int y=0; y<detall.size(); y++){
-                    contTotal=contTotal+(Double.parseDouble(detall.get(y).getCantidad())*Double.parseDouble(detall.get(y).getPrecio()));
-                    total.setText(String.valueOf(contTotal));
-                }
+            } // fin del if(pos==4)
+            else{
+                if (v.getId() == min.getId()) {
+                    String cantidad = cant.getText().toString();
+                    if (cantidad.equals("")) {
+                        cantidad = "0";
+                    }
+                    int jlh = Integer.valueOf(cantidad);
+                    cant.setText(String.valueOf(jlh - 1 >= 0 ? jlh - 1 : 0));
+                    if (detall.isEmpty()) {
+                        detall.add(new Detalles(cant.getText().toString(), codigo.getText().toString(), precio.getText().toString(), cod_prod.getText().toString()));
+                    } else {
+                        int aux = 0;
+                        for (int x = 0; x < detall.size(); x++) {
+                            if (detall.get(x).getCodigo().equals(codigo.getText())) {
+                                detall.set(x, new Detalles(cant.getText().toString(), codigo.getText().toString(), precio.getText().toString(), cod_prod.getText().toString()));
+                                aux++;
+                            }
+                        }
+                        if (aux == 0) {
+                            detall.add(new Detalles(cant.getText().toString(), codigo.getText().toString(), precio.getText().toString(), cod_prod.getText().toString()));
+                        }
+                    }
+                    //IMPRIMIR TOTAL DE LOS RUBROS
+                    contTotal = 0;
+                    for (int y = 0; y < detall.size(); y++) {
+                        contTotal = contTotal + (Double.parseDouble(detall.get(y).getCantidad()) * Double.parseDouble(detall.get(y).getPrecio()));
+                        total.setText(String.valueOf(contTotal));
+                    }
 
-                for (int x=0 ; x<detall.size(); x++){
-                    if(detall.get(x).getCantidad().equals("0")){
+                    for (int x = 0; x < detall.size(); x++) {
+                        if (detall.get(x).getCantidad().equals("0")) {
 
+                        } else {
+                            Log.e("COL_LIB", detall.get(x).getCodigo() + "@@" + detall.get(x).getCod_prod() + "@@" + detall.get(x).getPrecio() + "@@" + detall.get(x).getCantidad());
+                        }
+                    }
+
+                } else if(v.getId() == plus.getId()) {
+                    String cantidad = cant.getText().toString();
+                    if (cantidad.equals("1")) {
+                        //cantidad = "0";
                     }else{
-                        Log.e("COL_LIB",detall.get(x).getCodigo()+"@@"+detall.get(x).getCod_prod()+"@@"+detall.get(x).getPrecio()+"@@"+detall.get(x).getCantidad());
+                       // String cantidad = cant.getText().toString();
+                        if (cantidad.equals("")) {
+                            cantidad = "0";
+                        }
+                        int jlh = Integer.valueOf(cantidad);
+                        cant.setText(String.valueOf(jlh + 1));
+                        if (detall.isEmpty()) {
+                            detall.add(new Detalles(cant.getText().toString(), codigo.getText().toString(), precio.getText().toString(), cod_prod.getText().toString()));
+                        } else {
+                            int aux = 0;
+                            for (int x = 0; x < detall.size(); x++) {
+                                if (detall.get(x).getCodigo().equals(codigo.getText())) {
+                                    detall.set(x, new Detalles(cant.getText().toString(), codigo.getText().toString(), precio.getText().toString(), cod_prod.getText().toString()));
+                                    aux++;
+                                }
+                            }
+                            if (aux == 0) {
+                                detall.add(new Detalles(cant.getText().toString(), codigo.getText().toString(), precio.getText().toString(), cod_prod.getText().toString()));
+                            }
+                        }
+                        //IMPRIMIR TOTAL DE LOS RUBROS
+                        contTotal = 0;
+                        for (int y = 0; y < detall.size(); y++) {
+                            contTotal = contTotal + (Double.parseDouble(detall.get(y).getCantidad()) * Double.parseDouble(detall.get(y).getPrecio()));
+                            total.setText(String.valueOf(contTotal));
+                        }
+
+                        for (int x = 0; x < detall.size(); x++) {
+                            if (detall.get(x).getCantidad().equals("0")) {
+
+                            } else {
+                                Log.e("COL_LIB", detall.get(x).getCodigo() + "@@" + detall.get(x).getCod_prod() + "@@" + detall.get(x).getPrecio() + "@@" + detall.get(x).getCantidad());
+                            }
+                        }
                     }
+                   /* int jlh = Integer.valueOf(cantidad);
+                    cant.setText(String.valueOf(jlh + 1));
+                    if (detall.isEmpty()) {
+                        detall.add(new Detalles(cant.getText().toString(), codigo.getText().toString(), precio.getText().toString(), cod_prod.getText().toString()));
+                    } else {
+                        int aux = 0;
+                        for (int x = 0; x < detall.size(); x++) {
+                            if (detall.get(x).getCodigo().equals(codigo.getText())) {
+                                detall.set(x, new Detalles(cant.getText().toString(), codigo.getText().toString(), precio.getText().toString(), cod_prod.getText().toString()));
+                                aux++;
+                            }
+                        }
+                        if (aux == 0) {
+                            detall.add(new Detalles(cant.getText().toString(), codigo.getText().toString(), precio.getText().toString(), cod_prod.getText().toString()));
+                        }
+                    }
+                    //IMPRIMIR TOTAL DE LOS RUBROS
+                    contTotal = 0;
+                    for (int y = 0; y < detall.size(); y++) {
+                        contTotal = contTotal + (Double.parseDouble(detall.get(y).getCantidad()) * Double.parseDouble(detall.get(y).getPrecio()));
+                        total.setText(String.valueOf(contTotal));
+                    }
+
+                    for (int x = 0; x < detall.size(); x++) {
+                        if (detall.get(x).getCantidad().equals("0")) {
+
+                        } else {
+                            Log.e("COL_LIB", detall.get(x).getCodigo() + "@@" + detall.get(x).getCod_prod() + "@@" + detall.get(x).getPrecio() + "@@" + detall.get(x).getCantidad());
+                        }
+                    }*/
                 }
             }
 

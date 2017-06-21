@@ -21,15 +21,17 @@
             android:background="?attr/colorPrimary" app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </android.support.design.widget.AppBarLayout>
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+         <com.mapbox.mapboxsdk.maps.MapView
+        android:id="@+id/mapview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        mapbox:mapbox_cameraTargetLat="-1.055745"
+        mapbox:mapbox_cameraTargetLng="-80.456656"
+        mapbox:mapbox_styleUrl="mapbox://styles/jhony27/cj461mc6l03lh2snyp4k2b6bs"
+        mapbox:mapbox_cameraTilt="20"
+        mapbox:mapbox_cameraZoom="14"
+        />
 
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/map"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.example.pmat_programador_1.portoaguas.MapsActivity"
-    />
     </LinearLayout>
     <android.support.design.widget.NavigationView
         android:id="@+id/nav_view_3"
@@ -41,7 +43,3 @@
         app:menu="@menu/activity_main_drawer" />
 
 </android.support.v4.widget.DrawerLayout>
-
-
-
-

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/form_cliente"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -32,16 +33,16 @@
                     android:layout_marginTop="21dp"
                     android:layout_weight="1"
                     android:text="Datos del Cliente"
-                    android:textColor="#333"
-                    android:textSize="16sp" />
+                    android:textColor="#333" />
 
                 <TextView
-                    android:id="@+id/textView10"
+                    android:id="@+id/textView11"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="21dp"
                     android:layout_weight="1"
-                    android:text="TRAMINTE" />
+                    android:text="TRAMINTE"
+                    android:textAlignment="textEnd" />
 
                 <TextView
                     android:id="@+id/txt_id_tramite"
@@ -49,13 +50,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="21dp"
                     android:layout_weight="1"
-                    android:text="TextView" />
+                    android:text="TextView"
+                    android:textAlignment="center" />
 
             </LinearLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="230dp"
                 android:layout_marginBottom="10dp"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
@@ -63,12 +65,38 @@
                 android:elevation="5dp">
 
                 <TextView
+                    android:id="@+id/textView9"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@+id/txt_reclamo"
+                    android:layout_alignBottom="@+id/txt_reclamo"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:text="Reclamo"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/txt_reclamo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/txt_meses"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_toEndOf="@+id/textView22"
+                    android:layout_toRightOf="@+id/textView22"
+                    android:text="NIN"
+                    android:textSize="18sp" />
+
+                <TextView
                     android:id="@+id/txt_cuenta"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_marginStart="11dp"
-                    android:layout_toEndOf="@+id/textView7"
+                    android:layout_alignBaseline="@+id/textView19"
+                    android:layout_alignBottom="@+id/textView19"
+                    android:layout_alignLeft="@+id/txt_reclamo"
+                    android:layout_alignStart="@+id/txt_reclamo"
+                    android:layout_toEndOf="@+id/txt_reclamo"
                     android:text="TextView"
                     android:textSize="18sp" />
 
@@ -76,9 +104,11 @@
                     android:id="@+id/textView7"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
-                    android:layout_alignParentTop="true"
-                    android:text="N° Cuenta:"
+                    android:layout_below="@+id/textView13"
+                    android:layout_marginTop="2dp"
+                    android:text="N° Cuenta"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                     android:textSize="18sp" />
 
@@ -86,11 +116,11 @@
                     android:id="@+id/textMeses"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/textView7"
-                    android:layout_marginTop="5dp"
-                    android:layout_toLeftOf="@+id/txt_cuenta"
-                    android:layout_toStartOf="@+id/txt_cuenta"
-                    android:text="Meses:"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/textView19"
+                    android:layout_marginBottom="5dp"
+                    android:text="Meses"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                     android:textSize="18sp" />
 
@@ -101,7 +131,10 @@
                     android:layout_alignLeft="@+id/txt_cuenta"
                     android:layout_alignStart="@+id/txt_cuenta"
                     android:layout_below="@+id/txt_cuenta"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_toLeftOf="@+id/textDeuda"
                     android:text="TextView"
                     android:textSize="18sp" />
 
@@ -109,11 +142,9 @@
                     android:id="@+id/textDeuda"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@+id/txt_deuda"
-                    android:layout_alignBottom="@+id/txt_deuda"
-                    android:layout_marginLeft="10dp"
-                    android:layout_toLeftOf="@+id/txt_deuda"
-                    android:layout_toStartOf="@+id/txt_deuda"
+                    android:layout_alignBaseline="@+id/txt_meses"
+                    android:layout_alignBottom="@+id/txt_meses"
+                    android:layout_centerHorizontal="true"
                     android:text="Deuda:"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                     android:textSize="18sp" />
@@ -122,10 +153,12 @@
                     android:id="@+id/txt_deuda"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@+id/txt_meses"
-                    android:layout_alignBottom="@+id/txt_meses"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginLeft="10dp"
+                    android:layout_alignBaseline="@+id/textDeuda"
+                    android:layout_alignBottom="@+id/textDeuda"
+                    android:layout_marginLeft="14dp"
+                    android:layout_marginStart="14dp"
+                    android:layout_toEndOf="@+id/textDeuda"
+                    android:layout_toRightOf="@+id/textDeuda"
                     android:text="TextView"
                     android:textSize="18sp" />
 
@@ -133,34 +166,188 @@
                     android:id="@+id/btn_act_deuda"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
-                    app:srcCompat="@drawable/sync"
-                    android:layout_alignBottom="@+id/txt_deuda"
-                    android:layout_alignParentRight="true"
                     android:layout_alignParentEnd="true"
-                    android:background="@color/colorPrimary"/>
+                    android:layout_alignParentRight="true"
+                    android:layout_below="@+id/textView16"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginRight="16dp"
+                    android:background="@drawable/btn_default"
+                    app:srcCompat="@drawable/ic_sync" />
+
+                <TextView
+                    android:id="@+id/textView13"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginTop="13dp"
+                    android:text="Cliente"
+                    android:textColor="#333"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/txt_cliente"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/textView18"
+                    android:layout_alignLeft="@+id/txt_cuenta"
+                    android:layout_alignStart="@+id/txt_cuenta"
+                    android:layout_alignTop="@+id/textView18"
+                    android:text="TextView"
+                    android:textSize="14sp"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true" />
+
+
+                <TextView
+                    android:id="@+id/estado_medidor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@+id/textView25"
+                    android:layout_alignBottom="@+id/textView25"
+                    android:text="..."
+                    android:textSize="18sp"
+                    android:layout_toLeftOf="@+id/textDeuda"
+                    android:layout_alignLeft="@+id/txt_reclamo"
+                    android:layout_alignStart="@+id/txt_reclamo" />
+
+                <TextView
+                    android:id="@+id/txt_serieMedidor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@+id/estado_medidor"
+                    android:layout_alignStart="@+id/estado_medidor"
+                    android:layout_below="@+id/txt_reclamo"
+                    android:paddingTop="5dp"
+                    android:text="TextView"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/textView17"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/textView8"
+                    android:text="Medidor"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/textView16"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@id/textView23"
+                    android:text="Medidor"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/textView23"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/textView9"
+                    android:layout_marginBottom="2dp"
+                    android:layout_marginTop="2dp"
+                    android:text="Serie"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/textView18"
+                    android:layout_width="20dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@+id/textView13"
+                    android:layout_alignBottom="@+id/textView13"
+                    android:layout_toEndOf="@+id/textView7"
+                    android:layout_toRightOf="@+id/textView7"
+                    android:text=":"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/textView19"
+                    android:layout_width="20dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@+id/textView7"
+                    android:layout_alignBottom="@+id/textView7"
+                    android:layout_toEndOf="@+id/textView7"
+                    android:layout_toRightOf="@+id/textView7"
+                    android:text=":"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/textView20"
+                    android:layout_width="20dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textView19"
+                    android:layout_toEndOf="@+id/textView7"
+                    android:layout_toRightOf="@+id/textView7"
+                    android:text=":"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/textView21"
+                    android:layout_width="20dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@+id/textView22"
+                    android:layout_alignStart="@+id/textView22"
+                    android:layout_below="@+id/textView9"
+                    android:layout_marginTop="5dp"
+                    android:paddingTop="5dp"
+                    android:text=":"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/textView25"
+                    android:layout_width="20dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/textView17"
+                    android:layout_alignLeft="@+id/textView21"
+                    android:layout_alignStart="@+id/textView21"
+                    android:layout_below="@+id/textView21"
+                    android:paddingTop="22dp"
+                    android:text=":"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/textView22"
+                    android:layout_width="20dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@+id/textView9"
+                    android:layout_alignBottom="@+id/textView9"
+                    android:layout_alignLeft="@+id/textView20"
+                    android:layout_alignStart="@+id/textView20"
+                    android:text=":"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textSize="18sp" />
 
                 <TextView
                     android:id="@+id/textView8"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignBottom="@+id/txt_deuda"
-                    android:layout_marginLeft="23dp"
-                    android:layout_marginStart="23dp"
-                    android:layout_toEndOf="@+id/txt_deuda"
-                    android:layout_toRightOf="@+id/txt_deuda"
-                    android:text="Reclamo:"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/textView16"
+                    android:layout_marginTop="2dp"
+                    android:text="Estado"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                     android:textSize="18sp" />
-
-                <TextView
-                    android:id="@+id/txt_reclamo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@+id/textView8"
-                    android:layout_marginLeft="5dp"
-                    android:layout_toEndOf="@+id/textView8"
-                    android:layout_toRightOf="@+id/textView8"
-                    android:textSize="14sp" />
             </RelativeLayout>
 
             <LinearLayout
@@ -192,8 +379,7 @@
                     android:layout_marginTop="10dp"
                     android:layout_weight="1"
                     android:text="Total:"
-                    android:textAlignment="viewEnd"
-                    android:textSize="16sp" />
+                    android:textAlignment="viewEnd" />
 
                 <TextView
                     android:id="@+id/txt_total"
@@ -201,7 +387,11 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:layout_weight="1"
-                    android:textAlignment="center" />
+                    android:textAlignment="center"
+                    android:textAllCaps="false"
+                    android:textColor="@color/common_google_signin_btn_text_dark_focused"
+                    android:textSize="16sp"
+                    android:textStyle="bold|italic" />
             </LinearLayout>
 
             <LinearLayout
@@ -224,6 +414,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:ems="10"
+                        android:lines="5"
+                        android:gravity="top|left"
                         android:hint="Escriba un comentario"
                         android:inputType="textMultiLine" />
                 </android.support.design.widget.TextInputLayout>
@@ -245,8 +437,7 @@
                     android:layout_below="@+id/linearLayout4"
                     android:layout_marginTop="27dp"
                     android:layout_weight="1"
-                    android:text="Tomar foto"
-                    android:textSize="16sp" />
+                    android:text="Tomar foto" />
 
                 <ImageButton
                     android:id="@+id/btn_camera"
@@ -256,18 +447,18 @@
                     android:layout_below="@+id/linearLayout4"
                     android:layout_marginTop="16dp"
                     android:layout_weight="1"
-                    android:background="@color/colorPrimary"
+                    android:background="@drawable/btn_default"
                     app:srcCompat="@drawable/camera" />
             </LinearLayout>
 
             <ImageView
                 android:id="@+id/img1"
                 android:layout_width="match_parent"
-                android:layout_height="230dp"
+                android:layout_height="150dp"
                 android:layout_below="@+id/btn_camera"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="16dp"
-                app:srcCompat="@drawable/ic_portoaguas_2" />
+                app:srcCompat="@drawable/portoaguas" />
 
             <TextView
                 android:id="@+id/textView15"

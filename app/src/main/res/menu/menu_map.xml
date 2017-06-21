@@ -7,4 +7,10 @@
         android:icon="@drawable/sync"
         android:title="@string/action_map"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/predios"
+        android:orderInCategory="200"
+        android:icon="@drawable/palette"
+        android:title="@string/action_map"
+        app:showAsAction="ifRoom" />
 </menu>

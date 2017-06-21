@@ -9,6 +9,9 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -19,12 +22,15 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Xml;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -51,6 +57,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.maps.android.kml.KmlPoint;
 import com.muddzdev.styleabletoastlibrary.StyleableToast;
 
 import org.apache.http.HttpEntity;
@@ -64,12 +71,15 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
+import org.xmlpull.v1.XmlSerializer;
 
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import servicios.ServicioGPS;
+import sqlit.TramitesDB;
 import utils.Constants;
 import utils.JSON;
 
@@ -86,7 +96,7 @@ public class MainActivity extends AppCompatActivity
     private LocationSettingsRequest mLocationSettingsRequest;
     private Location mLastLocation;
 
-    private TextView txtNombre, txtCargo;
+    private TextView txtNombre, txtCargo,numero_tramites;
 
     public static String data;
     public boolean resul;
@@ -95,13 +105,14 @@ public class MainActivity extends AppCompatActivity
     public static final int REQUEST_LOCATION = 1;
     public static final int REQUEST_CHECK_SETTINGS = 2;
 
+    TramitesDB objDB;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        objDB = new TramitesDB(getApplicationContext());
 
         final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -123,7 +134,8 @@ public class MainActivity extends AppCompatActivity
         txtCargo    = (TextView) navHeaderView.findViewById(R.id.textCargo);
         txtNombre.setText(da.getString("p_nombreU",null));
         txtCargo.setText(da.getString("p_cargoU",null));
-
+        numero_tramites =(TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_gallery));
+        initializeCountDrawer();
 
         new ValidarLogin().execute();
         // Establecer punto de entrada para la API de ubicación
@@ -146,6 +158,43 @@ public class MainActivity extends AppCompatActivity
 
     AlertDialog alert = null;
 
+
+    private void initializeCountDrawer(){
+        numero_tramites.setGravity(Gravity.CENTER_VERTICAL);
+        numero_tramites.setTypeface(null, Typeface.BOLD);
+        numero_tramites.setTextColor(getResources().getColor(R.color.colorAccent));
+        int val= Total_tramitesSQLITE();
+        if(val==0){
+        numero_tramites.setText("");
+        }else{
+            numero_tramites.setText("(" + String.valueOf(val) + ")");
+        }
+    }
+
+    /*
+   FUNCION TOTAL_TRAMITESSQLITE PERMITE OBTENER EL TOTAL DE TRAMITES QUE
+   EXISTEN EN LA BASE DE DATOS SQLITE DEL DISPOSITIVO
+    */
+    public int Total_tramitesSQLITE(){
+        int total_tra_sqlite=0;
+
+        SQLiteDatabase db = objDB.getReadableDatabase();
+        String[] valores_recuperar = {"id_tramite", "id_tarea_tramite"};
+        Cursor c = db.query("tramites", valores_recuperar,
+                "estado_tramite=?", new String[]{"I"}, null, null, null, null);
+        c.moveToFirst();
+        if(c.getCount()==0){
+
+        }else {
+            do {
+                total_tra_sqlite++;
+            } while (c.moveToNext());
+        }
+        db.close();
+        c.close();
+
+        return total_tra_sqlite;
+    }
     private void AlertNoGps() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("El sistema GPS esta desactivado, ¿Es necesario activarlo?")
@@ -229,7 +278,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(inte);
 
         } else if (id == R.id.nav_slideshow) {
-            Intent inte = new Intent(MainActivity.this, ArsGisActivity.class);
+            Intent inte = new Intent(MainActivity.this,  com.example.pmat_programador_1.portoaguas.Activitys.MapsBox.class);
             startActivity(inte);
         }  else if (id == R.id.nav_manage) {
             Intent inte = new Intent(MainActivity.this, com.example.pmat_programador_1.portoaguas.Activitys.MainActivity.class);
@@ -242,9 +291,26 @@ public class MainActivity extends AppCompatActivity
             Intent inte = new Intent(MainActivity.this, locationActivity.class);
             startActivity(inte);
         } */else if (id == R.id.nav_send) {
-            Intent inte = new Intent(MainActivity.this, loginActivity.class);
+            /*Intent inte = new Intent(MainActivity.this, loginActivity.class);
             startActivity(inte);
-            finish();
+            finish();*/
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Esta seguro de salir del sistema?")
+                    .setCancelable(false)
+                    .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                        public void onClick(@SuppressWarnings("unused")
+                                            final DialogInterface dialog, @SuppressWarnings("unused")
+                                            final int id) {
+                            new CerrarSesion().execute();
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(final DialogInterface dialog, @SuppressWarnings("unused")
+                        final int id) {
+                        }
+                    });
+            alert = builder.create();
+            alert.show();
 
         }
 

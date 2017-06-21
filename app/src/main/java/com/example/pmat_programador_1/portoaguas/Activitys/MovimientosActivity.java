@@ -6,19 +6,23 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,9 +31,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.pmat_programador_1.portoaguas.MapsActivity;
-import com.example.pmat_programador_1.portoaguas.R;
-import com.example.pmat_programador_1.portoaguas.loginActivity;
+import com.example.pmat_programador_1.portoaguas.*;
+import com.example.pmat_programador_1.portoaguas.MainActivity;
 import com.muddzdev.styleabletoastlibrary.StyleableToast;
 
 import net.gotev.uploadservice.MultipartUploadRequest;
@@ -37,6 +40,18 @@ import net.gotev.uploadservice.ServerResponse;
 import net.gotev.uploadservice.UploadInfo;
 import net.gotev.uploadservice.UploadNotificationConfig;
 import net.gotev.uploadservice.UploadStatusDelegate;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -63,8 +78,11 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
     private MovimientoHelper movimientoHelper;
     ArrayList<Movimiento> items = new ArrayList<Movimiento>();
     MovimientoHelper MDB = new MovimientoHelper(MovimientosActivity.this);
-    private TextView txtNombre, txtCargo;
+    private TextView txtNombre, txtCargo,numero_tramites;
     TramitesDB objDB;
+    public String resuld;
+    public static String data;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -92,14 +110,53 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
         txtCargo    = (TextView) navHeaderView.findViewById(R.id.textCargo);
         txtNombre.setText(da.getString("p_nombreU",null));
         txtCargo.setText(da.getString("p_cargoU",null));
+        numero_tramites =(TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_gallery));
+
         /*if(items.size()==0){
             StyleableToast.makeText(MovimientosActivity.this, "Todas sus cortes y Reconeccion han sido enviado!" , Toast.LENGTH_SHORT, R.style.StyledToast).show();
         }else {*/
         new ContarMovimientos().execute();
         // }
+        initializeCountDrawer();
+
 
     }
 
+    private void initializeCountDrawer(){
+        numero_tramites.setGravity(Gravity.CENTER_VERTICAL);
+        numero_tramites.setTypeface(null, Typeface.BOLD);
+        numero_tramites.setTextColor(getResources().getColor(R.color.colorAccent));
+        int val= Total_tramitesSQLITE();
+        if(val==0){
+            numero_tramites.setText("");
+        }else{
+            numero_tramites.setText("(" + String.valueOf(val) + ")");
+        }
+    }
+    /*
+  FUNCION TOTAL_TRAMITESSQLITE PERMITE OBTENER EL TOTAL DE TRAMITES QUE
+  EXISTEN EN LA BASE DE DATOS SQLITE DEL DISPOSITIVO
+   */
+    public int Total_tramitesSQLITE(){
+        int total_tra_sqlite=0;
+
+        SQLiteDatabase db = objDB.getReadableDatabase();
+        String[] valores_recuperar = {"id_tramite", "id_tarea_tramite"};
+        Cursor c = db.query("tramites", valores_recuperar,
+                "estado_tramite=?", new String[]{"I"}, null, null, null, null);
+        c.moveToFirst();
+        if(c.getCount()==0){
+
+        }else {
+            do {
+                total_tra_sqlite++;
+            } while (c.moveToNext());
+        }
+        db.close();
+        c.close();
+
+        return total_tra_sqlite;
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -141,7 +198,7 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
         return super.onOptionsItemSelected(item);
     }
 
-
+    AlertDialog alert = null;
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -157,8 +214,8 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
             startActivity(inte);
 
         } */ else if (id == R.id.nav_manage) {
-            Intent inte = new Intent(this, com.example.pmat_programador_1.portoaguas.Activitys.MainActivity.class);
-            startActivity(inte);
+            /*Intent inte = new Intent(this, com.example.pmat_programador_1.portoaguas.Activitys.MainActivity.class);
+            startActivity(inte);*/
 
         }else if (id == R.id.nav_share) {
             Intent inte = new Intent(this, MovimientosActivity.class);
@@ -167,9 +224,26 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
             Intent inte = new Intent(MainActivity.this, locationActivity.class);
             startActivity(inte);
         } */else if (id == R.id.nav_send) {
-            Intent inte = new Intent(this, loginActivity.class);
+            /*Intent inte = new Intent(this, loginActivity.class);
             startActivity(inte);
-            finish();
+            finish();*/
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Esta seguro de salir del sistema?")
+                    .setCancelable(false)
+                    .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                        public void onClick(@SuppressWarnings("unused")
+                                            final DialogInterface dialog, @SuppressWarnings("unused")
+                                            final int id) {
+                            new CerrarSesion().execute();
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(final DialogInterface dialog, @SuppressWarnings("unused")
+                        final int id) {
+                        }
+                    });
+            alert = builder.create();
+            alert.show();
 
         }
 
@@ -328,6 +402,59 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
             } else {
                 StyleableToast.makeText(MovimientosActivity.this, "Todas sus cortes y Reconeccion han sido enviado!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
             }
+        }
+    }
+    class CerrarSesion extends AsyncTask<String, Void ,String>{
+        private ProgressDialog pDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(MovimientosActivity.this);
+            pDialog.setMessage("Saliendo...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            pDialog.dismiss();
+            if(s.equals("cerrada")){
+                SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+                da.edit().clear().commit();
+                Intent inte = new Intent(MovimientosActivity.this, loginActivity.class);
+                startActivity(inte);
+                finish();
+            }else if(s.equals("No_cerrada")){
+                StyleableToast.makeText(MovimientosActivity.this, "Error Al cerrar Sesión intente nuevamente!!", Toast.LENGTH_LONG, R.style.StyledToastError).show();
+
+            }
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+            SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+            ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+            nameValuePairs.add(new BasicNameValuePair("id_usuario", da.getString("p_idUsuario",null)));
+            nameValuePairs.add(new BasicNameValuePair("id_dispositivo", da.getString("p_idmovil",null)));
+            try {
+                HttpClient httpclient = new DefaultHttpClient();
+                HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/logout");
+                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
+                HttpResponse response = httpclient.execute(httppost);
+                HttpEntity entity = response.getEntity();
+                data = EntityUtils.toString(entity);
+                Log.e("CERRAR", data);
+
+                JSONObject obj= new JSONObject(data);
+                String  res=obj.getString("respuesta");
+                //data=codigojson;
+                resuld = res;
+            } catch (Exception e) {
+                Log.e("log_tag", "Error in http connection " + e.toString());
+                resuld = "";
+            }
+            return resuld;
         }
     }
 

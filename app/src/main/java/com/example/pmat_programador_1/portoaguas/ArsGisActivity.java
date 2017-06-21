@@ -193,7 +193,8 @@ public class ArsGisActivity extends AppCompatActivity {
                 String usuarioOficialjson     = jsonObject.getString("usuario_oficial");
                 String tipotramitejson      = jsonObject.getString("tipo_tramite");
                 String clientejson          = jsonObject.getString("CLIENTE");
-                item.add(new Puntos(idtramitejson,id_tarea_tramitejson,numeroCuentejson,codClientejson,codPrediojson,mes_deudajson,latitudjson,longitudjson,deuda_portoaguasjson,codMedidorjson,serieMedidorjson,"I",usuarioOficialjson,tipotramitejson,clientejson));
+                String estado_medidorjson          = jsonObject.getString("estado_medidor");
+                item.add(new Puntos(idtramitejson,id_tarea_tramitejson,numeroCuentejson,codClientejson,codPrediojson,mes_deudajson,latitudjson,longitudjson,deuda_portoaguasjson,codMedidorjson,serieMedidorjson,"I",usuarioOficialjson,tipotramitejson,clientejson,estado_medidorjson));
 
             }
         } catch (JSONException e) {
