@@ -81,6 +81,7 @@ import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationSource;
@@ -198,8 +199,10 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
         setSupportActionBar(toolbar);
         mapView = (MapView) findViewById(R.id.mapview);
         mapView.onCreate(savedInstanceState);
+
         movimientoHelper = new MovimientoHelper(MapsBox.this);
         objDB = new TramitesDB(getApplicationContext());
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_3);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -225,23 +228,32 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
         initializeCountDrawer();
         if(!isOnlineNet()){
             Toast.makeText(MapsBox.this,"No hay conexion con el servidor Portoaguas los datos se almacenaran internamente",Toast.LENGTH_LONG).show();
-
         }else {
             SQLiteDatabase db = objDB.getReadableDatabase();
             String[] valores_recuperar = {"*"};
             final Cursor c = db.query("trab_mov", valores_recuperar,
                     null, null, null, null, null, null);
-            // c.moveToFirst();
             if (c.moveToFirst()) {
                 do {
                     new RegistrarMovimiento_2().execute(c.getString(1),c.getString(2),c.getString(3),c.getString(4),c.getString(5),c.getString(6),c.getString(7));
                 } while (c.moveToNext());
-                finish();
-                startActivity(getIntent());
+
             }
             db.close();
             c.close();
+            /*finish();
+            startActivity(getIntent());*/
         }
+        SQLiteDatabase db1 = objDB.getReadableDatabase();
+        String[] valor_recuperado ={"id_tramite"};
+        final Cursor c = db1.query("tramites",valor_recuperado,"estado_tramite=?", new String[]{"I"},null,null,null);
+        if(c.moveToFirst()){
+            do{
+                new ValidarPuntos().execute(c.getString(0));
+            }while (c.moveToNext());
+        }
+        db1.close();
+        c.close();
         new LoadPuntos().execute();
          /* ********************* geolocalizacion **********************/
 
@@ -376,6 +388,65 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
         }
     }
 
+    public class ValidarPuntos extends AsyncTask<String, String, String>{
+        String respuesta="";
+        String _idTramite="";
+        @Override
+        protected String doInBackground(String... strings) {
+            SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+            ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+            nameValuePairs.add(new BasicNameValuePair("cedula",dato.getString("p_idUsuario", null) ));
+            nameValuePairs.add(new BasicNameValuePair("id_dispositivo",dato.getString("p_idmovil",null)));
+            nameValuePairs.add(new BasicNameValuePair("id_tramite",strings[0]));
+            String values;
+            try {
+                HttpClient httpclient = new DefaultHttpClient();
+                HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/val_puntos");
+                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
+                HttpResponse response = httpclient.execute(httppost);
+                HttpEntity entity = response.getEntity();
+                response.getStatusLine();
+                values = EntityUtils.toString(entity);
+                //Log.e("Puntos en el Mapa", values);
+                JSONObject obj = new JSONObject(values);
+                 respuesta = obj.getString("respuesta");
+                _idTramite=strings[0];
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (ClientProtocolException e1) {
+                e1.printStackTrace();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+
+            return respuesta ;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            if(s.equals("1")){
+                Log.e("RESPUESTA VAL","Aun esta disponible" +_idTramite);
+            }else{
+                Log.e("RESPUESTA VAL","Ya no esta disponible" + _idTramite);
+                  /*
+                            ACTUALIZAR PUNTO EL ESTADO SQLITE
+                            */
+                SQLiteDatabase bd = objDB.getWritableDatabase();
+                ContentValues valores = new ContentValues();
+                valores.put(TramitesDB.Datos_tramites.ESTADO_TRAMITE, "F");
+                String[] argsel = {String.valueOf(_idTramite)};
+                String Selection = TramitesDB.Datos_tramites.ID_TRAMITE + "=?";
+                int count = bd.update(TramitesDB.Datos_tramites.TABLA,
+                        valores, Selection, argsel);
+                Log.e("UPDATE", String.valueOf(count));
+                //REINICIAMOS LA ACTIVIDAD
+                //finish();
+                //startActivity(getIntent());
+                //*********************************************************
+            }
+        }
+    }
     //FUNCION PARA OBTENER DATOS
     public class LoadPuntos extends AsyncTask<String, String, String> {
         private ProgressDialog pDialog;
@@ -403,9 +474,6 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
         @Override
         protected String doInBackground(String... strings) {
             try {
-                //Log.e("TOTAL PUNTOS DB", String.valueOf(Total_tramitesDB()));
-                //Log.e("TOTAL PUNTOS SQLITE", String.valueOf(Total_tramitesSQLITE()));
-                //Log.e("MAX PUNTO DB", String.valueOf(id_tramite_DB));
                 item.clear();
                 if (Total_tramitesSQLITE() == 0) {
                     item = getPuntos();//CONSULTA A LA BASE DE DATOS  LOS PUNTOSD
@@ -438,28 +506,20 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
         @Override
         protected void onPostExecute(String s) {
             pDialog.dismiss();
-
-            //map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-           // mMap.setBuildingsEnabled(true);
-            //mMap.setIndoorEnabled(true);
             if (ContextCompat.checkSelfPermission(MapsBox.this, Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
                 //mMap.setMyLocationEnabled(true);
             } else {
                 // Show rationale and request permission.
             }
-            //UiSettings uiSettings = mMap.getUiSettings();
-            //uiSettings.setZoomControlsEnabled(true);
+
             LatLng sydney;
             if(item.size()==0){
                 LatLng sydney2= new LatLng(-1.035966, -80.464269);
                 //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney2,new Float(15)));
                 StyleableToast.makeText(MapsBox.this, "No contiene puntos de corte en su mapa comuniquese con la central para que se le asignen mas puntos de corte....", Toast.LENGTH_LONG, R.style.StyledToastError).show();
-
             }else {
-
-
-
+                CameraPosition position = null;
                 for (int i = 0; i < item.size(); i++) {
                     if (item.get(i).getTipo_tramite().equals("RECONEXION")) {
                         if(item.get(i).getEstado_tramite().equals("I")){
@@ -472,8 +532,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                             double lati = item.get(i).getLatitud();
                             double longLat = item.get(i).getLongitud();
                             double[] ltn = obj.utm2LatLon("17 M " + longLat + " " + lati);
-                           //s float zoomlevel = 19;
-                            // Create an Icon object for the marker to use
+                            // Creamos un icono objeto para el marcador que usaremos
                             IconFactory iconFactory = IconFactory.getInstance(MapsBox.this);
                             Icon icon = iconFactory.fromResource(R.drawable.blank_1);
                             //sydney = new LatLng(ltn[0], ltn[1]);
@@ -483,18 +542,19 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                                     .title("CORTE / Cuenta: " + String.valueOf(item.get(i).getNumero_cuenta()))
                                     .snippet("Serie M.: "+item.get(i).getSerie_medidor()+" Meses: " + item.get(i).getMes_deuda() + " Deuda: " + Math.rint(item.get(i).getDeuda_portoagua() * 100) / 100));
 
-                            /*Marker melbourne = mMap.addMarker(new MarkerOptions()
-                                    .position(sydney)
-                                    .title("CORTE / Cuenta: " + String.valueOf(item.get(i).getNumero_cuenta()))
-                                    .snippet("Serie M.: "+item.get(i).getSerie_medidor()+" Meses: " + item.get(i).getMes_deuda() + " Deuda: " + Math.rint(item.get(i).getDeuda_portoagua() * 100) / 100)
-                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.blank_1)));*/
-                           // melbourne.showInfoWindow();
-                           // mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, zoomlevel));
+                             position = new CameraPosition.Builder()
+                                    .target(new LatLng(ltn[0], ltn[1])) // Sets the new camera position
+                                    .zoom(20) // Sets the zoom
+                                    .bearing(30) // Rotate the camera
+                                    .tilt(30) // Set the camera tilt
+                                    .build(); // Creates a CameraPosition from the builder
                         }else if(item.get(i).getEstado_tramite().equals("F")){
 
                         }
                     }
                 }
+                map.animateCamera(CameraUpdateFactory
+                        .newCameraPosition(position), 7000);
             }
             map.setOnInfoWindowClickListener(new MapboxMap.OnInfoWindowClickListener() {
                 @Override
@@ -588,7 +648,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                         public void onClick(View v) {
                             //PREGUNTA SI HAY CONEXION
                             if(!isOnlineNet()){
-                                Snackbar.make(mView,"No hay conexion con el servidor los datos se almacenaran internamente",Snackbar.LENGTH_LONG).setAction("Action",null).show();
+                                Snackbar.make(mView,"No hay conexion con el servidor los datos se almacenaran localmente",Snackbar.LENGTH_LONG).setAction("Action",null).show();
                                 String Observacion = comentario.getText().toString();
                                 if (Observacion.equals("")) {
                                     comentario.setError("Debe ingresar una observación");
@@ -605,15 +665,15 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                                     Log.e("UTM", String.valueOf(easting) + " " + String.valueOf(northing));
 
                                     //////////////////////////////////////////
-                            /*
-                            SAL_ABIL PARA ENVIAR
-                            PATRON
-                             63     @@      77  @@   1   @@  6 -> ||
-                              ^     ^       ^   ^    ^   ^   ^     ^
-                              |     |       |   |    |   |   |     |
-                              COD         COD        V     CANT
-                              R.          PRO        UNI
-                             */
+                                    /*
+                                    SAL_ABIL PARA ENVIAR
+                                    PATRON
+                                      63     @@      77  @@   1   @@  6 -> ||
+                                       ^     ^       ^   ^    ^   ^   ^     ^
+                                       |     |       |   |    |   |   |     |
+                                       COD         COD        V     CANT
+                                         R.          PRO        UNI
+                                     */
 
                                     String patron = "";
                                     JSONArray tabla = new JSONArray();
@@ -975,8 +1035,6 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                 .setFastestInterval(Constants.UPDATE_FASTEST_INTERVAL)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
-
-
     private void updateLocationUI() {
         RequestQueue queue = Volley.newRequestQueue(this);
         String URL= "http://" + JSON.ipserver + "/MovimientosDispositivos";
@@ -1140,13 +1198,18 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                 HttpResponse response = httpclient.execute(httppost);
                 String status= String.valueOf(response.getStatusLine().getStatusCode());
                 Log.e("Estado",status);
-                HttpEntity entity = response.getEntity();
-                data = EntityUtils.toString(entity);
-                JSONObject obj = new JSONObject(data);
-                String codigojson = obj.getString("registro");
-                Log.e("ULTIMO ID MOVIMIENTO", data);
-                data = codigojson;
-                resul = true;
+                if(status.equals("500")){
+                    Log.e("error", "Error 500 error interno en el servidor " );
+                    resul = false;
+                }else {
+                    HttpEntity entity = response.getEntity();
+                    data = EntityUtils.toString(entity);
+                    JSONObject obj = new JSONObject(data);
+                    String codigojson = obj.getString("registro");
+                    Log.e("ULTIMO ID MOVIMIENTO", data);
+                    data = codigojson;
+                    resul = true;
+                }
             } catch (Exception e) {
                 Log.e("log_tag", "Error in http connection " + e.toString());
                 resul = false;
@@ -1238,6 +1301,10 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                 HttpResponse response = httpclient.execute(httppost);
                 String status= String.valueOf(response.getStatusLine().getStatusCode());
                 Log.e("Estado",status);
+                if(status.equals("500")){
+                    Log.e("ERROR 500 ", "ERROR INTERNO EN EL SERVIDOR ALMACENAR LOS TRAMITES GUARDADOS OFFLINE");
+                    resul=false;
+                }else{
                 HttpEntity entity = response.getEntity();
                 data = EntityUtils.toString(entity);
                 JSONObject obj = new JSONObject(data);
@@ -1245,6 +1312,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                 Log.e("ULTIMO ID MOVIMIENTO", data);
                 data = codigojson;
                 resul = true;
+                }
             } catch (Exception e) {
                 Log.e("log_tag", "Error in http connection " + e.toString());
                 resul = false;
@@ -1683,7 +1751,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
         protected void onPreExecute() {
             super.onPreExecute();
             pDialog = new ProgressDialog(MapsBox.this);
-            pDialog.setMessage("Saliendo...");
+            pDialog.setMessage("Cerrando Sesión...");
             pDialog.setIndeterminate(false);
             pDialog.setCancelable(false);
             pDialog.show();
@@ -1695,6 +1763,8 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
             if(s.equals("cerrada")){
                 SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
                 da.edit().clear().commit();
+                SQLiteDatabase DB =objDB.getWritableDatabase();
+                int valor = DB.delete(TramitesDB.Datos_tramites.TABLA,null,null);
                 Intent inte = new Intent(MapsBox.this, loginActivity.class);
                 startActivity(inte);
                 finish();

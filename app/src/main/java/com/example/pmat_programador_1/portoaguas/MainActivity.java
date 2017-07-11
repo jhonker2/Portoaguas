@@ -512,7 +512,7 @@ public class MainActivity extends AppCompatActivity
         protected void onPreExecute() {
             super.onPreExecute();
             pDialog = new ProgressDialog(MainActivity.this);
-            pDialog.setMessage("Saliendo...");
+            pDialog.setMessage("Cerrando Sessión...");
             pDialog.setIndeterminate(false);
             pDialog.setCancelable(false);
             pDialog.show();
@@ -524,6 +524,8 @@ public class MainActivity extends AppCompatActivity
             if(s.equals("cerrada")){
                 SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
                 da.edit().clear().commit();
+                SQLiteDatabase DB =objDB.getWritableDatabase();
+                int valor = DB.delete(TramitesDB.Datos_tramites.TABLA,null,null);
                 Intent inte = new Intent(MainActivity.this, loginActivity.class);
                 startActivity(inte);
                 finish();

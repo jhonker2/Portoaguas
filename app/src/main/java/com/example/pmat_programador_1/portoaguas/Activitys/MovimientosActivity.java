@@ -407,7 +407,7 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
         protected void onPreExecute() {
             super.onPreExecute();
             pDialog = new ProgressDialog(MovimientosActivity.this);
-            pDialog.setMessage("Saliendo...");
+            pDialog.setMessage("Cerrando Sesión...");
             pDialog.setIndeterminate(false);
             pDialog.setCancelable(false);
             pDialog.show();
@@ -419,6 +419,9 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
             if(s.equals("cerrada")){
                 SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
                 da.edit().clear().commit();
+                SQLiteDatabase DB =objDB.getWritableDatabase();
+                int valor = DB.delete(TramitesDB.Datos_tramites.TABLA,null,null);
+
                 Intent inte = new Intent(MovimientosActivity.this, loginActivity.class);
                 startActivity(inte);
                 finish();

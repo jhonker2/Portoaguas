@@ -75,7 +75,7 @@ public class loginActivity extends AppCompatActivity {
                     } else if (txt_clave.getText().toString().equals("")) {
                         StyleableToast.makeText(loginActivity.this, "La contraseña se encuentra vacio!", Toast.LENGTH_LONG, R.style.StyledToastError).show();
                     } else {
-                        Log.e("ID MOVIL", Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID));
+                        //Log.e("ID MOVIL", Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID));
                         new RegistrarDispositivos().execute(txt_usuario.getText().toString(), txt_clave.getText().toString());
                     }
 
@@ -150,12 +150,6 @@ public class loginActivity extends AppCompatActivity {
                 startActivity(inte);
                 finish();
             }
-        }
-
-        @Override
-        protected void onCancelled(String s) {
-            pDialog.dismiss();
-
         }
 
         @Override
