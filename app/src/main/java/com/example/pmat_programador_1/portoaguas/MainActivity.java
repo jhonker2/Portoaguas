@@ -44,6 +44,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.pmat_programador_1.portoaguas.Activitys.MovimientosActivity;
+import com.example.pmat_programador_1.portoaguas.Activitys.consulta;
 import com.example.pmat_programador_1.portoaguas.Activitys.locationActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -283,10 +284,10 @@ public class MainActivity extends AppCompatActivity
         }  else if (id == R.id.nav_share) {
             Intent inte = new Intent(MainActivity.this, MovimientosActivity.class);
             startActivity(inte);
-        } /*else if (id == R.id.Position) {
-            Intent inte = new Intent(MainActivity.this, locationActivity.class);
+        } else if (id == R.id.consultar) {
+            Intent inte = new Intent(MainActivity.this, consulta.class);
             startActivity(inte);
-        } */else if (id == R.id.nav_send) {
+        } else if (id == R.id.nav_send) {
             /*Intent inte = new Intent(MainActivity.this, loginActivity.class);
             startActivity(inte);
             finish();*/

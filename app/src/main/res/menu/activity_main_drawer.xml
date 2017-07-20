@@ -11,8 +11,8 @@
             android:icon="@drawable/ic_portoaguas_01"
             app:actionViewClass="android.widget.TextView"
             android:title="Corte y Reconexion" />
-        <!--<item android:id="@+id/Position" android:icon="@drawable/map_marker"-->
-            <!--android:title="Mi Ubicacion" />-->
+        <item android:id="@+id/consultar" android:icon="@drawable/account_box"
+            android:title="Consultar deudas" />
 
     </group>
 

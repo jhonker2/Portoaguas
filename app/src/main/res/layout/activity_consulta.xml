@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.pmat_programador_1.portoaguas.Activitys.consulta">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:orientation="horizontal"
+        android:id="@+id/linearLayout2">
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/til_identificacion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/txt_identificacion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:hint="Cuenta o Cedula/Ruc"
+                android:imeOptions="actionSearch"
+                android:inputType="number" />
+
+        </android.support.design.widget.TextInputLayout>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="130dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:id="@+id/linearLayout5">
+
+        <ListView
+            android:id="@+id/lista_clientes"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView24"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cuenta"
+        tools:ignore="UnknownId"
+        android:layout_below="@+id/linearLayout2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="12dp" />
+
+    <TextView
+        android:id="@+id/textView27"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textView24"
+        android:layout_alignBottom="@+id/textView24"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="56dp"
+        android:layout_marginStart="56dp"
+        android:text="Cedula" />
+
+    <TextView
+        android:id="@+id/textView28"
+        android:layout_width="110dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textView27"
+        android:layout_alignBottom="@+id/textView27"
+        android:layout_marginLeft="27dp"
+        android:layout_marginStart="27dp"
+        android:layout_toEndOf="@+id/textView27"
+        android:layout_toRightOf="@+id/textView27"
+        android:text="Cliente" />
+
+    <TextView
+        android:id="@+id/textView30"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textView28"
+        android:layout_alignBottom="@+id/textView28"
+        android:layout_marginLeft="18dp"
+        android:layout_marginStart="18dp"
+        android:layout_toRightOf="@+id/textView28"
+        android:text="Direccion" />
+
+
+</RelativeLayout>

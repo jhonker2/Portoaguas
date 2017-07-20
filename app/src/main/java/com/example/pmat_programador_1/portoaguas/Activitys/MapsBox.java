@@ -93,6 +93,12 @@ import com.mapbox.services.android.telemetry.permissions.PermissionsListener;
 import com.mapbox.services.android.telemetry.permissions.PermissionsManager;
 import com.muddzdev.styleabletoastlibrary.StyleableToast;
 
+import net.gotev.uploadservice.MultipartUploadRequest;
+import net.gotev.uploadservice.ServerResponse;
+import net.gotev.uploadservice.UploadInfo;
+import net.gotev.uploadservice.UploadNotificationConfig;
+import net.gotev.uploadservice.UploadStatusDelegate;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -109,7 +115,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -117,6 +125,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import Adapter.RecycleViewAdapter;
 import Models.Puntos;
@@ -142,7 +151,6 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
     private Button btnSaveCliente;
     private ImageButton btnC,btn_deuda;
     private ImageView img;
-    private MovimientoHelper movimientoHelper;
     public ArrayList<Puntos> item = new ArrayList<Puntos>();
     AlertDialog alertDialog;
     /*
@@ -164,7 +172,6 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
     public File storageDir;
     CoordinateConversion obj = new CoordinateConversion();
     TramitesDB objDB;
-    KmlLayer layer;
     /*
     VARIABLES PARA ALMACENAR LOS DATOS QUE SE VAN A ENVIAR A HACER UPDATE DEL MOVIMIENTO
      */
@@ -199,8 +206,6 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
         setSupportActionBar(toolbar);
         mapView = (MapView) findViewById(R.id.mapview);
         mapView.onCreate(savedInstanceState);
-
-        movimientoHelper = new MovimientoHelper(MapsBox.this);
         objDB = new TramitesDB(getApplicationContext());
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_3);
@@ -244,6 +249,8 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
             /*finish();
             startActivity(getIntent());*/
         }
+        new LoadPuntos().execute();
+
         SQLiteDatabase db1 = objDB.getReadableDatabase();
         String[] valor_recuperado ={"id_tramite"};
         final Cursor c = db1.query("tramites",valor_recuperado,"estado_tramite=?", new String[]{"I"},null,null,null);
@@ -254,9 +261,9 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
         }
         db1.close();
         c.close();
-        new LoadPuntos().execute();
-         /* ********************* geolocalizacion **********************/
 
+
+         /* ********************* geolocalizacion **********************/
         // Establecer punto de entrada para la API de ubicación
         buildGoogleApiClient();
 
@@ -459,6 +466,8 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
             pDialog.setCancelable(false);
             pDialog.show();
             new LoadMaxTramite().execute();
+
+            /*CODIGO DE ELIMINAR LOS TRAMITES QUE SE ENCUENTRAN CON ESTADOS_TRAMITE (F)*/
             SQLiteDatabase DB =objDB.getWritableDatabase();
             String Selection= TramitesDB.Datos_tramites.ESTADO_TRAMITE+"=?";
             String [] argsel= {"F"};
@@ -469,6 +478,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                 Log.e("DELETE TRAMITES","DATOS ELIMINADOS FINALIZADO");
 
             }
+            /* *************************************************************************************/
         }
 
         @Override
@@ -611,7 +621,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                     alertDialog.show();
                     cont = 0;
                     //ced.setText(marker.getPosition().toString());
-                    cuenta.setText(marker.getTitle().substring(16   ));
+                    cuenta.setText(marker.getTitle().substring(16));
 
                     for (int x=0; x<item.size(); x++){
                         if(String.valueOf(item.get(x).getNumero_cuenta()).equals(cuenta.getText().toString())){
@@ -977,6 +987,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
     private void buildLocationSettingsRequest() {
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(mLocationRequest)
@@ -1035,6 +1046,8 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                 .setFastestInterval(Constants.UPDATE_FASTEST_INTERVAL)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
+
+
     private void updateLocationUI() {
         RequestQueue queue = Volley.newRequestQueue(this);
         String URL= "http://" + JSON.ipserver + "/MovimientosDispositivos";
@@ -1181,6 +1194,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
         SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
         @Override
         protected Boolean doInBackground(String... strings) {
+
             ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
             nameValuePairs.add(new BasicNameValuePair("lat_reg_trab",strings[0]));
             nameValuePairs.add(new BasicNameValuePair("long_reg_trab", strings[1]));
@@ -1232,9 +1246,50 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
             pDialog.dismiss();
 
             if (aBoolean) {
+
                 StyleableToast.makeText(MapsBox.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
                 alertDialog.dismiss();
-                SQLiteDatabase db= objDB.getWritableDatabase();
+                String uploadId = UUID.randomUUID().toString();
+                //final int finalX = x;
+                try {
+                    new MultipartUploadRequest(MapsBox.this, uploadId, "http://"+ JSON.ipserver+"/ftp_imagen")
+                            .addFileToUpload(foto, "foto")
+                            .addParameter("id_tarea_tramite", data)
+                            .setMaxRetries(2)
+                            .setDelegate(new UploadStatusDelegate() {
+                                @Override
+                                public void onProgress(UploadInfo uploadInfo) {}
+
+                                @Override
+                                public void onError(UploadInfo uploadInfo, Exception e) {
+
+                                }
+
+                                @Override
+                                public void onCompleted(UploadInfo uploadInfo, ServerResponse serverResponse) {
+                                    //ELiminar imagen
+                                    File eliminar = new File(foto);
+                                            if (eliminar.exists()) {
+                                                if (eliminar.delete()) {
+                                                   Log.e("archivo eliminado","");
+                                                } else {
+                                                    Log.e("archivo no eliminado","");
+                                                }
+                                            }
+                                    Log.e("Response Upload", serverResponse.toString());
+                                    //Toast.makeText(MapsBox.this,"Imagen subida exitosamente.",Toast.LENGTH_SHORT).show();
+                                }
+
+                                @Override
+                                public void onCancelled(UploadInfo uploadInfo) {}
+                            }).setNotificationConfig(new UploadNotificationConfig().setTitle("Portoaguas EP.").setCompletedMessage("Subida Completada en [[ELAPSED_TIME]]").setIcon(R.drawable.ic_stat_name))
+                            .startUpload();
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                /*SQLiteDatabase db= objDB.getWritableDatabase();
                 ContentValues valores1 =  new ContentValues();
                 valores1.put(TramitesDB.Datos_tramites.ID_TAREA_TRAMITE,data);
                 valores1.put(TramitesDB.Datos_tramites.IMAGEN,foto);
@@ -1244,7 +1299,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                 if(id_Guardar==-1){
                     Log.e("SQLITE SAVE","ERRORguardados");
                 }else{
-                    Log.e("SQLITE SAVE","Datos guardados");
+                    Log.e("SQLITE SAVE","Datos guardados");*/
                             /*
                             ACTUALIZAR PUNTO EL ESTADO SQLITE
                             */
@@ -1268,7 +1323,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                     finish();
                     startActivity(getIntent());
                     //*********************************************************
-                }
+               // }
 
             } else {
                 StyleableToast.makeText(MapsBox.this, "Error al realizar la transacción!", Toast.LENGTH_SHORT, R.style.StyledToastError).show();
@@ -1300,7 +1355,6 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
                 HttpResponse response = httpclient.execute(httppost);
                 String status= String.valueOf(response.getStatusLine().getStatusCode());
-                Log.e("Estado",status);
                 if(status.equals("500")){
                     Log.e("ERROR 500 ", "ERROR INTERNO EN EL SERVIDOR ALMACENAR LOS TRAMITES GUARDADOS OFFLINE");
                     resul=false;
@@ -1312,6 +1366,59 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                 Log.e("ULTIMO ID MOVIMIENTO", data);
                 data = codigojson;
                 resul = true;
+
+                //  SUBIDA DE LA FOTO ALMACENA LOCAL
+                    String uploadId = UUID.randomUUID().toString();
+                    String foto_local="";
+                    SQLiteDatabase DB1 = objDB.getReadableDatabase();
+                    String[] valor_recuperado ={"imagen"};
+                    final Cursor c = DB1.query("movimientos",valor_recuperado,"id_tarea_tramite=?", new String[]{strings[2]},null,null,null);
+                    if(c.moveToFirst()){
+                        do{
+                            foto_local= c.getString(0);
+                        }while (c.moveToNext());
+                    }
+                    DB1.close();
+                    c.close();
+
+                    try {
+                        new MultipartUploadRequest(MapsBox.this, uploadId, "http://"+ JSON.ipserver+"/ftp_imagen")
+                                .addFileToUpload(foto_local, "foto")
+                                .addParameter("id_tarea_tramite", data)
+                                .setMaxRetries(2)
+                                .setDelegate(new UploadStatusDelegate() {
+                                    @Override
+                                    public void onProgress(UploadInfo uploadInfo) {}
+
+                                    @Override
+                                    public void onError(UploadInfo uploadInfo, Exception e) {
+
+                                    }
+
+                                    @Override
+                                    public void onCompleted(UploadInfo uploadInfo, ServerResponse serverResponse) {
+                                        //ELiminar imagen
+                                        File eliminar = new File(foto);
+                                        if (eliminar.exists()) {
+                                            if (eliminar.delete()) {
+                                                Log.e("archivo eliminado","");
+                                            } else {
+                                                Log.e("archivo no eliminado","");
+                                            }
+                                        }
+                                        Log.e("Response Upload", serverResponse.toString());
+                                        //Toast.makeText(MapsBox.this,"Imagen subida exitosamente.",Toast.LENGTH_SHORT).show();
+                                    }
+
+                                    @Override
+                                    public void onCancelled(UploadInfo uploadInfo) {}
+                                }).setNotificationConfig(new UploadNotificationConfig().setTitle("Portoaguas EP.").setCompletedMessage("Subida Completada en [[ELAPSED_TIME]]").setIcon(R.drawable.ic_stat_name))
+                                .startUpload();
+                    } catch (MalformedURLException e) {
+                        e.printStackTrace();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
                 }
             } catch (Exception e) {
                 Log.e("log_tag", "Error in http connection " + e.toString());
@@ -1333,16 +1440,18 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             pDialog.dismiss();
-
             if (aBoolean) {
-                SQLiteDatabase DB = objDB.getWritableDatabase();
+                SQLiteDatabase DB;
+                DB=objDB.getWritableDatabase();
                 String Selection = TramitesDB.Datos_tramites.ID_TAREA_TRAMITE + "=?";
                 String[] argsel = {data};
                 int valor = DB.delete(TramitesDB.Datos_tramites.TABLA_TRAB_MOV, Selection, argsel);
                 if (valor != 1) {
                     Log.e("DELETE TRAB_MOV LOCAL", "ERROR AL ELIMINAR EL CORTE ");
                 } else {
-                    alertDialog.dismiss();
+                    DB.close();
+                    //alertDialog.dismiss();
+
                     StyleableToast.makeText(MapsBox.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
                     Log.e("DELETE TRAB_MOV LOCAL", "DATOS ELIMINADOS FINALIZADO");
                 }
@@ -1434,6 +1543,35 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
       FUNCION MAX_TRAMITEDB PERMITE OBTENER EL MAX ID_TRAMITES
       QUE EXISTE EN LA BASE DE DATOS PRINCIPAL
      */
+    /*
+    public int Max_tramiteDB2(){
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String URL= "http://" + JSON.ipserver + "/maxTramite";
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.e("MOVIMIENTOS DISPOSITIVO", response);
+
+            }
+        },new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("Response","Error a almacenar la posicion del usuario");
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("id_dispositivo", Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID));
+               // params.put("latitud", String.valueOf(mLastLocation.getLatitude()));
+                //params.put("longitud",  String.valueOf(mLastLocation.getLongitude()));
+                params.put("cedula", dato.getString("p_idUsuario", null) );
+                return params;
+            }
+        };
+        queue.add(stringRequest);
+    }*/
     public int Max_tramiteDB() throws  ParseException{
         int max_tramite=0;
         SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
@@ -1844,8 +1982,8 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
     }
 
     /*
-  Funcion para Capturar una fotografia
-   */
+    Funcion para Capturar una fotografia
+    */
     private void createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
