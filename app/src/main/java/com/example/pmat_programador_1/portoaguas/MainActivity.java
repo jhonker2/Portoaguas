@@ -2,6 +2,7 @@ package com.example.pmat_programador_1.portoaguas;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,6 +15,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -96,15 +100,14 @@ public class MainActivity extends AppCompatActivity
     private LocationRequest mLocationRequest;
     private LocationSettingsRequest mLocationSettingsRequest;
     private Location mLastLocation;
-
     private TextView txtNombre, txtCargo,numero_tramites;
-
     public static String data;
     public boolean resul;
     public String resuld;
-
     public static final int REQUEST_LOCATION = 1;
     public static final int REQUEST_CHECK_SETTINGS = 2;
+    AlertDialog alert = null;
+
 
     TramitesDB objDB;
     @Override
@@ -115,7 +118,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         objDB = new TramitesDB(getApplicationContext());
 
-        final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        //final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         //if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
          //   AlertNoGps();
@@ -136,6 +139,9 @@ public class MainActivity extends AppCompatActivity
         txtNombre.setText(da.getString("p_nombreU",null));
         txtCargo.setText(da.getString("p_cargoU",null));
         numero_tramites =(TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_slideshow));
+        if (!estaConectado()) {
+            //Toast.makeText(getBaseContext(),"Necesaria conexión a internet ", Toast.LENGTH_SHORT).show();
+        }else{
         initializeCountDrawer();
 
         new ValidarLogin().execute();
@@ -154,11 +160,9 @@ public class MainActivity extends AppCompatActivity
 /*        ServicioGPS servigps = new ServicioGPS(getApplicationContext());
 
         servigps.Miubicacion();*/
+        }
 
     }
-
-    AlertDialog alert = null;
-
 
     private void initializeCountDrawer(){
         numero_tramites.setGravity(Gravity.CENTER_VERTICAL);
@@ -195,26 +199,6 @@ public class MainActivity extends AppCompatActivity
         c.close();
 
         return total_tra_sqlite;
-    }
-    private void AlertNoGps() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("El sistema GPS esta desactivado, ¿Es necesario activarlo?")
-                .setCancelable(false)
-                .setPositiveButton("Si", new DialogInterface.OnClickListener() {
-                    public void onClick(@SuppressWarnings("unused")
-                                        final DialogInterface dialog, @SuppressWarnings("unused")
-                                        final int id) {
-                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                    }
-                })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    public void onClick(final DialogInterface dialog, @SuppressWarnings("unused")
-                    final int id) {
-
-                    }
-                });
-        alert = builder.create();
-        alert.show();
     }
     @Override
     public void onBackPressed() {
@@ -267,7 +251,6 @@ public class MainActivity extends AppCompatActivity
 
         return super.onOptionsItemSelected(item);
     }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -360,7 +343,6 @@ public class MainActivity extends AppCompatActivity
             manageDeniedPermission();
         }
     }
-
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         // Obtenemos la última ubicación al ser la primera vez
@@ -368,7 +350,6 @@ public class MainActivity extends AppCompatActivity
         // Iniciamos las actualizaciones de ubicación
         startLocationUpdates();
     }
-
     @Override
     public void onConnectionSuspended(int i) {
         Log.d(TAG, "Conexión suspendida");
@@ -387,14 +368,18 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-        mGoogleApiClient.connect();
+        if (estaConectado()) {
+            mGoogleApiClient.connect();
+        }
 
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mGoogleApiClient.disconnect();
+        if(mGoogleApiClient!=null) {
+            mGoogleApiClient.disconnect();
+        }
     }
 
     private synchronized void buildGoogleApiClient() {
@@ -647,4 +632,83 @@ public class MainActivity extends AppCompatActivity
         }
 
     }
+
+    public static boolean pruebaConexion(Context context){
+        boolean connected = false;
+
+        ConnectivityManager connec = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        // Recupera todas las redes (tanto móviles como wifi)
+        NetworkInfo[] redes = connec.getAllNetworkInfo();
+
+        for (int i = 0; i < redes.length; i++) {
+            // Si alguna red tiene conexión, se devuelve true
+            if (redes[i].getState() == NetworkInfo.State.CONNECTED) {
+                connected = true;
+            }
+        }
+        return connected;
+    }
+
+    protected Boolean estaConectado(){
+        if(conectadoWifi()){
+            /*showAlertDialog(MainActivity.this, "Conexion a Internet",
+                    "Tu Dispositivo tiene Conexion a Wifi.", true);*/
+            return true;
+        }else{
+            if(conectadoRedMovil()){
+               /* showAlertDialog(MainActivity.this, "Conexion a Internet",
+                        "Tu Dispositivo tiene Conexion Movil.", true);*/
+                return true;
+            }else{
+                showAlertDialog(MainActivity.this, "Conexion a Internet",
+                        "Tu Dispositivo no tiene Conexion a Internet. ", false);
+                return false;
+            }
+        }
+    }
+    protected Boolean conectadoRedMovil(){
+        ConnectivityManager connectivity = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivity != null) {
+            NetworkInfo info = connectivity.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+            if (info != null) {
+                if (info.isConnected()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    protected Boolean conectadoWifi(){
+        ConnectivityManager connectivity = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivity != null) {
+            NetworkInfo info = connectivity.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            if (info != null) {
+                if (info.isConnected()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    public void showAlertDialog(Context context, String title, String message, Boolean status) {
+        AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+
+        alertDialog.setTitle(title);
+
+        alertDialog.setMessage(message);
+
+        alertDialog.setIcon((status) ? R.drawable.success : R.drawable.cancel);
+
+        alertDialog.setButton(Dialog.BUTTON_POSITIVE,"OK",new DialogInterface.OnClickListener(){
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+               // finish();
+            }
+        });
+
+        alertDialog.show();
+    }
+
 }

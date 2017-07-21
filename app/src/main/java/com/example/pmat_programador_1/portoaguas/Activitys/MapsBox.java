@@ -56,6 +56,8 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.pmat_programador_1.portoaguas.MapsActivity;
@@ -141,7 +143,7 @@ import static Adapter.RecycleViewAdapter.detall;
 public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status>, PermissionsListener {
     private MapView mapView;
-    private MapboxMap map;
+    MapboxMap map=null;
     private LocationEngine locationEngine;
     private LocationEngineListener locationEngineListener;
     private PermissionsManager permissionsManager;
@@ -165,8 +167,6 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
     private long mTim = 1500;
     public static String data;
     public boolean resul , active=true;
-
-
     public String foto = "", deuda_ac = "",facturas_impagos="", reclamo="", estadoMedidorBD="";
     public Uri output;
     public File storageDir;
@@ -191,9 +191,9 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
     //////////////////////////////////////////////////
     private TextView txtNombre, txtCargo,numero_tramites;
     public String resuld;
-
-
     AlertDialog alert = null;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -215,11 +215,51 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
         toggle.syncState();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view_3);
         navigationView.setNavigationItemSelectedListener(this);
-
+        SharedPreferences datos_preferencias2 = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+        if(datos_preferencias2.getString("p_modoOffline",null)==null) {
+            if (!isOnlineNet()) {
+                //mensaje_ofline();
+                final SharedPreferences datos_off = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = datos_off.edit();
+                editor.putString("p_modoOffline", "1");
+                editor.commit();
+            }
+        }
         mapView.getMapAsync(new com.mapbox.mapboxsdk.maps.OnMapReadyCallback() {
             @Override
             public void onMapReady(MapboxMap mapboxMap) {
                 map=mapboxMap;
+                SharedPreferences datos_preferencias = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+                if(datos_preferencias.getString("p_modoOffline",null)==String.valueOf(1)){
+                    Toast.makeText(MapsBox.this,"No hay conexion con el servidor Portoaguas los datos se almacenaran internamente",Toast.LENGTH_LONG).show();
+                    Proceso_Puntos(map);
+                }else{
+                        /* VERIFICAMOS SI EXISTEN REGISTRO ALMACENANOS*/
+                        SQLiteDatabase db = objDB.getReadableDatabase();
+                        String[] valores_recuperar = {"*"};
+                        final Cursor c = db.query("trab_mov", valores_recuperar,
+                            null, null, null, null, null, null);
+                            if (c.moveToFirst()) {
+                                do {
+                                    new RegistrarMovimiento_2().execute(c.getString(1),c.getString(2),c.getString(3),c.getString(4),c.getString(5),c.getString(6),c.getString(7));
+                                } while (c.moveToNext());
+                            }
+                        db.close();
+                        c.close();
+
+                        new LoadPuntos().execute();
+
+                        SQLiteDatabase db1 = objDB.getReadableDatabase();
+                        String[] valor_recuperado ={"id_tramite"};
+                        final Cursor c2 = db1.query("tramites",valor_recuperado,"estado_tramite=?", new String[]{"I"},null,null,null);
+                        if(c2.moveToFirst()){
+                            do{
+                                new ValidarPuntos().execute(c2.getString(0));
+                            }while (c2.moveToNext());
+                        }
+                        db1.close();
+                        c2.close();
+                    }
             }
         });
 
@@ -231,36 +271,8 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
         txtCargo.setText(da.getString("p_cargoU",null));
         numero_tramites =(TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_slideshow));
         initializeCountDrawer();
-        if(!isOnlineNet()){
-            Toast.makeText(MapsBox.this,"No hay conexion con el servidor Portoaguas los datos se almacenaran internamente",Toast.LENGTH_LONG).show();
-        }else {
-            SQLiteDatabase db = objDB.getReadableDatabase();
-            String[] valores_recuperar = {"*"};
-            final Cursor c = db.query("trab_mov", valores_recuperar,
-                    null, null, null, null, null, null);
-            if (c.moveToFirst()) {
-                do {
-                    new RegistrarMovimiento_2().execute(c.getString(1),c.getString(2),c.getString(3),c.getString(4),c.getString(5),c.getString(6),c.getString(7));
-                } while (c.moveToNext());
 
-            }
-            db.close();
-            c.close();
-            /*finish();
-            startActivity(getIntent());*/
-        }
-        new LoadPuntos().execute();
 
-        SQLiteDatabase db1 = objDB.getReadableDatabase();
-        String[] valor_recuperado ={"id_tramite"};
-        final Cursor c = db1.query("tramites",valor_recuperado,"estado_tramite=?", new String[]{"I"},null,null,null);
-        if(c.moveToFirst()){
-            do{
-                new ValidarPuntos().execute(c.getString(0));
-            }while (c.moveToNext());
-        }
-        db1.close();
-        c.close();
 
 
          /* ********************* geolocalizacion **********************/
@@ -466,6 +478,8 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
             pDialog.setCancelable(false);
             pDialog.show();
             new LoadMaxTramite().execute();
+            //id_tramite_DB=Max_tramiteDB2();
+
 
             /*CODIGO DE ELIMINAR LOS TRAMITES QUE SE ENCUENTRAN CON ESTADOS_TRAMITE (F)*/
             SQLiteDatabase DB =objDB.getWritableDatabase();
@@ -516,16 +530,15 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
         @Override
         protected void onPostExecute(String s) {
             pDialog.dismiss();
-            if (ContextCompat.checkSelfPermission(MapsBox.this, Manifest.permission.ACCESS_FINE_LOCATION)
+           /* if (ContextCompat.checkSelfPermission(MapsBox.this, Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
                 //mMap.setMyLocationEnabled(true);
             } else {
                 // Show rationale and request permission.
-            }
+            }*/
 
-            LatLng sydney;
             if(item.size()==0){
-                LatLng sydney2= new LatLng(-1.035966, -80.464269);
+                //LatLng sydney2= new LatLng(-1.035966, -80.464269);
                 //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney2,new Float(15)));
                 StyleableToast.makeText(MapsBox.this, "No contiene puntos de corte en su mapa comuniquese con la central para que se le asignen mas puntos de corte....", Toast.LENGTH_LONG, R.style.StyledToastError).show();
             }else {
@@ -658,7 +671,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                         public void onClick(View v) {
                             //PREGUNTA SI HAY CONEXION
                             if(!isOnlineNet()){
-                                Snackbar.make(mView,"No hay conexion con el servidor los datos se almacenaran localmente",Snackbar.LENGTH_LONG).setAction("Action",null).show();
+                                //Snackbar.make(mView,"No hay conexion con el servidor los datos se almacenaran localmente",Snackbar.LENGTH_LONG).setAction("Action",null).show();
                                 String Observacion = comentario.getText().toString();
                                 if (Observacion.equals("")) {
                                     comentario.setError("Debe ingresar una observación");
@@ -920,7 +933,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
 
     public Boolean isOnlineNet(){
         try {
-            Process p = Runtime.getRuntime().exec("ping -c 1 186.42.226.114");
+            Process p = Runtime.getRuntime().exec("ping -c 1 192.168.137.1");
             int val = p.waitFor();
             boolean reachable = (val == 0);
             return  reachable;
@@ -1336,9 +1349,21 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
 
     class RegistrarMovimiento_2 extends AsyncTask<String, Void, Boolean> {
         private ProgressDialog pDialog;
+        String ID_TAREA_TRAMITE ="";
         SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(MapsBox.this);
+            pDialog.setMessage("Se estan enviado a la Central los datos guardado en memoria...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        @Override
         protected Boolean doInBackground(String... strings) {
+            pDialog.dismiss();
             ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
             nameValuePairs.add(new BasicNameValuePair("lat_reg_trab",strings[0]));
             nameValuePairs.add(new BasicNameValuePair("long_reg_trab", strings[1]));
@@ -1359,13 +1384,13 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                     Log.e("ERROR 500 ", "ERROR INTERNO EN EL SERVIDOR ALMACENAR LOS TRAMITES GUARDADOS OFFLINE");
                     resul=false;
                 }else{
-                HttpEntity entity = response.getEntity();
-                data = EntityUtils.toString(entity);
-                JSONObject obj = new JSONObject(data);
-                String codigojson = obj.getString("registro");
-                Log.e("ULTIMO ID MOVIMIENTO", data);
-                data = codigojson;
-                resul = true;
+                    HttpEntity entity = response.getEntity();
+                    ID_TAREA_TRAMITE = EntityUtils.toString(entity);
+                    JSONObject obj = new JSONObject(ID_TAREA_TRAMITE);
+                    String codigojson = obj.getString("registro");
+                    //Log.e("ULTIMO ID MOVIMIENTO", data);
+                    ID_TAREA_TRAMITE = codigojson;
+                    resul = true;
 
                 //  SUBIDA DE LA FOTO ALMACENA LOCAL
                     String uploadId = UUID.randomUUID().toString();
@@ -1384,7 +1409,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                     try {
                         new MultipartUploadRequest(MapsBox.this, uploadId, "http://"+ JSON.ipserver+"/ftp_imagen")
                                 .addFileToUpload(foto_local, "foto")
-                                .addParameter("id_tarea_tramite", data)
+                                .addParameter("id_tarea_tramite", ID_TAREA_TRAMITE)
                                 .setMaxRetries(2)
                                 .setDelegate(new UploadStatusDelegate() {
                                     @Override
@@ -1426,20 +1451,9 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
             }
             return resul;
         }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            pDialog = new ProgressDialog(MapsBox.this);
-            pDialog.setMessage("Enviando Datos a la Central...");
-            pDialog.setIndeterminate(false);
-            pDialog.setCancelable(false);
-            pDialog.show();
-        }
-
         @Override
         protected void onPostExecute(Boolean aBoolean) {
-            pDialog.dismiss();
+
             if (aBoolean) {
                 SQLiteDatabase DB;
                 DB=objDB.getWritableDatabase();
@@ -1543,15 +1557,31 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
       FUNCION MAX_TRAMITEDB PERMITE OBTENER EL MAX ID_TRAMITES
       QUE EXISTE EN LA BASE DE DATOS PRINCIPAL
      */
-    /*
+
     public int Max_tramiteDB2(){
         RequestQueue queue = Volley.newRequestQueue(this);
+        final String[] id_tramite = {""};
         String URL= "http://" + JSON.ipserver + "/maxTramite";
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
+        JsonArrayRequest stringRequest = new JsonArrayRequest(Request.Method.POST, URL,null, new Response.Listener<JSONArray>() {
             @Override
-            public void onResponse(String response) {
-                Log.e("MOVIMIENTOS DISPOSITIVO", response);
+            public void onResponse(JSONArray response) {
+                //Log.e("MOVIMIENTOS DISPOSITIVO", response);
+                // Process the JSON
+                try{
+                    // Loop through the array elements
+                    for(int i=0;i<response.length();i++){
+                        // Get current json object
+                        JSONObject student = response.getJSONObject(i);
 
+                        // Get the current student (json object) data
+                        String firstName = student.getString("usuario_oficial");
+                        id_tramite[0] = student.getString("id_tramite");
+                        Log.e("MOVIMIENTOS DISPOSITIVO", id_tramite[0]);
+
+                    }
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
             }
         },new Response.ErrorListener() {
             @Override
@@ -1564,14 +1594,13 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                 SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("id_dispositivo", Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID));
-               // params.put("latitud", String.valueOf(mLastLocation.getLatitude()));
-                //params.put("longitud",  String.valueOf(mLastLocation.getLongitude()));
                 params.put("cedula", dato.getString("p_idUsuario", null) );
                 return params;
             }
         };
         queue.add(stringRequest);
-    }*/
+    return Integer.parseInt(id_tramite[0]);
+    }
     public int Max_tramiteDB() throws  ParseException{
         int max_tramite=0;
         SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
@@ -1736,6 +1765,33 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
     * GETPUNTOS FUNCION PARA OBTENER LOS PUNTOS POR PRIMERA VEZ
     * Y LOS ALMACENA A LA BASE DE DATOS SQLITE
     */
+    public void getPuntosVolley() throws  ParseException{
+        SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+        HashMap<String,String> parametros = new HashMap<>();
+        parametros.put("cedula",dato.getString("p_idUsuario", null));
+        parametros.put("id_dispositivo",dato.getString("p_idmovil",null));
+        JsonObjectRequest jsArrayRequest = new JsonObjectRequest(
+                Request.Method.POST,
+                "http://" + JSON.ipserver + "/punto",
+                new JSONObject(parametros),
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        // Manejo de la respuesta
+                        Log.e("Res",response.toString());
+
+                    }
+                },
+                new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // Manejo de errores
+
+                    }
+                });
+    }
+
     public ArrayList<Puntos> getPuntos() throws ParseException {
         SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
         ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
@@ -1813,6 +1869,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
         }
         return item;
     }
+
 
     /*
         Funcion para consulta la deuda del cliente
@@ -2039,5 +2096,423 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
         }
         img.setImageBitmap(bit);
     }
+
+    public void Proceso_Puntos(MapboxMap mapboxMap){
+        map=mapboxMap;
+        item = recuperarTramites();
+        if(item.size()==0){
+            LatLng sydney2= new LatLng(-1.035966, -80.464269);
+            //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney2,new Float(15)));
+            StyleableToast.makeText(MapsBox.this, "No contiene puntos de corte en su mapa comuniquese con la central para que se le asignen mas puntos de corte....", Toast.LENGTH_LONG, R.style.StyledToastError).show();
+        }else {
+            CameraPosition position = null;
+            for (int i = 0; i < item.size(); i++) {
+                if (item.get(i).getTipo_tramite().equals("RECONEXION")) {
+                    if(item.get(i).getEstado_tramite().equals("I")){
+
+                    }else if(item.get(i).getEstado_tramite().equals("F")){
+
+                    }
+                } else if(item.get(i).getTipo_tramite().equals("CORTE")){
+                    if (item.get(i).getEstado_tramite().equals("I")) {
+                        double lati = item.get(i).getLatitud();
+                        double longLat = item.get(i).getLongitud();
+                        double[] ltn = obj.utm2LatLon("17 M " + longLat + " " + lati);
+                        // Creamos un icono objeto para el marcador que usaremos
+                        IconFactory iconFactory = IconFactory.getInstance(MapsBox.this);
+                        Icon icon = iconFactory.fromResource(R.drawable.blank_1);
+                        //sydney = new LatLng(ltn[0], ltn[1]);
+                        map.addMarker(new MarkerOptions()
+                                .position(new LatLng(ltn[0],  ltn[1]))
+                                .icon(icon)
+                                .title("CORTE / Cuenta: " + String.valueOf(item.get(i).getNumero_cuenta()))
+                                .snippet("Serie M.: "+item.get(i).getSerie_medidor()+" Meses: " + item.get(i).getMes_deuda() + " Deuda: " + Math.rint(item.get(i).getDeuda_portoagua() * 100) / 100));
+
+                        position = new CameraPosition.Builder()
+                                .target(new LatLng(ltn[0], ltn[1])) // Sets the new camera position
+                                .zoom(20) // Sets the zoom
+                                .bearing(30) // Rotate the camera
+                                .tilt(30) // Set the camera tilt
+                                .build(); // Creates a CameraPosition from the builder
+                    }else if(item.get(i).getEstado_tramite().equals("F")){
+
+                    }
+                }
+            }
+            map.animateCamera(CameraUpdateFactory
+                    .newCameraPosition(position), 7000);
+        }
+        map.setOnInfoWindowClickListener(new MapboxMap.OnInfoWindowClickListener() {
+            @Override
+            public boolean onInfoWindowClick(@NonNull Marker marker) {
+                final ArrayList rubros = new ArrayList();
+                rubros.add(new Rubros("65","RECONEXION CON EXCAVADORA EN TIERRAAPERTURA MANUAL DE ZANJA","6", "78"));
+                rubros.add(new Rubros("66","RECONEXION CON EXCAVADORA MANUAL DE ZANJA EN AREA CON H.S","13", "79"));
+                rubros.add(new Rubros("64","LLAVE DE ACERO","6.50", "80"));
+                rubros.add(new Rubros("67","INSTALACION Y REUBICACION DE MEDIDOR Y VALVULA DE ESFERA","12", "81"));
+                rubros.add(new Rubros("63","OTROS MATERIALES","1", "77"));
+                rubros.add(new Rubros("54", "CORTE CON LLAVE DE ACERO", "2.50","67"));
+                rubros.add(new Rubros("55", "CORTE CON LLAVE DE ESFERA", "2","68"));
+                rubros.add(new Rubros("56", "CORTE CON EXCAVACION DE TIERRA", "6","69"));
+                rubros.add(new Rubros("57", "CORTE CON EXCAVACION MANUAL", "13","70"));
+                rubros.add(new Rubros("58", "RECONEXION CON LLAVE DE ACERO", "2.50","71"));
+                rubros.add(new Rubros("59", "RECONEXION CON LLAVE DE ESFERA", "2","72"));
+                rubros.add(new Rubros("60", "RECONEXION CON LLAVE DE ACERO CON CAMARA OBSTRUIDA", "3","73"));
+                rubros.add(new Rubros("61", "INSTALACION DE LLAVE DE ESFERA", "5","74"));
+                rubros.add(new Rubros("62", "LLAVE DE ESFERA", "4.8","75"));
+                rubros.add(new Rubros("157", "RECONEXION EN TUBERIA", "4","130"));
+                rubros.add(new Rubros("156", "CORTE EN TUBERIA", "4","130"));
+                rubros.add(new Rubros("53", "ENTREGA AVISO NOTIFICACION", "1.75","66"));
+
+                AlertDialog.Builder buil = new AlertDialog.Builder(MapsBox.this);
+                final View mView = getLayoutInflater().inflate(R.layout.storepunto, null);
+
+                comentario      = (EditText) mView.findViewById(R.id.t_comentario);
+                btnSaveCliente  = (Button) mView.findViewById(R.id.buttonNewC);
+                btnC            = (ImageButton) mView.findViewById(R.id.btn_camera);
+                btn_deuda       = (ImageButton) mView.findViewById(R.id.btn_act_deuda);
+                img             = (ImageView) mView.findViewById(R.id.img1);
+                recycler        = (RecyclerView) mView.findViewById(R.id.my_recycler_view);
+                total           = (TextView) mView.findViewById(R.id.txt_total);
+                cuenta          = (TextView) mView.findViewById(R.id.txt_cuenta);
+                meses           = (TextView) mView.findViewById(R.id.txt_meses);
+                deuda           = (TextView) mView.findViewById(R.id.txt_deuda);
+                textMeses       = (TextView) mView.findViewById(R.id.textMeses);
+                textDeuda       = (TextView) mView.findViewById(R.id.textDeuda);
+                txt_reclamo     = (TextView) mView.findViewById(R.id.txt_reclamo);
+                txtidtramite    = (TextView) mView.findViewById(R.id.txt_id_tramite);
+                txtcliente      = (TextView) mView.findViewById(R.id.txt_cliente);
+                txt_serieMedidor = (TextView) mView.findViewById(R.id.txt_serieMedidor);
+                txt_estadoMedidor = (TextView) mView.findViewById(R.id.estado_medidor);
+                lManager = new LinearLayoutManager(MapsBox.this, LinearLayoutManager.HORIZONTAL, false);
+                recycler.setHasFixedSize(true);
+                recycler.setLayoutManager(lManager);
+                adapter = new RecycleViewAdapter(MapsBox.this, rubros);
+                adapter.notifyDataSetChanged();
+                recycler.setAdapter(adapter);
+                //recycler.setNestedScrollingEnabled(true);
+
+                buil.setView(mView);
+                alertDialog = buil.create();
+                alertDialog.show();
+                cont = 0;
+                //ced.setText(marker.getPosition().toString());
+                cuenta.setText(marker.getTitle().substring(16));
+
+                for (int x=0; x<item.size(); x++){
+                    if(String.valueOf(item.get(x).getNumero_cuenta()).equals(cuenta.getText().toString())){
+                        txtcliente.setText(item.get(x).getCliente());
+                        if(item.get(x).getSerie_medidor().equals("0")){
+                            txt_serieMedidor.setText("Sin Medidor");
+                        }else{
+                            txt_serieMedidor.setText(item.get(x).getSerie_medidor());
+                        }
+                        deuda.setText(String.valueOf(Math.rint(item.get(x).getDeuda_portoagua()*100)/100));
+                        meses.setText(String.valueOf(item.get(x).getMes_deuda()));
+                        txtidtramite.setText(String.valueOf(item.get(x).getId_tramite()));
+                        txt_estadoMedidor.setText(item.get(x).getEstado_medidor());
+                    }
+                }
+
+                //Boton de la Camara
+                btnC.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            createImageFile();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                });
+
+
+                //Boton para ENVIAR DATOS AL SERVIDOR PORTOAGUAS
+                btnSaveCliente.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //PREGUNTA SI HAY CONEXION
+                        if(!isOnlineNet()){
+                            //Snackbar.make(mView,"No hay conexion con el servidor los datos se almacenaran localmente",Snackbar.LENGTH_LONG).setAction("Action",null).show();
+                            String Observacion = comentario.getText().toString();
+                            if (Observacion.equals("")) {
+                                comentario.setError("Debe ingresar una observación");
+                            } else {
+                                  /*
+                                     LATITUD Y LONGITUD EN UTM PARA ENVIAR
+                                    */
+                                latitud_r = mLastLocation.getLatitude();
+                                logintud_r = mLastLocation.getLongitude();
+                                String UTM = obj.latLon2UTM(latitud_r, logintud_r);
+                                String[] _utm = UTM.split(" ");
+                                double easting = Double.parseDouble(_utm[2]);
+                                double northing = Double.parseDouble(_utm[3]);
+                                Log.e("UTM", String.valueOf(easting) + " " + String.valueOf(northing));
+
+                                //////////////////////////////////////////
+                                    /*
+                                    SAL_ABIL PARA ENVIAR
+                                    PATRON
+                                      63     @@      77  @@   1   @@  6 -> ||
+                                       ^     ^       ^   ^    ^   ^   ^     ^
+                                       |     |       |   |    |   |   |     |
+                                       COD         COD        V     CANT
+                                         R.          PRO        UNI
+                                     */
+
+                                String patron = "";
+                                JSONArray tabla = new JSONArray();
+                                for (int x = 0; x < detall.size(); x++) {
+                                    JSONObject pc = new JSONObject();
+
+                                    if (detall.get(x).getCantidad().equals("0")) {
+
+                                    } else {
+                                        patron = patron + detall.get(x).getCodigo() + "@@" + detall.get(x).getCod_prod() + "@@" + detall.get(x).getPrecio() + "@@" + detall.get(x).getCantidad() + "||";
+                                        try {
+                                            pc.put("Cod_rubro", detall.get(x).getCodigo());
+                                            pc.put("Cod_prod", detall.get(x).getCod_prod());
+                                            pc.put("v_unit", detall.get(x).getPrecio());
+                                            pc.put("cant", detall.get(x).getCantidad());
+                                            tabla.put(pc);
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                                int length = patron.length();
+                                String _patron = "";
+                                if (patron.endsWith("||")) {
+                                    Log.e("Patron", patron.substring(0, length - 2));
+                                    _patron = patron.substring(0, length - 2);
+                                } else {
+                                    Log.e("Patron", patron);
+                                    _patron = patron;
+                                }
+                                /////////////////////////////////////////////
+
+                            /*
+                                TOTAL MOVIMIENTO
+                             */
+                                double total_ = 0;
+                                if (total.getText().toString().equals("") || total.getText().toString().equals(0)) {
+                                    total_ = 0;
+                                } else {
+                                    total_ = Double.parseDouble(total.getText().toString());
+                                }
+                                Log.e("TOTAL", String.valueOf(total_));
+
+
+                                ////////////////////////////////
+                            /*
+                                ID_TRAMITE Y ID_TAREA_TRAMITE
+                             */
+                                long idtrami = 0, id_tarea_tra = 0;
+                                for (int xx = 0; xx < item.size(); xx++) {
+                                    if (item.get(xx).getNumero_cuenta() == Long.parseLong(cuenta.getText().toString())) {
+                                        idtrami = item.get(xx).getId_tramite();
+                                        id_tarea_tra = item.get(xx).getId_tarea_tramite();
+                                    }
+                                }
+
+                                Log.e("ID_TRAMITE", String.valueOf(idtrami) + " " + String.valueOf(id_tarea_tra));
+
+                                ///////////////////////////////////////
+
+
+                                //Proceso de almacenamiento local SQLITE
+                                SQLiteDatabase db= objDB.getWritableDatabase();
+                                ContentValues valores1 =  new ContentValues();
+                                valores1.put(TramitesDB.Datos_tramites.LAT_REG_TRAB,String.valueOf(easting));
+                                valores1.put(TramitesDB.Datos_tramites.LONG_REG_TRAB, String.valueOf(northing));
+                                valores1.put(TramitesDB.Datos_tramites.ID_TAREA_TRAMITE,String.valueOf(id_tarea_tra));
+                                valores1.put(TramitesDB.Datos_tramites.OBSERVACION,comentario.getText().toString());
+                                valores1.put(TramitesDB.Datos_tramites.SAL_ABIL,_patron);
+                                valores1.put(TramitesDB.Datos_tramites.TOTAL_MOV,String.valueOf(total_));
+                                valores1.put(TramitesDB.Datos_tramites.IMAGEN,foto);
+                                valores1.put(TramitesDB.Datos_tramites.TABLA_INFO,tabla.toString());
+                                Long id_Guardar=db.insert(TramitesDB.Datos_tramites.TABLA_TRAB_MOV,null,valores1);
+                                if(id_Guardar==-1){
+                                    Log.e("SQLITE SAVE","ERRORguardados");
+                                }else {
+                                    Log.e("SQLITE SAVE", "Datos guardados");
+                                   /* StyleableToast.makeText(MapsBox.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
+                                    SQLiteDatabase db1= objDB.getWritableDatabase();
+                                    ContentValues valores2 =  new ContentValues();
+                                    valores2.put(TramitesDB.Datos_tramites.ID_TAREA_TRAMITE,String.valueOf(id_tarea_tra));
+                                    valores2.put(TramitesDB.Datos_tramites.IMAGEN,foto);
+                                    valores2.put(TramitesDB.Datos_tramites.OBSERVACION,comentario.getText().toString());
+                                    valores2.put(TramitesDB.Datos_tramites.ESTADO,"S");
+                                    Long id_Guardar1=db1.insert(TramitesDB.Datos_tramites.TABLA_MOVIMIENTOS,null,valores2);
+                                    if(id_Guardar1==-1){
+                                        Log.e("SQLITE SAVE","ERRORguardados");
+                                    }else {
+                                        Log.e("SQLITE SAVE", "Datos guardados");*/
+                            /*
+                            ACTUALIZAR PUNTO EL ESTADO SQLITE
+                            */
+                                        SQLiteDatabase bd = objDB.getWritableDatabase();
+                                        ContentValues valores = new ContentValues();
+                                        valores.put(TramitesDB.Datos_tramites.ESTADO_TRAMITE, "E");
+                                        String[] argsel = {String.valueOf(id_tarea_tra)};
+                                        String Selection = TramitesDB.Datos_tramites.ID_TAREA_TRAMITE + "=?";
+                                        int count = bd.update(TramitesDB.Datos_tramites.TABLA,
+                                                valores, Selection, argsel);
+                                        Log.e("UPDATE", String.valueOf(count));
+
+                            /*
+                            *******************************CONSULTAR SI EXISTEN NUEVOS `PUNTOS ******
+                             */
+                                        //NULL
+                            /*
+                            **************************************************************
+                            */
+                                        alertDialog.dismiss();
+
+                                        //REINICIAMOS LA ACTIVIDAD
+                                        finish();
+                                        startActivity(getIntent());
+                                        //*********************************************************
+                                    }
+                                }
+
+                        }else{
+                            String Observacion = comentario.getText().toString();
+                            if (Observacion.equals("")) {
+                                comentario.setError("Debe ingresar una observación");
+                            } else {
+                            /*
+                            LATITUD Y LONGITUD EN UTM PARA ENVIAR
+                             */
+                                latitud_r = mLastLocation.getLatitude();
+                                logintud_r = mLastLocation.getLongitude();
+                                String UTM = obj.latLon2UTM(latitud_r, logintud_r);
+                                String[] _utm = UTM.split(" ");
+                                double easting = Double.parseDouble(_utm[2]);
+                                double northing = Double.parseDouble(_utm[3]);
+                                Log.e("UTM", String.valueOf(easting) + " " + String.valueOf(northing));
+
+                                //////////////////////////////////////////
+                            /*
+                            SAL_ABIL PARA ENVIAR
+                            PATRON
+                             63     @@      77  @@   1   @@  6 -> ||
+                              ^     ^       ^   ^    ^   ^   ^     ^
+                              |     |       |   |    |   |   |     |
+                              COD         COD        V     CANT
+                              R.          PRO        UNI
+                             */
+
+                                String patron = "";
+                                JSONArray tabla = new JSONArray();
+                                for (int x = 0; x < detall.size(); x++) {
+                                    JSONObject pc = new JSONObject();
+
+                                    if (detall.get(x).getCantidad().equals("0")) {
+
+                                    } else {
+                                        patron = patron + detall.get(x).getCodigo() + "@@" + detall.get(x).getCod_prod() + "@@" + detall.get(x).getPrecio() + "@@" + detall.get(x).getCantidad() + "||";
+                                        try {
+                                            pc.put("Cod_rubro", detall.get(x).getCodigo());
+                                            pc.put("Cod_prod", detall.get(x).getCod_prod());
+                                            pc.put("v_unit", detall.get(x).getPrecio());
+                                            pc.put("cant", detall.get(x).getCantidad());
+                                            tabla.put(pc);
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                                int length = patron.length();
+                                String _patron = "";
+                                if (patron.endsWith("||")) {
+                                    Log.e("Patron", patron.substring(0, length - 2));
+                                    _patron = patron.substring(0, length - 2);
+                                } else {
+                                    Log.e("Patron", patron);
+                                    _patron = patron;
+                                }
+                                /////////////////////////////////////////////
+
+                            /*
+                                TOTAL MOVIMIENTO
+                             */
+                                double total_ = 0;
+                                if (total.getText().toString().equals("") || total.getText().toString().equals(0)) {
+                                    total_ = 0;
+                                } else {
+                                    total_ = Double.parseDouble(total.getText().toString());
+                                }
+                                Log.e("TOTAL", String.valueOf(total_));
+
+
+                                ////////////////////////////////
+                            /*
+                                ID_TRAMITE Y ID_TAREA_TRAMITE
+                             */
+                                long idtrami = 0, id_tarea_tra = 0;
+                                for (int xx = 0; xx < item.size(); xx++) {
+                                    if (item.get(xx).getNumero_cuenta() == Long.parseLong(cuenta.getText().toString())) {
+                                        idtrami = item.get(xx).getId_tramite();
+                                        id_tarea_tra = item.get(xx).getId_tarea_tramite();
+                                    }
+                                }
+
+                                Log.e("ID_TRAMITE", String.valueOf(idtrami) + " " + String.valueOf(id_tarea_tra));
+
+                                ///////////////////////////////////////
+
+                                //Metodo para almacenar el movimiento en el mapa
+                                new RegistrarMovimiento().execute(String.valueOf(easting), String.valueOf(northing), String.valueOf(Observacion), String.valueOf(total_), _patron, String.valueOf(id_tarea_tra), tabla.toString());
+
+                            }// fin del if de observacion
+                        }
+                        detall.clear();
+                    }
+
+                });
+
+
+                //BOTON PARA ACTUALIZAR DEUDA DEL CLIENTE
+                btn_deuda.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String cuenta2=cuenta.getText().toString();
+                        new Act_Deuda().execute(cuenta2);
+                    }
+                }); // Fin de btn_deuda
+                return false;
+            }
+        });
+    }
+
+    /*
+        FUNCION MENSAJE PARA ACTIVAR MODO OFLINE
+     */
+    public void mensaje_ofline(){
+        final SharedPreferences datos_off = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Parece ser que se encuentra fuera de la ciudad y exite un problema de conexión con el servidor de portoaguas es necesario que active el modo desconectado")
+                .setCancelable(false)
+                .setPositiveButton("Si activar!", new DialogInterface.OnClickListener() {
+                    public void onClick(@SuppressWarnings("unused")
+                                        final DialogInterface dialog, @SuppressWarnings("unused")
+                                        final int id) {
+                        //new CerrarSesion().execute();
+                        SharedPreferences.Editor editor = datos_off.edit();
+                        editor.putString("p_modoOffline", "1");
+                        editor.commit();
+                    }
+                })
+                .setNegativeButton("No Activar!", new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, @SuppressWarnings("unused")
+                    final int id) {
+                    }
+                });
+        alert = builder.create();
+        alert.show();
+    }
+
 
 }

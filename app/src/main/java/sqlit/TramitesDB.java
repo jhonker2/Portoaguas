@@ -72,6 +72,7 @@ public class TramitesDB extends SQLiteOpenHelper {
                          Datos_tramites.OBSERVACION+TEXT_TYPE+COMMA_SEP+
                          Datos_tramites.SAL_ABIL+TEXT_TYPE+COMMA_SEP+
                          Datos_tramites.TOTAL_MOV+TEXT_TYPE+COMMA_SEP+
+                         Datos_tramites.IMAGEN+TEXT_TYPE+COMMA_SEP+
                          Datos_tramites.TABLA_INFO+TEXT_TYPE+" )";
 
 
