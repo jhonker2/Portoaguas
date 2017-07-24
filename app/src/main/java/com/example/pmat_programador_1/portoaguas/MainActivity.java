@@ -47,6 +47,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.pmat_programador_1.portoaguas.Activitys.MapsBox;
 import com.example.pmat_programador_1.portoaguas.Activitys.MovimientosActivity;
 import com.example.pmat_programador_1.portoaguas.Activitys.consulta;
 import com.example.pmat_programador_1.portoaguas.Activitys.locationActivity;
@@ -79,7 +80,9 @@ import org.json.JSONObject;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -87,6 +90,7 @@ import servicios.ServicioGPS;
 import sqlit.TramitesDB;
 import utils.Constants;
 import utils.JSON;
+import utils.VerificarInternet;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks,
@@ -107,6 +111,8 @@ public class MainActivity extends AppCompatActivity
     public static final int REQUEST_LOCATION = 1;
     public static final int REQUEST_CHECK_SETTINGS = 2;
     AlertDialog alert = null;
+    static SimpleDateFormat formatofecha = new SimpleDateFormat("yyyy-MM-dd");
+    static SimpleDateFormat formatohora = new SimpleDateFormat("hh:mm:ss");
 
 
     TramitesDB objDB;
@@ -117,12 +123,6 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         objDB = new TramitesDB(getApplicationContext());
-
-        //final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        //if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-         //   AlertNoGps();
-        //}
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -142,9 +142,10 @@ public class MainActivity extends AppCompatActivity
         if (!estaConectado()) {
             //Toast.makeText(getBaseContext(),"Necesaria conexión a internet ", Toast.LENGTH_SHORT).show();
         }else{
+            new ValidarLogin().execute();
+        }
         initializeCountDrawer();
 
-        new ValidarLogin().execute();
         // Establecer punto de entrada para la API de ubicación
         buildGoogleApiClient();
 
@@ -160,7 +161,6 @@ public class MainActivity extends AppCompatActivity
 /*        ServicioGPS servigps = new ServicioGPS(getApplicationContext());
 
         servigps.Miubicacion();*/
-        }
 
     }
 
@@ -300,34 +300,53 @@ public class MainActivity extends AppCompatActivity
     }
     // FUNCIONES PARA LOCALIZAR DISPOSTIVO
     private void updateLocationUI() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String URL= "http://" + JSON.ipserver + "/MovimientosDispositivos";
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
+        VerificarInternet tarea = new VerificarInternet(MainActivity.this, new VerificarInternet.EntoncesHacer() {
             @Override
-            public void onResponse(String response) {
-                Log.e("MOVIMIENTOS DISPOSITIVO", response);
+            public void cuandoHayInternet() {
+                RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
+                String URL= "http://" + JSON.ipserver + "/MovimientosDispositivos";
+                StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.e("MOVIMIENTOS DISPOSITIVO", response);
 
+                    }
+                },new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Response","Error a almacenar la posicion del usuario");
+                    }
+                }) {
+                    @Override
+                    protected Map<String, String> getParams() {
+                        SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("id_dispositivo",Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID));
+                        params.put("latitud", String.valueOf(mLastLocation.getLatitude()));
+                        params.put("longitud",  String.valueOf(mLastLocation.getLongitude()));
+                        params.put("cedula", dato.getString("p_idUsuario", null) );
+
+                        return params;
+                    }
+                };
+                queue.add(stringRequest);
             }
-        },new Response.ErrorListener() {
+
+            @SuppressLint("WrongConstant")
             @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e("Response","Error a almacenar la posicion del usuario");
+            public void cuandoNOHayInternet() {
+                Calendar calendar = Calendar.getInstance();
+                Calendar calendarHora = Calendar.getInstance();
+                calendarHora.set(Calendar.HOUR, 17);
+                calendarHora.set(Calendar.MINUTE, 30);
+                calendarHora.set(Calendar.SECOND, 2);
+                Toast.makeText(MainActivity.this, formatofecha.format(calendar.getTime())+" la hora: "+formatohora.format(calendarHora.getTime()),Toast.LENGTH_LONG).show();
             }
-        }) {
-            @Override
-            protected Map<String, String> getParams() {
-                SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+        });
 
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("id_dispositivo",Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID));
-                params.put("latitud", String.valueOf(mLastLocation.getLatitude()));
-                params.put("longitud",  String.valueOf(mLastLocation.getLongitude()));
-                params.put("cedula", dato.getString("p_idUsuario", null) );
+        tarea.execute();
 
-                return params;
-            }
-        };
-        queue.add(stringRequest);
     }
     private void processLastLocation() {
         getLastLocation();

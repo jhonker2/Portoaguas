@@ -15,6 +15,7 @@
             <task name="prepareComAndroidSupportAppcompatV72531Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.android.support:appcompat-v7:25.3.1&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="compileDebugSources">&lt;i&gt;Task group: build&lt;i&gt;</task>
             <task name="prepareComAndroidSupportSupportVectorDrawable2531Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.android.support:support-vector-drawable:25.3.1&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
+            <task name="transformClassesWithJarMergingForRelease" type="com.android.build.gradle.internal.pipeline.TransformTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="deviceCheck">Runs all device checks using Device Providers and Test Servers.&lt;p&gt;&lt;i&gt;Task group: verification&lt;i&gt;</task>
             <task name="processDebugResources" type="com.android.build.gradle.tasks.ProcessAndroidResources">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="lint" type="com.android.build.gradle.tasks.Lint">Runs lint on all variants.&lt;p&gt;&lt;i&gt;Task group: verification&lt;i&gt;</task>
@@ -31,6 +32,7 @@
             <task name="compileDebugUnitTestJavaWithJavac" type="com.android.build.gradle.tasks.factory.AndroidJavaCompile">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="transformResourcesWithMergeJavaResForReleaseUnitTest" type="com.android.build.gradle.internal.pipeline.TransformTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="transformClassesWithDexForDebug" type="com.android.build.gradle.internal.pipeline.TransformTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
+            <task name="transformClassesWithJarMergingForDebug" type="com.android.build.gradle.internal.pipeline.TransformTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="preDebugAndroidTestBuild">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="processDebugAndroidTestJavaRes" type="org.gradle.api.tasks.Sync">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="processReleaseUnitTestJavaRes" type="org.gradle.api.tasks.Sync">&lt;i&gt;Task group: other&lt;i&gt;</task>
@@ -84,6 +86,7 @@
             <task name="generateDebugResValues" type="com.android.build.gradle.tasks.GenerateResValues">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="check">Runs all checks.&lt;p&gt;&lt;i&gt;Task group: verification&lt;i&gt;</task>
             <task name="testDebugUnitTest" type="com.android.build.gradle.tasks.factory.AndroidUnitTest">Run unit tests for the debug build.&lt;p&gt;&lt;i&gt;Task group: verification&lt;i&gt;</task>
+            <task name="prepareComAndroidSupportMultidex101Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.android.support:multidex:1.0.1&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="jarDebugClasses" type="com.android.build.gradle.tasks.AndroidJarTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="prepareComAndroidSupportAnimatedVectorDrawable2531Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.android.support:animated-vector-drawable:25.3.1&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="installDebug" type="com.android.build.gradle.internal.tasks.InstallVariantTask">Installs the Debug build.&lt;p&gt;&lt;i&gt;Task group: Install&lt;i&gt;</task>
@@ -113,6 +116,8 @@
             <task name="preDebugBuild">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="generateDebugBuildConfig" type="com.android.build.gradle.tasks.GenerateBuildConfig">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="assembleRelease">Assembles all Release builds.&lt;p&gt;&lt;i&gt;Task group: build&lt;i&gt;</task>
+            <task name="prepareComAndroidSupportMultidexInstrumentation101Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.android.support:multidex-instrumentation:1.0.1&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
+            <task name="transformClassesWithJarMergingForDebugAndroidTest" type="com.android.build.gradle.internal.pipeline.TransformTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="generateReleaseResValues" type="com.android.build.gradle.tasks.GenerateResValues">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="prepareComAndroidSupportConstraintConstraintLayout102Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.android.support.constraint:constraint-layout:1.0.2&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="assembleReleaseUnitTest">&lt;i&gt;Task group: other&lt;i&gt;</task>
@@ -126,6 +131,7 @@
             <task name="prepareComAndroidSupportSupportMediaCompat2531Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.android.support:support-media-compat:25.3.1&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="dependencies" type="org.gradle.api.tasks.diagnostics.DependencyReportTask">Displays all dependencies declared in root project 'Portoaguas'.&lt;p&gt;&lt;i&gt;Task group: help&lt;i&gt;</task>
             <task name="packageDebug" type="com.android.build.gradle.tasks.PackageApplication">&lt;i&gt;Task group: other&lt;i&gt;</task>
+            <task name="transformClassesWithMultidexlistForDebug" type="com.android.build.gradle.internal.pipeline.TransformTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="generateDebugResources">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="buildNeeded">Assembles and tests this project and all projects it depends on.&lt;p&gt;&lt;i&gt;Task group: build&lt;i&gt;</task>
             <task name="processDebugUnitTestJavaRes" type="org.gradle.api.tasks.Sync">&lt;i&gt;Task group: other&lt;i&gt;</task>
@@ -148,6 +154,7 @@
             <task name="dependencyInsight" type="org.gradle.api.tasks.diagnostics.DependencyInsightReportTask">Displays the insight into a specific dependency in root project 'Portoaguas'.&lt;p&gt;&lt;i&gt;Task group: help&lt;i&gt;</task>
             <task name="generateReleaseSources">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="preReleaseBuild">&lt;i&gt;Task group: other&lt;i&gt;</task>
+            <task name="transformClassesWithMultidexlistForRelease" type="com.android.build.gradle.internal.pipeline.TransformTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="incrementalDebugUnitTestJavaCompilationSafeguard" type="com.android.build.gradle.tasks.factory.IncrementalSafeguard">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="incrementalReleaseJavaCompilationSafeguard" type="com.android.build.gradle.tasks.factory.IncrementalSafeguard">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="help" type="org.gradle.configuration.Help">Displays a help message.&lt;p&gt;&lt;i&gt;Task group: help&lt;i&gt;</task>
@@ -172,6 +179,7 @@
             <task name="prepareComGoogleAndroidGmsPlayServicesLocation1021Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.google.android.gms:play-services-location:10.2.1&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="compileDebugNdk" type="com.android.build.gradle.tasks.NdkCompile">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="prepareComEsriArcgisAndroidArcgisAndroid1029Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.esri.arcgis.android:arcgis-android:10.2.9&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
+            <task name="transformClassesWithMultidexlistForDebugAndroidTest" type="com.android.build.gradle.internal.pipeline.TransformTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="prepareComGoogleFirebaseFirebaseIid1021Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.google.firebase:firebase-iid:10.2.1&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="javaPreCompileDebug" type="com.android.build.gradle.tasks.JavaPreCompileTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="prepareComAndroidSupportSupportCompat2531Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.android.support:support-compat:25.3.1&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
@@ -223,6 +231,7 @@
             <task name="prepareComAndroidSupportAppcompatV72531Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.android.support:appcompat-v7:25.3.1&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="compileDebugSources">&lt;i&gt;Task group: build&lt;i&gt;</task>
             <task name="prepareComAndroidSupportSupportVectorDrawable2531Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.android.support:support-vector-drawable:25.3.1&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
+            <task name="transformClassesWithJarMergingForRelease" type="com.android.build.gradle.internal.pipeline.TransformTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="deviceCheck">Runs all device checks using Device Providers and Test Servers.&lt;p&gt;&lt;i&gt;Task group: verification&lt;i&gt;</task>
             <task name="processDebugResources" type="com.android.build.gradle.tasks.ProcessAndroidResources">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="lint" type="com.android.build.gradle.tasks.Lint">Runs lint on all variants.&lt;p&gt;&lt;i&gt;Task group: verification&lt;i&gt;</task>
@@ -239,6 +248,7 @@
             <task name="compileDebugUnitTestJavaWithJavac" type="com.android.build.gradle.tasks.factory.AndroidJavaCompile">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="transformResourcesWithMergeJavaResForReleaseUnitTest" type="com.android.build.gradle.internal.pipeline.TransformTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="transformClassesWithDexForDebug" type="com.android.build.gradle.internal.pipeline.TransformTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
+            <task name="transformClassesWithJarMergingForDebug" type="com.android.build.gradle.internal.pipeline.TransformTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="preDebugAndroidTestBuild">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="processDebugAndroidTestJavaRes" type="org.gradle.api.tasks.Sync">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="processReleaseUnitTestJavaRes" type="org.gradle.api.tasks.Sync">&lt;i&gt;Task group: other&lt;i&gt;</task>
@@ -291,6 +301,7 @@
             <task name="generateDebugResValues" type="com.android.build.gradle.tasks.GenerateResValues">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="check">Runs all checks.&lt;p&gt;&lt;i&gt;Task group: verification&lt;i&gt;</task>
             <task name="testDebugUnitTest" type="com.android.build.gradle.tasks.factory.AndroidUnitTest">Run unit tests for the debug build.&lt;p&gt;&lt;i&gt;Task group: verification&lt;i&gt;</task>
+            <task name="prepareComAndroidSupportMultidex101Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.android.support:multidex:1.0.1&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="jarDebugClasses" type="com.android.build.gradle.tasks.AndroidJarTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="prepareComAndroidSupportAnimatedVectorDrawable2531Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.android.support:animated-vector-drawable:25.3.1&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="installDebug" type="com.android.build.gradle.internal.tasks.InstallVariantTask">Installs the Debug build.&lt;p&gt;&lt;i&gt;Task group: Install&lt;i&gt;</task>
@@ -319,6 +330,8 @@
             <task name="preDebugBuild">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="generateDebugBuildConfig" type="com.android.build.gradle.tasks.GenerateBuildConfig">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="assembleRelease">Assembles all Release builds.&lt;p&gt;&lt;i&gt;Task group: build&lt;i&gt;</task>
+            <task name="prepareComAndroidSupportMultidexInstrumentation101Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.android.support:multidex-instrumentation:1.0.1&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
+            <task name="transformClassesWithJarMergingForDebugAndroidTest" type="com.android.build.gradle.internal.pipeline.TransformTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="generateReleaseResValues" type="com.android.build.gradle.tasks.GenerateResValues">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="prepareComAndroidSupportConstraintConstraintLayout102Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.android.support.constraint:constraint-layout:1.0.2&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="assembleReleaseUnitTest">&lt;i&gt;Task group: other&lt;i&gt;</task>
@@ -331,6 +344,7 @@
             <task name="prepareComAndroidSupportSupportMediaCompat2531Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.android.support:support-media-compat:25.3.1&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="dependencies" type="org.gradle.api.tasks.diagnostics.DependencyReportTask">Displays all dependencies declared in project ':app'.&lt;p&gt;&lt;i&gt;Task group: help&lt;i&gt;</task>
             <task name="packageDebug" type="com.android.build.gradle.tasks.PackageApplication">&lt;i&gt;Task group: other&lt;i&gt;</task>
+            <task name="transformClassesWithMultidexlistForDebug" type="com.android.build.gradle.internal.pipeline.TransformTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="generateDebugResources">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="buildNeeded">Assembles and tests this project and all projects it depends on.&lt;p&gt;&lt;i&gt;Task group: build&lt;i&gt;</task>
             <task name="processDebugUnitTestJavaRes" type="org.gradle.api.tasks.Sync">&lt;i&gt;Task group: other&lt;i&gt;</task>
@@ -353,6 +367,7 @@
             <task name="dependencyInsight" type="org.gradle.api.tasks.diagnostics.DependencyInsightReportTask">Displays the insight into a specific dependency in project ':app'.&lt;p&gt;&lt;i&gt;Task group: help&lt;i&gt;</task>
             <task name="generateReleaseSources">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="preReleaseBuild">&lt;i&gt;Task group: other&lt;i&gt;</task>
+            <task name="transformClassesWithMultidexlistForRelease" type="com.android.build.gradle.internal.pipeline.TransformTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="incrementalDebugUnitTestJavaCompilationSafeguard" type="com.android.build.gradle.tasks.factory.IncrementalSafeguard">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="incrementalReleaseJavaCompilationSafeguard" type="com.android.build.gradle.tasks.factory.IncrementalSafeguard">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="help" type="org.gradle.configuration.Help">Displays a help message.&lt;p&gt;&lt;i&gt;Task group: help&lt;i&gt;</task>
@@ -376,6 +391,7 @@
             <task name="prepareComGoogleAndroidGmsPlayServicesLocation1021Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.google.android.gms:play-services-location:10.2.1&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="compileDebugNdk" type="com.android.build.gradle.tasks.NdkCompile">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="prepareComEsriArcgisAndroidArcgisAndroid1029Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.esri.arcgis.android:arcgis-android:10.2.9&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
+            <task name="transformClassesWithMultidexlistForDebugAndroidTest" type="com.android.build.gradle.internal.pipeline.TransformTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="prepareComGoogleFirebaseFirebaseIid1021Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.google.firebase:firebase-iid:10.2.1&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="javaPreCompileDebug" type="com.android.build.gradle.tasks.JavaPreCompileTask">&lt;i&gt;Task group: other&lt;i&gt;</task>
             <task name="prepareComAndroidSupportSupportCompat2531Library" type="com.android.build.gradle.internal.tasks.PrepareLibraryTask">Prepare com.android.support:support-compat:25.3.1&lt;p&gt;&lt;i&gt;Task group: other&lt;i&gt;</task>

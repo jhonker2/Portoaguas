@@ -13,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.example.pmat_programador_1.portoaguas.R;
 
 import java.io.File;
@@ -63,20 +62,20 @@ public class MovimientsAdapter2 extends BaseAdapter {
         if(convertView == null) {
             LayoutInflater inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             vi = inflater.inflate(R.layout.bd_items, null);
-
         }
-
         item= items.get(position);
         codigo          = (TextView) vi.findViewById(R.id.t_id);
         idmedidor       = (TextView) vi.findViewById(R.id.t_idmedidor);
         estado          = (TextView) vi.findViewById(R.id.t_estado);
         img             = (ImageView) vi.findViewById(R.id.imgF);
-        codigo.setText(String.valueOf(item.getId_movimiento()));
-        idmedidor.setText(item.getLectura());
-        estado.setText(item.getEstado());
-        storageDir= new File(item.getImage());
+        codigo.setText(String.valueOf(item.getId()));
+        idmedidor.setText(item.getObservacion());
+        estado.setText(item.getTotal_mov());
+        storageDir= new File(item.getImagen());
         ContentResolver cr = activity.getContentResolver();
-
+        /*Glide.with(img.getContext())
+                .load(storageDir)
+                .into(img);*/
         try {
             img.setImageBitmap(android.provider.MediaStore.Images.Media.getBitmap(cr, Uri.fromFile(storageDir)));
         } catch (IOException e) {

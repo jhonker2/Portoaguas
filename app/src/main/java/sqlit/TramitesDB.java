@@ -23,6 +23,7 @@ public class TramitesDB extends SQLiteOpenHelper {
         public static final String TABLA_MOVIMIENTOS = "movimientos";
         public static final String TABLA_MAXTRAMITE="Ultimo_tramites";
         public static final String TABLA_TRAB_MOV="trab_mov";
+        public static final String TABLA_GEOLOCALIZACION="geolocalizacion";
 
 
         public static final String ID="id";
@@ -55,6 +56,10 @@ public class TramitesDB extends SQLiteOpenHelper {
         public static final String TOTAL_MOV = "total_mov";
         public static final String TABLA_INFO = "tabla";
 
+        public static final String ID_DISPOSITIVO = "id_dispositivo";
+        public static final String ID_DISPOSITIVO_USUARIO = "id_dispositivo_usuario";
+        public static final String FECHA = "fecha";
+        public static final String HORA = "hora";
 
 
 
@@ -63,7 +68,8 @@ public class TramitesDB extends SQLiteOpenHelper {
         private static final String REAL_TYPE=" REAL";
 
         private static final String COMMA_SEP=",";
-         private static final String CREAR_TABLA_TRAB_MOV=
+
+        private static final String CREAR_TABLA_TRAB_MOV=
                  "CREATE TABLE "+ Datos_tramites.TABLA_TRAB_MOV+"("+
                          Datos_tramites.ID +" INTEGER PRIMARY KEY AUTOINCREMENT,"+
                          Datos_tramites.LAT_REG_TRAB+TEXT_TYPE+COMMA_SEP+
@@ -81,6 +87,16 @@ public class TramitesDB extends SQLiteOpenHelper {
                         Datos_tramites.ID +" INTEGER PRIMARY KEY AUTOINCREMENT,"+
                         Datos_tramites.USUARIO_OFICIAL+TEXT_TYPE+COMMA_SEP+
                         Datos_tramites.ID_TRAMITE+INTEGER_TYPE+" )";
+
+        private static final String CREAR_TABLA_GEOLOCALIZACION=
+                "CREATE TABLE "+ Datos_tramites.TABLA_GEOLOCALIZACION +" ("+
+                        Datos_tramites.ID +" INTEGER PRIMARY KEY AUTOINCREMENT,"+
+                        Datos_tramites.ID_DISPOSITIVO+TEXT_TYPE+COMMA_SEP+
+                        Datos_tramites.ID_DISPOSITIVO_USUARIO+TEXT_TYPE+COMMA_SEP+
+                        Datos_tramites.LATITUD+TEXT_TYPE+COMMA_SEP+
+                        Datos_tramites.LONGITUD+TEXT_TYPE+COMMA_SEP+
+                        Datos_tramites.FECHA+TEXT_TYPE+COMMA_SEP+
+                        Datos_tramites.HORA+TEXT_TYPE+" )";
 
         private static final String SQL_ELIMINAR_TABLA_MAXTRAMITE=
                 "DROP TABLE IF EXISTS" + Datos_tramites.TABLA;

@@ -40,8 +40,8 @@ public class MovimientoHelper extends SQLiteOpenHelper {
                 null, null, null, null, null, null);
         c.moveToFirst();
         do {
-            lista_contactos.add(new Movimiento(c.getString(0), c.getString(1),
-                    c.getString(2), c.getString(3)));
+           // lista_contactos.add(new Movimiento(c.getString(0), c.getString(1),
+                    //c.getString(2), c.getString(3)));
         } while (c.moveToNext());
         db.close();
         c.close();
@@ -69,13 +69,7 @@ public class MovimientoHelper extends SQLiteOpenHelper {
     }
 
 
-    public long saveMovimiento(Movimiento movimiento) {
 
-        return getWritableDatabase().insert(
-                MovimientoContrac.MovimientoEntry.TABLE_NAME,
-                null,
-                movimiento.toContentValues());
-    }
 
     public void eliminar(){
         SQLiteDatabase db = getReadableDatabase();

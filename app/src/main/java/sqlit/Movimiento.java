@@ -11,73 +11,111 @@ import java.util.UUID;
 
 public class Movimiento {
     private long id;
-    private String id_movimiento;
     private String imagen;
-    private String lectura;
-    private String estado;
+    private String lat_reg_trab;
+    private String long_reg_trab;
+    private String sal_abil;
+    private String total_mov;
+    private String id_tarea_tramite;
+    private String tabla;
+    private String observacion;
+    private boolean seleccionado=false;
 
-    public Movimiento( String imagen, String lectura, String estado) {
+    public boolean isSeleccionado() {
+        return seleccionado;
+    }
+
+    public void setSeleccionado(boolean seleccionado) {
+        this.seleccionado = seleccionado;
+    }
+
+    public Movimiento(long id, String imagen, String lat_reg_trab, String long_reg_trab, String sal_abil, String total_mov, String tabla, String observacion, String id_tarea_tramite) {
+        this.id = id;
         this.imagen = imagen;
-        this.lectura = lectura;
-        this.estado = estado;
+        this.lat_reg_trab = lat_reg_trab;
+        this.long_reg_trab = long_reg_trab;
+        this.sal_abil = sal_abil;
+        this.total_mov = total_mov;
+        this.tabla = tabla;
+        this.observacion = observacion;
+        this.id_tarea_tramite =  id_tarea_tramite;
     }
 
-    public Movimiento( String id_movimiento,String imagen, String lectura, String estado) {
-        this.id_movimiento =  id_movimiento;
-        this.imagen = imagen;
-        this.lectura = lectura;
-        this.estado = estado;
+    public String getId_tarea_tramite() {
+        return id_tarea_tramite;
     }
 
-
-
-    public ContentValues toContentValues() {
-        ContentValues values = new ContentValues();
-        //values.put(MovimientoContrac.MovimientoEntry.ID, id);
-        values.put(MovimientoContrac.MovimientoEntry.ID_MOVIMIENTO,id_movimiento);
-        values.put(MovimientoContrac.MovimientoEntry.IMAGEN, imagen);
-        values.put(MovimientoContrac.MovimientoEntry.LECTURA, lectura);
-        values.put(MovimientoContrac.MovimientoEntry.ESTADO, estado);
-        return values;
+    public void setId_tarea_tramite(String id_tarea_tramite) {
+        this.id_tarea_tramite = id_tarea_tramite;
     }
 
-    public String getId_movimiento() {
-        return id_movimiento;
+    public long getId() {
+        return id;
     }
 
-    public void setId_movimiento(String id_movimiento) {
-        this.id_movimiento = id_movimiento;
-    }
-
-    public String getLectura() {
-        return lectura;
-    }
-
-    public void setLectura(String lectura) {
-        this.lectura = lectura;
-    }
-
-    public Long getId() {   return id;    }
-
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
-    public String getImage() {
+    public String getImagen() {
         return imagen;
     }
 
-    public void setImage(String imagen) {
+    public void setImagen(String imagen) {
         this.imagen = imagen;
     }
 
-
-
-    public String getEstado() {
-        return estado;
+    public String getLat_reg_trab() {
+        return lat_reg_trab;
     }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
+    public void setLat_reg_trab(String lat_reg_trab) {
+        this.lat_reg_trab = lat_reg_trab;
     }
+
+    public String getLong_reg_trab() {
+        return long_reg_trab;
+    }
+
+    public void setLong_reg_trab(String long_reg_trab) {
+        this.long_reg_trab = long_reg_trab;
+    }
+
+    public String getSal_abil() {
+        return sal_abil;
+    }
+
+    public void setSal_abil(String sal_abil) {
+        this.sal_abil = sal_abil;
+    }
+
+    public String getTotal_mov() {
+        return total_mov;
+    }
+
+    public void setTotal_mov(String total_mov) {
+        this.total_mov = total_mov;
+    }
+
+    public String getTabla() {
+        return tabla;
+    }
+
+    public void setTabla(String tabla) {
+        this.tabla = tabla;
+    }
+
+    public String getObservacion() {
+        return observacion;
+    }
+
+    public void setObservacion(String observacion) {
+        this.observacion = observacion;
+    }
+
+
 }
+
+
+
+

@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">PORTOAGUAS EP</string>
+    <string name="app_name_MAIN">Corte y Reconexión</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -14,4 +15,6 @@
     <string name="title_activity_location">PortoAguas EP.</string>
     <string name="access_token">pk.eyJ1IjoiamhvbnkyNyIsImEiOiJjajQ0ZDBrc3kwMHVrMzN1YnAybGMzY2pxIn0.m6oCm21xzIXCVTHN9d7stA</string>
     <string name="title_activity_consulta">Buscar Cliente</string>
+    <string name="title_activity_tramite">Tramites Almacenados</string>
+    <string name="nombre_transicion_imagen">imagen_compartida</string>
 </resources>

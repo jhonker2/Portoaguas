@@ -11,9 +11,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -26,6 +29,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -77,7 +81,6 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
     public MovimientsAdapter2 Ma;
     private MovimientoHelper movimientoHelper;
     ArrayList<Movimiento> items = new ArrayList<Movimiento>();
-    MovimientoHelper MDB = new MovimientoHelper(MovimientosActivity.this);
     private TextView txtNombre, txtCargo,numero_tramites;
     TramitesDB objDB;
     public String resuld;
@@ -92,7 +95,7 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
         img = (ImageView) findViewById(R.id.imgview);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        movimientoHelper = new MovimientoHelper(MovimientosActivity.this);
+        //movimientoHelper = new MovimientoHelper(MovimientosActivity.this);
         objDB = new TramitesDB(getApplicationContext());
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_2);
@@ -118,6 +121,30 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
         new ContarMovimientos().execute();
         // }
         initializeCountDrawer();
+        lista.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (items.get(position).isSeleccionado()) {
+                    items.get(position).setSeleccionado(false);
+                } else {
+                    items.get(position).setSeleccionado(true);
+                }
+               // Ma.notifyDataSetChanged();
+                Movimiento elegido = (Movimiento) parent.getItemAtPosition(position);
+
+               /* Intent intent = new Intent(MovimientosActivity.this, ActivityPreview.class);
+                intent.putExtra(ActivityPreview.EXTRA_PARAM_ID, items.get(position).getImagen());
+
+                /*if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.LOLLIPOP){
+                    ActivityOptionsCompat activityOptionsCompat= ActivityOptionsCompat.makeSceneTransitionAnimation(
+                            MovimientosActivity.this,
+                            new Pair<View, String> (view.findViewById(R.id.im))
+                    );
+                }*/
+                //startActivity(intent);
+                Toast.makeText(MovimientosActivity.this, elegido.getImagen(),Toast.LENGTH_LONG).show();
+            }
+        });
 
 
     }
@@ -252,7 +279,7 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
     *   Subir Datos al servidor de sqlite a mysql
     *
     */
-    class Subir extends AsyncTask<String, String, String> {
+   class Subir extends AsyncTask<String, String, String> {
         @Override
         protected String doInBackground(String... strings) {
             if (items.size() > 0) {
@@ -261,7 +288,7 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
                         //filenameGaleria = getFilename();
                         String uploadId = UUID.randomUUID().toString();
                         final int finalX = x;
-                        new MultipartUploadRequest(MovimientosActivity.this, uploadId, "http://"+ JSON.ipserver+"/sincronizarImagen")
+                        /*new MultipartUploadRequest(MovimientosActivity.this, uploadId, "http://"+ JSON.ipserver+"/sincronizarImagen")
                                 .addFileToUpload(items.get(x).getImage(), "fotoUp")
                                 .addParameter("Nombre", items.get(x).getId_movimiento())
                                 .setMaxRetries(2)
@@ -278,13 +305,13 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
                                     public void onCompleted(UploadInfo uploadInfo, ServerResponse serverResponse) {
                                         //ELiminar imagen
                                         File eliminar = new File(items.get(finalX).getImage());
-                                        /*if (eliminar.exists()) {
+                                        if (eliminar.exists()) {
                                             if (eliminar.delete()) {
                                                 System.out.println("archivo eliminado:" + items.get(finalX).getImage());
                                             } else {
                                                 System.out.println("archivo no eliminado" + items.get(finalX).getImage());
                                             }
-                                        }*/
+                                        }
                                         Log.e("Response Upload", serverResponse.toString());
                                         Toast.makeText(MovimientosActivity.this,"Imagen subida exitosamente.",Toast.LENGTH_SHORT).show();
                                     }
@@ -292,21 +319,21 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
                                     @Override
                                     public void onCancelled(UploadInfo uploadInfo) {}
                                 }).setNotificationConfig(new UploadNotificationConfig().setTitle("Portoaguas EP.").setCompletedMessage("Subida Completada en [[ELAPSED_TIME]]").setIcon(R.drawable.ic_stat_name))
-                                .startUpload();
+                                .startUpload();*/
 
                         //////// AQUI VA EL ACTUALIZAR PARA SUBIR LOS DATOS SINCRONIZADOS
                         //movimientoHelper.eliminar_dato(Integer.getInteger(items.get(x).getId_movimiento()));
-                        SQLiteDatabase DB =objDB.getWritableDatabase();
+                        /*SQLiteDatabase DB =objDB.getWritableDatabase();
                         String Selection= TramitesDB.Datos_tramites.ID_TAREA_TRAMITE+"=?";
                         String [] argsel= {items.get(x).getId_movimiento()};
                         int valor = DB.delete(TramitesDB.Datos_tramites.TABLA_MOVIMIENTOS,Selection,argsel);
-                        Log.e("VAL", String.valueOf(valor));
+                        Log.e("VAL", String.valueOf(valor));*/
 
 
                         /* ***************************
                            ACTUALIZACION EN LA TABLA TRAMITES EL ESTADO FINALIZADO
                          *****/
-                        SQLiteDatabase bd = objDB.getWritableDatabase();
+                      /*  SQLiteDatabase bd = objDB.getWritableDatabase();
                         ContentValues valores = new ContentValues();
                         valores.put(TramitesDB.Datos_tramites.ESTADO_TRAMITE,"F");
                         String [] argsel1 = {items.get(x).getId_movimiento()};
@@ -318,7 +345,7 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
 
 
                         finish();
-                        startActivity(getIntent());
+                        startActivity(getIntent());*/
                     } catch (Exception exc) {
                         System.out.println(exc.getMessage()+" "+exc.getLocalizedMessage());
                     }
@@ -349,19 +376,36 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
 
         @Override
         protected void onPostExecute(String s) {
-            pDialog.dismiss();
             if (s == "0") {
                 StyleableToast.makeText(MovimientosActivity.this, "Todas sus cortes y Reconeccion han sido enviado!", Toast.LENGTH_SHORT, R.style.StyledToastError).show();
             } else {
                 Ma = new MovimientsAdapter2(MovimientosActivity.this, items);
                 lista.setAdapter(Ma);
+
+                pDialog.dismiss();
             }
         }
 
         @Override
         protected String doInBackground(String... voids) {
             items.clear();
-            items = movimientoHelper.recuperarCONTACTOS();
+            //items = movimientoHelper.recuperarCONTACTOS();
+
+            SQLiteDatabase db = objDB.getReadableDatabase();
+
+           //ArrayList<Movimiento> lista_contactos = new ArrayList<Movimiento>();
+            String[] valores_recuperar = {"id,imagen,lat_reg_trab,long_reg_trab,sal_abil,total_mov,tabla,observacion,id_tarea_tramite"};
+            Cursor c = db.query("trab_mov", valores_recuperar,
+                    null, null, null, null, null, null);
+            c.moveToFirst();
+            do {
+                items.add(new Movimiento(c.getLong(0), c.getString(1),c.getString(2), c.getString(3),c.getString(4),c.getString(5),c.getString(6),c.getString(7),c.getString(8)));
+            } while (c.moveToNext());
+            db.close();
+            c.close();
+           // return lista_contactos;
+
+
             if (items.size() == 0) {
                 return "0";
             }
@@ -382,7 +426,8 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
 
         @Override
         protected String doInBackground(String... strings) {
-            total = movimientoHelper.TotalMovimientos();
+            //total = movimientoHelper.TotalMovimientos();
+            total= total_movimientos();
             Log.e("Total de item:", String.valueOf(total));
             if (total > 0) {
                 res = "ok";
@@ -458,5 +503,24 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
         }
     }
 
+    public int total_movimientos(){
+    SQLiteDatabase db = objDB.getReadableDatabase();
+        int cont = 0;
+    String[] valores_recuperar = {"id"};
+    Cursor c = db.query("trab_mov", valores_recuperar,
+            null, null, null, null, null, null);
+        c.moveToFirst();
+
+        if(c.getCount()==0){
+
+    }else {
+        do {
+            cont++;
+        } while (c.moveToNext());
+    }
+        db.close();
+        c.close();
+        return cont;
+    }
 
 }

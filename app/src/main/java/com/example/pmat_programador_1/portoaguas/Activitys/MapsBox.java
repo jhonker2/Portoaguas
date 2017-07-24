@@ -132,11 +132,13 @@ import java.util.UUID;
 import Adapter.RecycleViewAdapter;
 import Models.Puntos;
 import Models.Rubros;
+import sqlit.Movimiento;
 import sqlit.MovimientoHelper;
 import sqlit.TramitesDB;
 import utils.Constants;
 import utils.CoordinateConversion;
 import utils.JSON;
+import utils.VerificarInternet;
 
 import static Adapter.RecycleViewAdapter.detall;
 
@@ -216,7 +218,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view_3);
         navigationView.setNavigationItemSelectedListener(this);
         SharedPreferences datos_preferencias2 = getSharedPreferences("perfil", Context.MODE_PRIVATE);
-        if(datos_preferencias2.getString("p_modoOffline",null)==null) {
+        if(datos_preferencias2.getString("p_modoOffline",null) == null) {
             if (!isOnlineNet()) {
                 //mensaje_ofline();
                 final SharedPreferences datos_off = getSharedPreferences("perfil", Context.MODE_PRIVATE);
@@ -229,21 +231,20 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
             @Override
             public void onMapReady(MapboxMap mapboxMap) {
                 map=mapboxMap;
-                SharedPreferences datos_preferencias = getSharedPreferences("perfil", Context.MODE_PRIVATE);
-                if(datos_preferencias.getString("p_modoOffline",null)==String.valueOf(1)){
-                    Toast.makeText(MapsBox.this,"No hay conexion con el servidor Portoaguas los datos se almacenaran internamente",Toast.LENGTH_LONG).show();
-                    Proceso_Puntos(map);
-                }else{
+                VerificarInternet tarea = new VerificarInternet(MapsBox.this, new VerificarInternet.EntoncesHacer() {
+
+                    @Override
+                    public void cuandoHayInternet() {
                         /* VERIFICAMOS SI EXISTEN REGISTRO ALMACENANOS*/
                         SQLiteDatabase db = objDB.getReadableDatabase();
                         String[] valores_recuperar = {"*"};
                         final Cursor c = db.query("trab_mov", valores_recuperar,
-                            null, null, null, null, null, null);
-                            if (c.moveToFirst()) {
-                                do {
-                                    new RegistrarMovimiento_2().execute(c.getString(1),c.getString(2),c.getString(3),c.getString(4),c.getString(5),c.getString(6),c.getString(7));
-                                } while (c.moveToNext());
-                            }
+                                null, null, null, null, null, null);
+                        if (c.moveToFirst()) {
+                            do {
+                                new RegistrarMovimiento_2().execute(c.getString(1),c.getString(2),c.getString(3),c.getString(4),c.getString(5),c.getString(6),c.getString(7),c.getString(8));
+                            } while (c.moveToNext());
+                        }
                         db.close();
                         c.close();
 
@@ -260,6 +261,20 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                         db1.close();
                         c2.close();
                     }
+
+                    @Override
+                    public void cuandoNOHayInternet() {
+                        //Toast.makeText(MapsBox.this,"No hay conexion con el servidor Portoaguas los datos se almacenaran internamente",Toast.LENGTH_LONG).show();
+                        Proceso_Puntos(map);
+                    }
+                });
+                tarea.execute();
+               /* SharedPreferences datos_preferencias = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+                if(datos_preferencias.getString("p_modoOffline",null).equals(String.valueOf(1))){
+
+                }else{
+
+                    }*/
             }
         });
 
@@ -530,16 +545,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
         @Override
         protected void onPostExecute(String s) {
             pDialog.dismiss();
-           /* if (ContextCompat.checkSelfPermission(MapsBox.this, Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
-                //mMap.setMyLocationEnabled(true);
-            } else {
-                // Show rationale and request permission.
-            }*/
-
             if(item.size()==0){
-                //LatLng sydney2= new LatLng(-1.035966, -80.464269);
-                //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney2,new Float(15)));
                 StyleableToast.makeText(MapsBox.this, "No contiene puntos de corte en su mapa comuniquese con la central para que se le asignen mas puntos de corte....", Toast.LENGTH_LONG, R.style.StyledToastError).show();
             }else {
                 CameraPosition position = null;
@@ -670,6 +676,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                         @Override
                         public void onClick(View v) {
                             //PREGUNTA SI HAY CONEXION
+
                             if(!isOnlineNet()){
                                 //Snackbar.make(mView,"No hay conexion con el servidor los datos se almacenaran localmente",Snackbar.LENGTH_LONG).setAction("Action",null).show();
                                 String Observacion = comentario.getText().toString();
@@ -766,6 +773,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                                     valores1.put(TramitesDB.Datos_tramites.ID_TAREA_TRAMITE,String.valueOf(id_tarea_tra));
                                     valores1.put(TramitesDB.Datos_tramites.OBSERVACION,comentario.getText().toString());
                                     valores1.put(TramitesDB.Datos_tramites.SAL_ABIL,_patron);
+                                    valores1.put(TramitesDB.Datos_tramites.IMAGEN,foto);
                                     valores1.put(TramitesDB.Datos_tramites.TOTAL_MOV,String.valueOf(total_));
                                     valores1.put(TramitesDB.Datos_tramites.TABLA_INFO,tabla.toString());
                                     Long id_Guardar=db.insert(TramitesDB.Datos_tramites.TABLA_TRAB_MOV,null,valores1);
@@ -774,7 +782,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                                     }else {
                                         Log.e("SQLITE SAVE", "Datos guardados");
                                         StyleableToast.makeText(MapsBox.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
-                                        SQLiteDatabase db1= objDB.getWritableDatabase();
+                                        /*SQLiteDatabase db1= objDB.getWritableDatabase();
                                         ContentValues valores2 =  new ContentValues();
                                         valores2.put(TramitesDB.Datos_tramites.ID_TAREA_TRAMITE,String.valueOf(id_tarea_tra));
                                         valores2.put(TramitesDB.Datos_tramites.IMAGEN,foto);
@@ -784,7 +792,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                                         if(id_Guardar1==-1){
                                             Log.e("SQLITE SAVE","ERRORguardados");
                                         }else {
-                                            Log.e("SQLITE SAVE", "Datos guardados");
+                                            Log.e("SQLITE SAVE", "Datos guardados");*/
                             /*
                             ACTUALIZAR PUNTO EL ESTADO SQLITE
                             */
@@ -811,7 +819,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                                             startActivity(getIntent());
                                             //*********************************************************
                                         }
-                                    }
+                                    //}
                                 }
                             }else{
                                 String Observacion = comentario.getText().toString();
@@ -1349,7 +1357,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
 
     class RegistrarMovimiento_2 extends AsyncTask<String, Void, Boolean> {
         private ProgressDialog pDialog;
-        String ID_TAREA_TRAMITE ="";
+        String ID_TAREA_TRAMITE_VAL ="";
         SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
         @Override
         protected void onPreExecute() {
@@ -1371,7 +1379,7 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
             nameValuePairs.add(new BasicNameValuePair("observacion", strings[3]));
             nameValuePairs.add(new BasicNameValuePair("sal_abil", strings[4]));
             nameValuePairs.add(new BasicNameValuePair("total_mov", strings[5]));
-            nameValuePairs.add(new BasicNameValuePair("tabla", strings[6]));
+            nameValuePairs.add(new BasicNameValuePair("tabla", strings[7]));
             nameValuePairs.add(new BasicNameValuePair("cedula",dato.getString("p_idUsuario", null) ));
             nameValuePairs.add(new BasicNameValuePair("id_dispositivo",dato.getString("p_idmovil", null) ));
             try {
@@ -1385,31 +1393,21 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                     resul=false;
                 }else{
                     HttpEntity entity = response.getEntity();
-                    ID_TAREA_TRAMITE = EntityUtils.toString(entity);
-                    JSONObject obj = new JSONObject(ID_TAREA_TRAMITE);
+                    ID_TAREA_TRAMITE_VAL = EntityUtils.toString(entity);
+                    JSONObject obj = new JSONObject(ID_TAREA_TRAMITE_VAL);
                     String codigojson = obj.getString("registro");
                     //Log.e("ULTIMO ID MOVIMIENTO", data);
-                    ID_TAREA_TRAMITE = codigojson;
+                    ID_TAREA_TRAMITE_VAL = codigojson;
                     resul = true;
 
                 //  SUBIDA DE LA FOTO ALMACENA LOCAL
                     String uploadId = UUID.randomUUID().toString();
-                    String foto_local="";
-                    SQLiteDatabase DB1 = objDB.getReadableDatabase();
-                    String[] valor_recuperado ={"imagen"};
-                    final Cursor c = DB1.query("movimientos",valor_recuperado,"id_tarea_tramite=?", new String[]{strings[2]},null,null,null);
-                    if(c.moveToFirst()){
-                        do{
-                            foto_local= c.getString(0);
-                        }while (c.moveToNext());
-                    }
-                    DB1.close();
-                    c.close();
+
 
                     try {
                         new MultipartUploadRequest(MapsBox.this, uploadId, "http://"+ JSON.ipserver+"/ftp_imagen")
-                                .addFileToUpload(foto_local, "foto")
-                                .addParameter("id_tarea_tramite", ID_TAREA_TRAMITE)
+                                .addFileToUpload(strings[6], "foto")
+                                .addParameter("id_tarea_tramite", ID_TAREA_TRAMITE_VAL)
                                 .setMaxRetries(2)
                                 .setDelegate(new UploadStatusDelegate() {
                                     @Override
@@ -1458,14 +1456,13 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                 SQLiteDatabase DB;
                 DB=objDB.getWritableDatabase();
                 String Selection = TramitesDB.Datos_tramites.ID_TAREA_TRAMITE + "=?";
-                String[] argsel = {data};
+                String[] argsel = {ID_TAREA_TRAMITE_VAL};
                 int valor = DB.delete(TramitesDB.Datos_tramites.TABLA_TRAB_MOV, Selection, argsel);
                 if (valor != 1) {
                     Log.e("DELETE TRAB_MOV LOCAL", "ERROR AL ELIMINAR EL CORTE ");
                 } else {
                     DB.close();
                     //alertDialog.dismiss();
-
                     StyleableToast.makeText(MapsBox.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
                     Log.e("DELETE TRAB_MOV LOCAL", "DATOS ELIMINADOS FINALIZADO");
                 }
@@ -2230,170 +2227,31 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
 
                 //Boton para ENVIAR DATOS AL SERVIDOR PORTOAGUAS
                 btnSaveCliente.setOnClickListener(new View.OnClickListener() {
-                    @Override
+                        @Override
                     public void onClick(View v) {
                         //PREGUNTA SI HAY CONEXION
-                        if(!isOnlineNet()){
-                            //Snackbar.make(mView,"No hay conexion con el servidor los datos se almacenaran localmente",Snackbar.LENGTH_LONG).setAction("Action",null).show();
-                            String Observacion = comentario.getText().toString();
-                            if (Observacion.equals("")) {
-                                comentario.setError("Debe ingresar una observación");
-                            } else {
-                                  /*
-                                     LATITUD Y LONGITUD EN UTM PARA ENVIAR
-                                    */
-                                latitud_r = mLastLocation.getLatitude();
-                                logintud_r = mLastLocation.getLongitude();
-                                String UTM = obj.latLon2UTM(latitud_r, logintud_r);
-                                String[] _utm = UTM.split(" ");
-                                double easting = Double.parseDouble(_utm[2]);
-                                double northing = Double.parseDouble(_utm[3]);
-                                Log.e("UTM", String.valueOf(easting) + " " + String.valueOf(northing));
+                            VerificarInternet tarea = new VerificarInternet(MapsBox.this, new VerificarInternet.EntoncesHacer() {
 
-                                //////////////////////////////////////////
-                                    /*
-                                    SAL_ABIL PARA ENVIAR
-                                    PATRON
-                                      63     @@      77  @@   1   @@  6 -> ||
-                                       ^     ^       ^   ^    ^   ^   ^     ^
-                                       |     |       |   |    |   |   |     |
-                                       COD         COD        V     CANT
-                                         R.          PRO        UNI
-                                     */
-
-                                String patron = "";
-                                JSONArray tabla = new JSONArray();
-                                for (int x = 0; x < detall.size(); x++) {
-                                    JSONObject pc = new JSONObject();
-
-                                    if (detall.get(x).getCantidad().equals("0")) {
-
+                                @Override
+                                public void cuandoHayInternet() {
+                                    btnSaveCliente.setEnabled(false);
+                                    btnSaveCliente.setClickable(false);
+                                    String Observacion = comentario.getText().toString();
+                                    if (Observacion.equals("")) {
+                                        comentario.setError("Debe ingresar una observación");
                                     } else {
-                                        patron = patron + detall.get(x).getCodigo() + "@@" + detall.get(x).getCod_prod() + "@@" + detall.get(x).getPrecio() + "@@" + detall.get(x).getCantidad() + "||";
-                                        try {
-                                            pc.put("Cod_rubro", detall.get(x).getCodigo());
-                                            pc.put("Cod_prod", detall.get(x).getCod_prod());
-                                            pc.put("v_unit", detall.get(x).getPrecio());
-                                            pc.put("cant", detall.get(x).getCantidad());
-                                            tabla.put(pc);
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                }
-                                int length = patron.length();
-                                String _patron = "";
-                                if (patron.endsWith("||")) {
-                                    Log.e("Patron", patron.substring(0, length - 2));
-                                    _patron = patron.substring(0, length - 2);
-                                } else {
-                                    Log.e("Patron", patron);
-                                    _patron = patron;
-                                }
-                                /////////////////////////////////////////////
-
-                            /*
-                                TOTAL MOVIMIENTO
-                             */
-                                double total_ = 0;
-                                if (total.getText().toString().equals("") || total.getText().toString().equals(0)) {
-                                    total_ = 0;
-                                } else {
-                                    total_ = Double.parseDouble(total.getText().toString());
-                                }
-                                Log.e("TOTAL", String.valueOf(total_));
-
-
-                                ////////////////////////////////
-                            /*
-                                ID_TRAMITE Y ID_TAREA_TRAMITE
-                             */
-                                long idtrami = 0, id_tarea_tra = 0;
-                                for (int xx = 0; xx < item.size(); xx++) {
-                                    if (item.get(xx).getNumero_cuenta() == Long.parseLong(cuenta.getText().toString())) {
-                                        idtrami = item.get(xx).getId_tramite();
-                                        id_tarea_tra = item.get(xx).getId_tarea_tramite();
-                                    }
-                                }
-
-                                Log.e("ID_TRAMITE", String.valueOf(idtrami) + " " + String.valueOf(id_tarea_tra));
-
-                                ///////////////////////////////////////
-
-
-                                //Proceso de almacenamiento local SQLITE
-                                SQLiteDatabase db= objDB.getWritableDatabase();
-                                ContentValues valores1 =  new ContentValues();
-                                valores1.put(TramitesDB.Datos_tramites.LAT_REG_TRAB,String.valueOf(easting));
-                                valores1.put(TramitesDB.Datos_tramites.LONG_REG_TRAB, String.valueOf(northing));
-                                valores1.put(TramitesDB.Datos_tramites.ID_TAREA_TRAMITE,String.valueOf(id_tarea_tra));
-                                valores1.put(TramitesDB.Datos_tramites.OBSERVACION,comentario.getText().toString());
-                                valores1.put(TramitesDB.Datos_tramites.SAL_ABIL,_patron);
-                                valores1.put(TramitesDB.Datos_tramites.TOTAL_MOV,String.valueOf(total_));
-                                valores1.put(TramitesDB.Datos_tramites.IMAGEN,foto);
-                                valores1.put(TramitesDB.Datos_tramites.TABLA_INFO,tabla.toString());
-                                Long id_Guardar=db.insert(TramitesDB.Datos_tramites.TABLA_TRAB_MOV,null,valores1);
-                                if(id_Guardar==-1){
-                                    Log.e("SQLITE SAVE","ERRORguardados");
-                                }else {
-                                    Log.e("SQLITE SAVE", "Datos guardados");
-                                   /* StyleableToast.makeText(MapsBox.this, "Transaccion realizada con exito!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
-                                    SQLiteDatabase db1= objDB.getWritableDatabase();
-                                    ContentValues valores2 =  new ContentValues();
-                                    valores2.put(TramitesDB.Datos_tramites.ID_TAREA_TRAMITE,String.valueOf(id_tarea_tra));
-                                    valores2.put(TramitesDB.Datos_tramites.IMAGEN,foto);
-                                    valores2.put(TramitesDB.Datos_tramites.OBSERVACION,comentario.getText().toString());
-                                    valores2.put(TramitesDB.Datos_tramites.ESTADO,"S");
-                                    Long id_Guardar1=db1.insert(TramitesDB.Datos_tramites.TABLA_MOVIMIENTOS,null,valores2);
-                                    if(id_Guardar1==-1){
-                                        Log.e("SQLITE SAVE","ERRORguardados");
-                                    }else {
-                                        Log.e("SQLITE SAVE", "Datos guardados");*/
-                            /*
-                            ACTUALIZAR PUNTO EL ESTADO SQLITE
-                            */
-                                        SQLiteDatabase bd = objDB.getWritableDatabase();
-                                        ContentValues valores = new ContentValues();
-                                        valores.put(TramitesDB.Datos_tramites.ESTADO_TRAMITE, "E");
-                                        String[] argsel = {String.valueOf(id_tarea_tra)};
-                                        String Selection = TramitesDB.Datos_tramites.ID_TAREA_TRAMITE + "=?";
-                                        int count = bd.update(TramitesDB.Datos_tramites.TABLA,
-                                                valores, Selection, argsel);
-                                        Log.e("UPDATE", String.valueOf(count));
-
-                            /*
-                            *******************************CONSULTAR SI EXISTEN NUEVOS `PUNTOS ******
-                             */
-                                        //NULL
-                            /*
-                            **************************************************************
-                            */
-                                        alertDialog.dismiss();
-
-                                        //REINICIAMOS LA ACTIVIDAD
-                                        finish();
-                                        startActivity(getIntent());
-                                        //*********************************************************
-                                    }
-                                }
-
-                        }else{
-                            String Observacion = comentario.getText().toString();
-                            if (Observacion.equals("")) {
-                                comentario.setError("Debe ingresar una observación");
-                            } else {
                             /*
                             LATITUD Y LONGITUD EN UTM PARA ENVIAR
                              */
-                                latitud_r = mLastLocation.getLatitude();
-                                logintud_r = mLastLocation.getLongitude();
-                                String UTM = obj.latLon2UTM(latitud_r, logintud_r);
-                                String[] _utm = UTM.split(" ");
-                                double easting = Double.parseDouble(_utm[2]);
-                                double northing = Double.parseDouble(_utm[3]);
-                                Log.e("UTM", String.valueOf(easting) + " " + String.valueOf(northing));
+                                        latitud_r = mLastLocation.getLatitude();
+                                        logintud_r = mLastLocation.getLongitude();
+                                        String UTM = obj.latLon2UTM(latitud_r, logintud_r);
+                                        String[] _utm = UTM.split(" ");
+                                        double easting = Double.parseDouble(_utm[2]);
+                                        double northing = Double.parseDouble(_utm[3]);
+                                        Log.e("UTM", String.valueOf(easting) + " " + String.valueOf(northing));
 
-                                //////////////////////////////////////////
+                                        //////////////////////////////////////////
                             /*
                             SAL_ABIL PARA ENVIAR
                             PATRON
@@ -2404,73 +2262,240 @@ public class MapsBox extends AppCompatActivity implements OnMapReadyCallback, Na
                               R.          PRO        UNI
                              */
 
-                                String patron = "";
-                                JSONArray tabla = new JSONArray();
-                                for (int x = 0; x < detall.size(); x++) {
-                                    JSONObject pc = new JSONObject();
+                                        String patron = "";
+                                        JSONArray tabla = new JSONArray();
+                                        for (int x = 0; x < detall.size(); x++) {
+                                            JSONObject pc = new JSONObject();
 
-                                    if (detall.get(x).getCantidad().equals("0")) {
+                                            if (detall.get(x).getCantidad().equals("0")) {
 
-                                    } else {
-                                        patron = patron + detall.get(x).getCodigo() + "@@" + detall.get(x).getCod_prod() + "@@" + detall.get(x).getPrecio() + "@@" + detall.get(x).getCantidad() + "||";
-                                        try {
-                                            pc.put("Cod_rubro", detall.get(x).getCodigo());
-                                            pc.put("Cod_prod", detall.get(x).getCod_prod());
-                                            pc.put("v_unit", detall.get(x).getPrecio());
-                                            pc.put("cant", detall.get(x).getCantidad());
-                                            tabla.put(pc);
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
+                                            } else {
+                                                patron = patron + detall.get(x).getCodigo() + "@@" + detall.get(x).getCod_prod() + "@@" + detall.get(x).getPrecio() + "@@" + detall.get(x).getCantidad() + "||";
+                                                try {
+                                                    pc.put("Cod_rubro", detall.get(x).getCodigo());
+                                                    pc.put("Cod_prod", detall.get(x).getCod_prod());
+                                                    pc.put("v_unit", detall.get(x).getPrecio());
+                                                    pc.put("cant", detall.get(x).getCantidad());
+                                                    tabla.put(pc);
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
                                         }
-                                    }
-                                }
-                                int length = patron.length();
-                                String _patron = "";
-                                if (patron.endsWith("||")) {
-                                    Log.e("Patron", patron.substring(0, length - 2));
-                                    _patron = patron.substring(0, length - 2);
-                                } else {
-                                    Log.e("Patron", patron);
-                                    _patron = patron;
-                                }
-                                /////////////////////////////////////////////
+                                        int length = patron.length();
+                                        String _patron = "";
+                                        if (patron.endsWith("||")) {
+                                            Log.e("Patron", patron.substring(0, length - 2));
+                                            _patron = patron.substring(0, length - 2);
+                                        } else {
+                                            Log.e("Patron", patron);
+                                            _patron = patron;
+                                        }
+                                        /////////////////////////////////////////////
 
                             /*
                                 TOTAL MOVIMIENTO
                              */
-                                double total_ = 0;
-                                if (total.getText().toString().equals("") || total.getText().toString().equals(0)) {
-                                    total_ = 0;
-                                } else {
-                                    total_ = Double.parseDouble(total.getText().toString());
-                                }
-                                Log.e("TOTAL", String.valueOf(total_));
+                                        double total_ = 0;
+                                        if (total.getText().toString().equals("") || total.getText().toString().equals(0)) {
+                                            total_ = 0;
+                                        } else {
+                                            total_ = Double.parseDouble(total.getText().toString());
+                                        }
+                                        Log.e("TOTAL", String.valueOf(total_));
 
 
-                                ////////////////////////////////
+                                        ////////////////////////////////
                             /*
                                 ID_TRAMITE Y ID_TAREA_TRAMITE
                              */
-                                long idtrami = 0, id_tarea_tra = 0;
-                                for (int xx = 0; xx < item.size(); xx++) {
-                                    if (item.get(xx).getNumero_cuenta() == Long.parseLong(cuenta.getText().toString())) {
-                                        idtrami = item.get(xx).getId_tramite();
-                                        id_tarea_tra = item.get(xx).getId_tarea_tramite();
-                                    }
+                                        long idtrami = 0, id_tarea_tra = 0;
+                                        for (int xx = 0; xx < item.size(); xx++) {
+                                            if (item.get(xx).getNumero_cuenta() == Long.parseLong(cuenta.getText().toString())) {
+                                                idtrami = item.get(xx).getId_tramite();
+                                                id_tarea_tra = item.get(xx).getId_tarea_tramite();
+                                            }
+                                        }
+
+                                        Log.e("ID_TRAMITE", String.valueOf(idtrami) + " " + String.valueOf(id_tarea_tra));
+
+                                        ///////////////////////////////////////
+
+                                        //Metodo para almacenar el movimiento en el mapa
+                                        new RegistrarMovimiento().execute(String.valueOf(easting), String.valueOf(northing), String.valueOf(Observacion), String.valueOf(total_), _patron, String.valueOf(id_tarea_tra), tabla.toString());
+
+                                    }// fin del if de observacion
+                                    detall.clear();
+
                                 }
 
-                                Log.e("ID_TRAMITE", String.valueOf(idtrami) + " " + String.valueOf(id_tarea_tra));
+                                @Override
+                                public void cuandoNOHayInternet(){
+                                    String Observacion = comentario.getText().toString();
+                                    if (Observacion.equals("")) {
+                                        comentario.setError("Debe ingresar una observación");
+                                    } else {
+                                    /*
+                                     LATITUD Y LONGITUD EN UTM PARA ENVIAR
+                                    */
+                                        latitud_r = mLastLocation.getLatitude();
+                                        logintud_r = mLastLocation.getLongitude();
+                                        String UTM = obj.latLon2UTM(latitud_r, logintud_r);
+                                        String[] _utm = UTM.split(" ");
+                                        double easting = Double.parseDouble(_utm[2]);
+                                        double northing = Double.parseDouble(_utm[3]);
+                                        Log.e("UTM", String.valueOf(easting) + " " + String.valueOf(northing));
 
-                                ///////////////////////////////////////
+                                        //////////////////////////////////////////
+                                    /*
+                                    SAL_ABIL PARA ENVIAR
+                                    PATRON
+                                      63     @@      77  @@   1   @@  6 -> ||
+                                       ^     ^       ^   ^    ^   ^   ^     ^
+                                       |     |       |   |    |   |   |     |
+                                       COD         COD        V     CANT
+                                         R.          PRO        UNI
+                                     */
 
-                                //Metodo para almacenar el movimiento en el mapa
-                                new RegistrarMovimiento().execute(String.valueOf(easting), String.valueOf(northing), String.valueOf(Observacion), String.valueOf(total_), _patron, String.valueOf(id_tarea_tra), tabla.toString());
+                                        String patron = "";
+                                        JSONArray tabla = new JSONArray();
+                                        for (int x = 0; x < detall.size(); x++) {
+                                            JSONObject pc = new JSONObject();
 
-                            }// fin del if de observacion
-                        }
-                        detall.clear();
+                                            if (detall.get(x).getCantidad().equals("0")) {
+
+                                            } else {
+                                                patron = patron + detall.get(x).getCodigo() + "@@" + detall.get(x).getCod_prod() + "@@" + detall.get(x).getPrecio() + "@@" + detall.get(x).getCantidad() + "||";
+                                                try {
+                                                    pc.put("Cod_rubro", detall.get(x).getCodigo());
+                                                    pc.put("Cod_prod", detall.get(x).getCod_prod());
+                                                    pc.put("v_unit", detall.get(x).getPrecio());
+                                                    pc.put("cant", detall.get(x).getCantidad());
+                                                    tabla.put(pc);
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        }
+                                        int length = patron.length();
+                                        String _patron = "";
+                                        if (patron.endsWith("||")) {
+                                            Log.e("Patron", patron.substring(0, length - 2));
+                                            _patron = patron.substring(0, length - 2);
+                                        } else {
+                                            Log.e("Patron", patron);
+                                            _patron = patron;
+                                        }
+                                        /////////////////////////////////////////////
+
+                            /*
+                                TOTAL MOVIMIENTO
+                             */
+                                        double total_ = 0;
+                                        if (total.getText().toString().equals("") || total.getText().toString().equals(0)) {
+                                            total_ = 0;
+                                        } else {
+                                            total_ = Double.parseDouble(total.getText().toString());
+                                        }
+                                        Log.e("TOTAL", String.valueOf(total_));
+
+
+                                        ////////////////////////////////
+                            /*
+                                ID_TRAMITE Y ID_TAREA_TRAMITE
+                             */
+                                        long idtrami = 0, id_tarea_tra = 0;
+                                        for (int xx = 0; xx < item.size(); xx++) {
+                                            if (item.get(xx).getNumero_cuenta() == Long.parseLong(cuenta.getText().toString())) {
+                                                idtrami = item.get(xx).getId_tramite();
+                                                id_tarea_tra = item.get(xx).getId_tarea_tramite();
+                                            }
+                                        }
+
+                                        Log.e("ID_TRAMITE", String.valueOf(idtrami) + " " + String.valueOf(id_tarea_tra));
+
+                                        ///////////////////////////////////////
+                                        int total_tra_sqlite=0;
+
+                                        SQLiteDatabase db1 = objDB.getReadableDatabase();
+                                        String[] valores_recuperar = {"id"};
+                                        Cursor c = db1.query("trab_mov", valores_recuperar,
+                                                "id_tarea_tramite=?", new String[]{ String.valueOf(id_tarea_tra)}, null, null, null, null);
+                                        c.moveToFirst();
+                                        if(c.getCount()==0){
+
+                                        }else {
+                                            do {
+                                                total_tra_sqlite++;
+                                            } while (c.moveToNext());
+                                        }
+                                        db1.close();
+                                        c.close();
+
+                                        if(total_tra_sqlite>=1){
+
+                                            SQLiteDatabase DB =objDB.getWritableDatabase();
+                                            String Selection= TramitesDB.Datos_tramites.ID_TAREA_TRAMITE+"=?";
+                                            String [] argsel= {String.valueOf(id_tarea_tra)};
+                                            int valor = DB.delete(TramitesDB.Datos_tramites.TABLA,Selection,argsel);
+                                            //Toast.makeText(MapsBox.this, valor,Toast.LENGTH_LONG).show();
+                                            if(valor==1){
+
+                                            }
+                                            alertDialog.dismiss();
+                                            //REINICIAMOS LA ACTIVIDAD
+                                            finish();
+                                            startActivity(getIntent());
+
+                                        }else{
+                                        //Proceso de almacenamiento local SQLITE
+                                        SQLiteDatabase db= objDB.getWritableDatabase();
+                                        ContentValues valores1 =  new ContentValues();
+                                        valores1.put(TramitesDB.Datos_tramites.LAT_REG_TRAB,String.valueOf(easting));
+                                        valores1.put(TramitesDB.Datos_tramites.LONG_REG_TRAB, String.valueOf(northing));
+                                        valores1.put(TramitesDB.Datos_tramites.ID_TAREA_TRAMITE,String.valueOf(id_tarea_tra));
+                                        valores1.put(TramitesDB.Datos_tramites.OBSERVACION,comentario.getText().toString());
+                                        valores1.put(TramitesDB.Datos_tramites.SAL_ABIL,_patron);
+                                        valores1.put(TramitesDB.Datos_tramites.TOTAL_MOV,String.valueOf(total_));
+                                        valores1.put(TramitesDB.Datos_tramites.IMAGEN,foto);
+                                        valores1.put(TramitesDB.Datos_tramites.TABLA_INFO,tabla.toString());
+                                        Long id_Guardar=db.insert(TramitesDB.Datos_tramites.TABLA_TRAB_MOV,null,valores1);
+                                        if(id_Guardar==-1){
+                                            Log.e("SQLITE SAVE","ERRORguardados");
+                                        }else {
+                                            /*
+                                            ACTUALIZAR PUNTO EL ESTADO SQLITE
+                                            */
+                                            /*SQLiteDatabase bd = objDB.getWritableDatabase();
+                                            ContentValues valores = new ContentValues();
+                                            valores.put(TramitesDB.Datos_tramites.ESTADO_TRAMITE, "E");
+                                            String[] argsel = {String.valueOf(id_tarea_tra)};
+                                            String Selection = TramitesDB.Datos_tramites.ID_TAREA_TRAMITE + "=?";
+                                            int count = bd.update(TramitesDB.Datos_tramites.TABLA,
+                                                    valores, Selection, argsel);
+                                            Log.e("UPDATE", String.valueOf(count));*/
+
+                                            SQLiteDatabase DB =objDB.getWritableDatabase();
+                                            String Selection= TramitesDB.Datos_tramites.ID_TAREA_TRAMITE+"=?";
+                                            String [] argsel= {String.valueOf(id_tarea_tra)};
+                                            int valor = DB.delete(TramitesDB.Datos_tramites.TABLA,Selection,argsel);
+                                            //Toast.makeText(MapsBox.this, valor,Toast.LENGTH_LONG).show();
+                                            if(valor==1){
+
+                                            }
+                                            alertDialog.dismiss();
+                                            //REINICIAMOS LA ACTIVIDAD
+                                            finish();
+                                            startActivity(getIntent());
+                                            //*********************************************************
+                                        }
+                                        }
+                                    }
+                                    detall.clear();
+                                }
+                            });
+                            tarea.execute();
                     }
-
                 });
 
 
