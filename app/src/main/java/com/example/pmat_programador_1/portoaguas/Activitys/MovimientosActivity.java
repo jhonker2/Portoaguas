@@ -81,7 +81,7 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
     public MovimientsAdapter2 Ma;
     private MovimientoHelper movimientoHelper;
     ArrayList<Movimiento> items = new ArrayList<Movimiento>();
-    private TextView txtNombre, txtCargo,numero_tramites;
+    private TextView txtNombre, txtCargo, numero_tramites;
     TramitesDB objDB;
     public String resuld;
     public static String data;
@@ -109,11 +109,11 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
         SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
 
         View navHeaderView = navigationView.getHeaderView(0);
-        txtNombre   = (TextView) navHeaderView.findViewById(R.id.textNombre);
-        txtCargo    = (TextView) navHeaderView.findViewById(R.id.textCargo);
-        txtNombre.setText(da.getString("p_nombreU",null));
-        txtCargo.setText(da.getString("p_cargoU",null));
-        numero_tramites =(TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_slideshow));
+        txtNombre = (TextView) navHeaderView.findViewById(R.id.textNombre);
+        txtCargo = (TextView) navHeaderView.findViewById(R.id.textCargo);
+        txtNombre.setText(da.getString("p_nombreU", null));
+        txtCargo.setText(da.getString("p_cargoU", null));
+        numero_tramites = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_slideshow));
 
         /*if(items.size()==0){
             StyleableToast.makeText(MovimientosActivity.this, "Todas sus cortes y Reconeccion han sido enviado!" , Toast.LENGTH_SHORT, R.style.StyledToast).show();
@@ -129,7 +129,7 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
                 } else {
                     items.get(position).setSeleccionado(true);
                 }
-               // Ma.notifyDataSetChanged();
+                // Ma.notifyDataSetChanged();
                 Movimiento elegido = (Movimiento) parent.getItemAtPosition(position);
 
                /* Intent intent = new Intent(MovimientosActivity.this, ActivityPreview.class);
@@ -142,39 +142,40 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
                     );
                 }*/
                 //startActivity(intent);
-                Toast.makeText(MovimientosActivity.this, elegido.getImagen(),Toast.LENGTH_LONG).show();
+                Toast.makeText(MovimientosActivity.this, elegido.getImagen(), Toast.LENGTH_LONG).show();
             }
         });
 
 
     }
 
-    private void initializeCountDrawer(){
+    private void initializeCountDrawer() {
         numero_tramites.setGravity(Gravity.CENTER_VERTICAL);
         numero_tramites.setTypeface(null, Typeface.BOLD);
         numero_tramites.setTextColor(getResources().getColor(R.color.colorAccent));
-        int val= Total_tramitesSQLITE();
-        if(val==0){
+        int val = Total_tramitesSQLITE();
+        if (val == 0) {
             numero_tramites.setText("");
-        }else{
+        } else {
             numero_tramites.setText("(" + String.valueOf(val) + ")");
         }
     }
+
     /*
   FUNCION TOTAL_TRAMITESSQLITE PERMITE OBTENER EL TOTAL DE TRAMITES QUE
   EXISTEN EN LA BASE DE DATOS SQLITE DEL DISPOSITIVO
    */
-    public int Total_tramitesSQLITE(){
-        int total_tra_sqlite=0;
+    public int Total_tramitesSQLITE() {
+        int total_tra_sqlite = 0;
 
         SQLiteDatabase db = objDB.getReadableDatabase();
         String[] valores_recuperar = {"id_tramite", "id_tarea_tramite"};
         Cursor c = db.query("tramites", valores_recuperar,
                 "estado_tramite=?", new String[]{"I"}, null, null, null, null);
         c.moveToFirst();
-        if(c.getCount()==0){
+        if (c.getCount() == 0) {
 
-        }else {
+        } else {
             do {
                 total_tra_sqlite++;
             } while (c.moveToNext());
@@ -184,6 +185,7 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
 
         return total_tra_sqlite;
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -226,6 +228,7 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
     }
 
     AlertDialog alert = null;
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -236,7 +239,8 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
             Intent inte = new Intent(this, MapsActivity.class);
             startActivity(inte);
 
-        } else*/ if (id == R.id.nav_slideshow) {
+        } else*/
+        if (id == R.id.nav_slideshow) {
             Intent inte = new Intent(this, com.example.pmat_programador_1.portoaguas.Activitys.MapsBox.class);
             startActivity(inte);
 
@@ -246,7 +250,7 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
         } /*else if (id == R.id.Position) {
             Intent inte = new Intent(MainActivity.this, locationActivity.class);
             startActivity(inte);
-        } */else if (id == R.id.nav_send) {
+        } */ else if (id == R.id.nav_send) {
             /*Intent inte = new Intent(this, loginActivity.class);
             startActivity(inte);
             finish();*/
@@ -279,7 +283,7 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
     *   Subir Datos al servidor de sqlite a mysql
     *
     */
-   class Subir extends AsyncTask<String, String, String> {
+    class Subir extends AsyncTask<String, String, String> {
         @Override
         protected String doInBackground(String... strings) {
             if (items.size() > 0) {
@@ -347,7 +351,7 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
                         finish();
                         startActivity(getIntent());*/
                     } catch (Exception exc) {
-                        System.out.println(exc.getMessage()+" "+exc.getLocalizedMessage());
+                        System.out.println(exc.getMessage() + " " + exc.getLocalizedMessage());
                     }
 
                 }
@@ -393,17 +397,17 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
 
             SQLiteDatabase db = objDB.getReadableDatabase();
 
-           //ArrayList<Movimiento> lista_contactos = new ArrayList<Movimiento>();
+            //ArrayList<Movimiento> lista_contactos = new ArrayList<Movimiento>();
             String[] valores_recuperar = {"id,imagen,lat_reg_trab,long_reg_trab,sal_abil,total_mov,tabla,observacion,id_tarea_tramite"};
             Cursor c = db.query("trab_mov", valores_recuperar,
                     null, null, null, null, null, null);
             c.moveToFirst();
             do {
-                items.add(new Movimiento(c.getLong(0), c.getString(1),c.getString(2), c.getString(3),c.getString(4),c.getString(5),c.getString(6),c.getString(7),c.getString(8)));
+                items.add(new Movimiento(c.getLong(0), c.getString(1), c.getString(2), c.getString(3), c.getString(4), c.getString(5), c.getString(6), c.getString(7), c.getString(8)));
             } while (c.moveToNext());
             db.close();
             c.close();
-           // return lista_contactos;
+            // return lista_contactos;
 
 
             if (items.size() == 0) {
@@ -427,9 +431,9 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
         @Override
         protected String doInBackground(String... strings) {
             //total = movimientoHelper.TotalMovimientos();
-            total= total_movimientos();
+            total = total_movimientos();
             Log.e("Total de item:", String.valueOf(total));
-            if (total > 0) {
+                if (total > 0) {
                 res = "ok";
             } else {
                 res = "vacio";
@@ -446,8 +450,10 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
             }
         }
     }
-    class CerrarSesion extends AsyncTask<String, Void ,String>{
+
+    class CerrarSesion extends AsyncTask<String, Void, String> {
         private ProgressDialog pDialog;
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -461,16 +467,16 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
         @Override
         protected void onPostExecute(String s) {
             pDialog.dismiss();
-            if(s.equals("cerrada")){
+            if (s.equals("cerrada")) {
                 SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
                 da.edit().clear().commit();
-                SQLiteDatabase DB =objDB.getWritableDatabase();
-                int valor = DB.delete(TramitesDB.Datos_tramites.TABLA,null,null);
+                SQLiteDatabase DB = objDB.getWritableDatabase();
+                int valor = DB.delete(TramitesDB.Datos_tramites.TABLA, null, null);
 
                 Intent inte = new Intent(MovimientosActivity.this, loginActivity.class);
                 startActivity(inte);
                 finish();
-            }else if(s.equals("No_cerrada")){
+            } else if (s.equals("No_cerrada")) {
                 StyleableToast.makeText(MovimientosActivity.this, "Error Al cerrar Sesión intente nuevamente!!", Toast.LENGTH_LONG, R.style.StyledToastError).show();
 
             }
@@ -480,8 +486,8 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
         protected String doInBackground(String... strings) {
             SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
             ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-            nameValuePairs.add(new BasicNameValuePair("id_usuario", da.getString("p_idUsuario",null)));
-            nameValuePairs.add(new BasicNameValuePair("id_dispositivo", da.getString("p_idmovil",null)));
+            nameValuePairs.add(new BasicNameValuePair("id_usuario", da.getString("p_idUsuario", null)));
+            nameValuePairs.add(new BasicNameValuePair("id_dispositivo", da.getString("p_idmovil", null)));
             try {
                 HttpClient httpclient = new DefaultHttpClient();
                 HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/logout");
@@ -491,8 +497,8 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
                 data = EntityUtils.toString(entity);
                 Log.e("CERRAR", data);
 
-                JSONObject obj= new JSONObject(data);
-                String  res=obj.getString("respuesta");
+                JSONObject obj = new JSONObject(data);
+                String res = obj.getString("respuesta");
                 //data=codigojson;
                 resuld = res;
             } catch (Exception e) {
@@ -503,23 +509,20 @@ public class MovimientosActivity extends AppCompatActivity implements Navigation
         }
     }
 
-    public int total_movimientos(){
-    SQLiteDatabase db = objDB.getReadableDatabase();
+    public int total_movimientos() {
+        SQLiteDatabase db = objDB.getReadableDatabase();
         int cont = 0;
-    String[] valores_recuperar = {"id"};
-    Cursor c = db.query("trab_mov", valores_recuperar,
-            null, null, null, null, null, null);
-        c.moveToFirst();
-
-        if(c.getCount()==0){
-
-    }else {
-        do {
-            cont++;
-        } while (c.moveToNext());
-    }
+        String[] valores_recuperar = {"id"};
+        Cursor c = db.query("trab_mov", valores_recuperar,
+                null, null, null, null, null, null);
+        if (c.moveToFirst()) {
+            do {
+                cont++;
+            } while (c.moveToNext());
+        }
         db.close();
         c.close();
+
         return cont;
     }
 

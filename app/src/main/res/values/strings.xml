@@ -17,4 +17,5 @@
     <string name="title_activity_consulta">Buscar Cliente</string>
     <string name="title_activity_tramite">Tramites Almacenados</string>
     <string name="nombre_transicion_imagen">imagen_compartida</string>
+    <string name="title_activity_info_general">InfoGeneral</string>
 </resources>

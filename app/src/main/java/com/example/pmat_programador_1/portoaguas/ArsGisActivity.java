@@ -1,25 +1,11 @@
 package com.example.pmat_programador_1.portoaguas;
 
-import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.pm.PackageManager;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-
-import com.esri.android.runtime.ArcGISRuntime;
-/*import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
-import com.esri.arcgisruntime.geometry.SpatialReferences;
-import com.esri.arcgisruntime.mapping.ArcGISMap;
-import com.esri.arcgisruntime.mapping.Basemap;
-import com.esri.arcgisruntime.mapping.view.Graphic;
-import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
-import com.esri.arcgisruntime.mapping.view.MapView;
-import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;*/
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -39,6 +25,15 @@ import Models.Puntos;
 import utils.CoordinateConversion;
 import utils.JSON;
 
+/*import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
+import com.esri.arcgisruntime.geometry.SpatialReferences;
+import com.esri.arcgisruntime.mapping.ArcGISMap;
+import com.esri.arcgisruntime.mapping.Basemap;
+import com.esri.arcgisruntime.mapping.view.Graphic;
+import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
+import com.esri.arcgisruntime.mapping.view.MapView;
+import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;*/
+
 
 /**
  * Created by PMAT-PROGRAMADOR_1 on 04/04/2017.
@@ -55,7 +50,6 @@ public class ArsGisActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ArcGISRuntime.setClientId("gn1VHfaow2NXi0H0");
         //ArcGISRuntimeEnvironment.setLicense("runtimelite,1000,rud4711010970,none,5H80TK8ELBC0A1GJH168");
         setContentView(R.layout.map_arsgis);
         //mMapView = (MapView) findViewById(R.id.map);

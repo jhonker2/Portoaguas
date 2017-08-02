@@ -12,8 +12,9 @@ import java.io.IOException;
 
 public class VerificarInternet extends AsyncTask<Void, Void, Boolean> {
 
-    public interface EntoncesHacer{
+    public interface EntoncesHacer {
         void cuandoHayInternet();
+
         void cuandoNOHayInternet();
     }
 
@@ -39,11 +40,11 @@ public class VerificarInternet extends AsyncTask<Void, Void, Boolean> {
     protected void onPostExecute(Boolean aBoolean) {
         super.onPostExecute(aBoolean);
 
-       // dialog.dismiss();
+        // dialog.dismiss();
 
-        if(aBoolean){
+        if (aBoolean) {
             accion.cuandoHayInternet();
-        }else{
+        } else {
             accion.cuandoNOHayInternet();
         }
     }
@@ -51,14 +52,14 @@ public class VerificarInternet extends AsyncTask<Void, Void, Boolean> {
     @Override
     protected Boolean doInBackground(Void... voids) {
         Runtime runtime = Runtime.getRuntime();
-        try{
-          // java.lang.Process ipProcess = runtime.exec("ping -c 2 -w 4 192.168.137.1");
-            java.lang.Process ipProcess = runtime.exec("ping -c 2 -w 4 google.com");
+        try {
+           // java.lang.Process ipProcess = runtime.exec("ping -c 2 -w 4 192.168.1.243");
+           java.lang.Process ipProcess = runtime.exec("ping -c 2 -w 4 google.com");
             int exitValue = ipProcess.waitFor();
             return (exitValue == 0);
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
-        }catch (InterruptedException e){
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
         return false;

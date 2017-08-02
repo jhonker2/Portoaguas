@@ -5,7 +5,7 @@
 
     <TextView
         android:id="@+id/l_cuenta"
-        android:layout_width="50dp"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
@@ -17,38 +17,53 @@
 
     <TextView
         android:id="@+id/l_cedula"
-        android:layout_width="70dp"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:text="cedula"
         android:layout_alignBaseline="@+id/l_cuenta"
         android:layout_alignBottom="@+id/l_cuenta"
-        android:layout_toRightOf="@+id/l_cuenta"
+        android:layout_marginLeft="76dp"
+        android:layout_marginStart="76dp"
         android:layout_toEndOf="@+id/l_cuenta"
-        android:layout_marginLeft="14dp"
-        android:layout_marginStart="14dp" />
+        android:layout_toRightOf="@+id/l_cuenta"
+        android:text="cedula" />
 
     <TextView
         android:id="@+id/l_cliente"
-        android:layout_width="150dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="cliente"
-        android:layout_alignBaseline="@+id/l_cedula"
-        android:layout_alignBottom="@+id/l_cedula"
-        android:layout_toRightOf="@+id/l_cedula"
-        android:layout_toEndOf="@+id/l_cedula"
-        android:layout_marginLeft="12dp"
-        android:layout_marginStart="12dp" />
+        android:layout_alignLeft="@+id/l_cuenta"
+        android:layout_alignStart="@+id/l_cuenta"
+        android:layout_below="@+id/l_cuenta"
+        android:layout_marginTop="6dp"
+        android:text="cliente" />
 
     <TextView
         android:id="@+id/l_direcion"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="direcion"
-        android:layout_alignBaseline="@+id/l_cliente"
-        android:layout_alignBottom="@+id/l_cliente"
-        android:layout_toRightOf="@+id/l_cliente"
-        android:layout_toEndOf="@+id/l_cliente"
-        android:layout_marginLeft="13dp"
-        android:layout_marginStart="13dp" />
+        android:layout_alignLeft="@+id/l_empresa"
+        android:layout_alignStart="@+id/l_empresa"
+        android:layout_below="@+id/l_empresa"
+        android:layout_marginTop="6dp"
+        android:text="direcion" />
+
+    <TextView
+        android:id="@+id/l_empresa"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/l_cliente"
+        android:layout_alignStart="@+id/l_cliente"
+        android:layout_below="@+id/l_cliente"
+        android:layout_marginTop="6dp"
+        android:text="Empresa" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/l_direcion"
+        android:layout_marginTop="10dp"
+        android:elevation="5dp" />
 
 </RelativeLayout>

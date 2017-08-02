@@ -22,7 +22,7 @@ import sqlit.Movimiento;
 public class ClientesAdapter extends BaseAdapter {
     protected Activity activity;
     protected ArrayList<Clientes> items;
-    public TextView cuenta,cedula,client,direcion;
+    public TextView cuenta,cedula,client,direcion,empresa;
     public Clientes item;
 
 
@@ -60,12 +60,12 @@ public class ClientesAdapter extends BaseAdapter {
         cedula = (TextView) vi.findViewById(R.id.l_cedula);
         client = (TextView) vi.findViewById(R.id.l_cliente);
         direcion = (TextView) vi.findViewById(R.id.l_direcion);
-
+        empresa  = (TextView) vi.findViewById(R.id.l_empresa);
         cuenta.setText(item.getCuenta());
-        cedula.setText(item.getCliente_());
+        cedula.setText(item.getCedula());
         client.setText(item.getCliente_());
         direcion.setText(item.getDirecion());
-
+        empresa.setText(item.getEmpresa());
         return vi;
     }
 }

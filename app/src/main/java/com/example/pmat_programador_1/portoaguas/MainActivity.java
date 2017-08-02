@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,10 +15,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
 import android.location.Location;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.wifi.WifiInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -33,7 +32,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.util.Xml;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -47,7 +45,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.pmat_programador_1.portoaguas.Activitys.MapsBox;
 import com.example.pmat_programador_1.portoaguas.Activitys.MovimientosActivity;
 import com.example.pmat_programador_1.portoaguas.Activitys.consulta;
 import com.example.pmat_programador_1.portoaguas.Activitys.locationActivity;
@@ -63,7 +60,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.google.maps.android.kml.KmlPoint;
 import com.muddzdev.styleabletoastlibrary.StyleableToast;
 
 import org.apache.http.HttpEntity;
@@ -77,16 +73,13 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
-import org.xmlpull.v1.XmlSerializer;
 
-import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import servicios.ServicioGPS;
 import sqlit.TramitesDB;
 import utils.Constants;
 import utils.JSON;
@@ -104,7 +97,7 @@ public class MainActivity extends AppCompatActivity
     private LocationRequest mLocationRequest;
     private LocationSettingsRequest mLocationSettingsRequest;
     private Location mLastLocation;
-    private TextView txtNombre, txtCargo,numero_tramites;
+    private TextView txtNombre, txtCargo, numero_tramites;
     public static String data;
     public boolean resul;
     public String resuld;
@@ -113,9 +106,8 @@ public class MainActivity extends AppCompatActivity
     AlertDialog alert = null;
     static SimpleDateFormat formatofecha = new SimpleDateFormat("yyyy-MM-dd");
     static SimpleDateFormat formatohora = new SimpleDateFormat("hh:mm:ss");
-
-
     TramitesDB objDB;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -134,16 +126,12 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
 
         View navHeaderView = navigationView.getHeaderView(0);
-        txtNombre   = (TextView) navHeaderView.findViewById(R.id.textNombre);
-        txtCargo    = (TextView) navHeaderView.findViewById(R.id.textCargo);
-        txtNombre.setText(da.getString("p_nombreU",null));
-        txtCargo.setText(da.getString("p_cargoU",null));
-        numero_tramites =(TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_slideshow));
-        if (!estaConectado()) {
-            //Toast.makeText(getBaseContext(),"Necesaria conexión a internet ", Toast.LENGTH_SHORT).show();
-        }else{
-            new ValidarLogin().execute();
-        }
+        txtNombre = (TextView) navHeaderView.findViewById(R.id.textNombre);
+        txtCargo = (TextView) navHeaderView.findViewById(R.id.textCargo);
+        txtNombre.setText(da.getString("p_nombreU", null));
+        txtCargo.setText(da.getString("p_cargoU", null));
+        numero_tramites = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_slideshow));
+        new ValidarLogin().execute();
         initializeCountDrawer();
 
         // Establecer punto de entrada para la API de ubicación
@@ -164,14 +152,14 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private void initializeCountDrawer(){
+    private void initializeCountDrawer() {
         numero_tramites.setGravity(Gravity.CENTER_VERTICAL);
         numero_tramites.setTypeface(null, Typeface.BOLD);
         numero_tramites.setTextColor(getResources().getColor(R.color.colorAccent));
-        int val= Total_tramitesSQLITE();
-        if(val==0){
-        numero_tramites.setText("");
-        }else{
+        int val = Total_tramitesSQLITE();
+        if (val == 0) {
+            numero_tramites.setText("");
+        } else {
             numero_tramites.setText("(" + String.valueOf(val) + ")");
         }
     }
@@ -180,17 +168,17 @@ public class MainActivity extends AppCompatActivity
    FUNCION TOTAL_TRAMITESSQLITE PERMITE OBTENER EL TOTAL DE TRAMITES QUE
    EXISTEN EN LA BASE DE DATOS SQLITE DEL DISPOSITIVO
     */
-    public int Total_tramitesSQLITE(){
-        int total_tra_sqlite=0;
+    public int Total_tramitesSQLITE() {
+        int total_tra_sqlite = 0;
 
         SQLiteDatabase db = objDB.getReadableDatabase();
         String[] valores_recuperar = {"id_tramite", "id_tarea_tramite"};
         Cursor c = db.query("tramites", valores_recuperar,
                 "estado_tramite=?", new String[]{"I"}, null, null, null, null);
         c.moveToFirst();
-        if(c.getCount()==0){
+        if (c.getCount() == 0) {
 
-        }else {
+        } else {
             do {
                 total_tra_sqlite++;
             } while (c.moveToNext());
@@ -200,6 +188,7 @@ public class MainActivity extends AppCompatActivity
 
         return total_tra_sqlite;
     }
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -251,6 +240,7 @@ public class MainActivity extends AppCompatActivity
 
         return super.onOptionsItemSelected(item);
     }
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -261,10 +251,11 @@ public class MainActivity extends AppCompatActivity
             Intent inte = new Intent(MainActivity.this, MapsActivity.class);
             startActivity(inte);
 
-        } else*/ if (id == R.id.nav_slideshow) {
-            Intent inte = new Intent(MainActivity.this,  com.example.pmat_programador_1.portoaguas.Activitys.MapsBox.class);
+        } else*/
+        if (id == R.id.nav_slideshow) {
+            Intent inte = new Intent(MainActivity.this, com.example.pmat_programador_1.portoaguas.Activitys.MapsBox.class);
             startActivity(inte);
-        }  else if (id == R.id.nav_share) {
+        } else if (id == R.id.nav_share) {
             Intent inte = new Intent(MainActivity.this, MovimientosActivity.class);
             startActivity(inte);
         } else if (id == R.id.consultar) {
@@ -298,23 +289,39 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
     // FUNCIONES PARA LOCALIZAR DISPOSTIVO
     private void updateLocationUI() {
         VerificarInternet tarea = new VerificarInternet(MainActivity.this, new VerificarInternet.EntoncesHacer() {
             @Override
             public void cuandoHayInternet() {
+                   /* VERIFICAMOS SI EXISTEN REGISTRO ALMACENANOS*/
+                SQLiteDatabase db = objDB.getReadableDatabase();
+                String[] valores_recuperar = {"*"};
+                final Cursor c = db.query("geolocalizacion", valores_recuperar,
+                        null, null, null, null, null, null);
+                if (c != null && c.moveToFirst()) {
+                    do {
+                        //new MapsBox.RegistrarMovimiento_2().execute(c.getString(1),c.getString(2),c.getString(3),c.getString(4),c.getString(5),c.getString(6),c.getString(7),c.getString(8));
+                        new Registrar_MovimientosDispositivo().execute(c.getString(0), c.getString(1), c.getString(2), c.getString(3), c.getString(4), c.getString(5), c.getString(6));
+                    } while (c.moveToNext());
+                }
+                db.close();
+                c.close();
+
+
                 RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
-                String URL= "http://" + JSON.ipserver + "/MovimientosDispositivos";
+                String URL = "http://" + JSON.ipserver + "/MovimientosDispositivos";
                 StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         Log.e("MOVIMIENTOS DISPOSITIVO", response);
 
                     }
-                },new Response.ErrorListener() {
+                }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e("Response","Error a almacenar la posicion del usuario");
+                        Log.e("Response", "Error a almacenar la posicion del usuario");
                     }
                 }) {
                     @Override
@@ -322,10 +329,10 @@ public class MainActivity extends AppCompatActivity
                         SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
 
                         Map<String, String> params = new HashMap<String, String>();
-                        params.put("id_dispositivo",Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID));
+                        params.put("id_dispositivo", Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID));
                         params.put("latitud", String.valueOf(mLastLocation.getLatitude()));
-                        params.put("longitud",  String.valueOf(mLastLocation.getLongitude()));
-                        params.put("cedula", dato.getString("p_idUsuario", null) );
+                        params.put("longitud", String.valueOf(mLastLocation.getLongitude()));
+                        params.put("cedula", dato.getString("p_idUsuario", null));
 
                         return params;
                     }
@@ -336,24 +343,52 @@ public class MainActivity extends AppCompatActivity
             @SuppressLint("WrongConstant")
             @Override
             public void cuandoNOHayInternet() {
+                SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+                String lat, log, id_dispositivo, cedula;
+                lat = String.valueOf(mLastLocation.getLatitude());
+                log = String.valueOf(mLastLocation.getLongitude());
+                id_dispositivo = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+                cedula = dato.getString("p_idUsuario", null);
+
                 Calendar calendar = Calendar.getInstance();
                 Calendar calendarHora = Calendar.getInstance();
-                calendarHora.set(Calendar.HOUR, 17);
-                calendarHora.set(Calendar.MINUTE, 30);
-                calendarHora.set(Calendar.SECOND, 2);
-                Toast.makeText(MainActivity.this, formatofecha.format(calendar.getTime())+" la hora: "+formatohora.format(calendarHora.getTime()),Toast.LENGTH_LONG).show();
+                // Toast.makeText(MainActivity.this, formatofecha.format(calendar.getTime())+" la hora: "+formatohora.format(calendarHora.getTime()),Toast.LENGTH_LONG).show();
+
+                SQLiteDatabase db = objDB.getWritableDatabase();
+                ContentValues valores1 = new ContentValues();
+                valores1.put(TramitesDB.Datos_tramites.LATITUD, lat);
+                valores1.put(TramitesDB.Datos_tramites.LONGITUD, log);
+                valores1.put(TramitesDB.Datos_tramites.ID_DISPOSITIVO, id_dispositivo);
+                valores1.put(TramitesDB.Datos_tramites.ID_DISPOSITIVO_USUARIO, cedula);
+                valores1.put(TramitesDB.Datos_tramites.FECHA, formatofecha.format(calendar.getTime()));
+                valores1.put(TramitesDB.Datos_tramites.HORA, formatohora.format(calendarHora.getTime()));
+                Long id_Guardar = db.insert(TramitesDB.Datos_tramites.TABLA_GEOLOCALIZACION, null, valores1);
+                if (id_Guardar == -1) {
+                    Toast.makeText(
+                            MainActivity.this,
+                            "Error al guardar la latitud y longitud",
+                            Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(
+                            MainActivity.this,
+                            "Posicion Almacenada SQLTIE",
+                            Toast.LENGTH_LONG).show();
+
+                }
             }
         });
 
         tarea.execute();
 
     }
+
     private void processLastLocation() {
         getLastLocation();
         if (mLastLocation != null) {
-           // updateLocationUI();
+            // updateLocationUI();
         }
     }
+
     @SuppressLint("MissingPermission")
     private void getLastLocation() {
         if (isLocationPermissionGranted()) {
@@ -362,6 +397,7 @@ public class MainActivity extends AppCompatActivity
             manageDeniedPermission();
         }
     }
+
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         // Obtenemos la última ubicación al ser la primera vez
@@ -369,6 +405,7 @@ public class MainActivity extends AppCompatActivity
         // Iniciamos las actualizaciones de ubicación
         startLocationUpdates();
     }
+
     @Override
     public void onConnectionSuspended(int i) {
         Log.d(TAG, "Conexión suspendida");
@@ -396,7 +433,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStop() {
         super.onStop();
-        if(mGoogleApiClient!=null) {
+        if (mGoogleApiClient != null) {
             mGoogleApiClient.disconnect();
         }
     }
@@ -511,8 +548,9 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    class CerrarSesion extends AsyncTask<String, Void ,String>{
+    class CerrarSesion extends AsyncTask<String, Void, String> {
         private ProgressDialog pDialog;
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -526,15 +564,15 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(String s) {
             pDialog.dismiss();
-            if(s.equals("cerrada")){
+            if (s.equals("cerrada")) {
                 SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
                 da.edit().clear().commit();
-                SQLiteDatabase DB =objDB.getWritableDatabase();
-                int valor = DB.delete(TramitesDB.Datos_tramites.TABLA,null,null);
+                SQLiteDatabase DB = objDB.getWritableDatabase();
+                int valor = DB.delete(TramitesDB.Datos_tramites.TABLA, null, null);
                 Intent inte = new Intent(MainActivity.this, loginActivity.class);
                 startActivity(inte);
                 finish();
-            }else if(s.equals("No_cerrada")){
+            } else if (s.equals("No_cerrada")) {
                 StyleableToast.makeText(MainActivity.this, "Error Al cerrar Sesión intente nuevamente!!", Toast.LENGTH_LONG, R.style.StyledToastError).show();
 
             }
@@ -544,8 +582,8 @@ public class MainActivity extends AppCompatActivity
         protected String doInBackground(String... strings) {
             SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
             ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-            nameValuePairs.add(new BasicNameValuePair("id_usuario", da.getString("p_idUsuario",null)));
-            nameValuePairs.add(new BasicNameValuePair("id_dispositivo", da.getString("p_idmovil",null)));
+            nameValuePairs.add(new BasicNameValuePair("id_usuario", da.getString("p_idUsuario", null)));
+            nameValuePairs.add(new BasicNameValuePair("id_dispositivo", da.getString("p_idmovil", null)));
             try {
                 HttpClient httpclient = new DefaultHttpClient();
                 HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/logout");
@@ -555,8 +593,8 @@ public class MainActivity extends AppCompatActivity
                 data = EntityUtils.toString(entity);
                 Log.e("CERRAR", data);
 
-                JSONObject obj= new JSONObject(data);
-                String  res=obj.getString("respuesta");
+                JSONObject obj = new JSONObject(data);
+                String res = obj.getString("respuesta");
                 //data=codigojson;
                 resuld = res;
             } catch (Exception e) {
@@ -566,6 +604,7 @@ public class MainActivity extends AppCompatActivity
             return resuld;
         }
     }
+
     class RegistrarDispositivos extends AsyncTask<String, Void, Boolean> {
 
         @Override
@@ -575,7 +614,7 @@ public class MainActivity extends AppCompatActivity
             nameValuePairs.add(new BasicNameValuePair("id_dispositivo", Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID)));
             nameValuePairs.add(new BasicNameValuePair("latitud", String.valueOf(mLastLocation.getLatitude())));
             nameValuePairs.add(new BasicNameValuePair("longitud", String.valueOf(mLastLocation.getLongitude())));
-            nameValuePairs.add(new BasicNameValuePair("cedula",dato.getString("p_idUsuario", null) ));
+            nameValuePairs.add(new BasicNameValuePair("cedula", dato.getString("p_idUsuario", null)));
 
             try {
                 HttpClient httpclient = new DefaultHttpClient();
@@ -598,14 +637,14 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    class ValidarLogin extends AsyncTask<String, Void, String>{
+    class ValidarLogin extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... strings) {
-            String resfull="";
+            String resfull = "";
             SharedPreferences da = getSharedPreferences("perfil", Context.MODE_PRIVATE);
             ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-            nameValuePairs.add(new BasicNameValuePair("id_usuario", da.getString("p_idUsuario",null)));
-            nameValuePairs.add(new BasicNameValuePair("id_dispositivo", da.getString("p_idmovil",null)));
+            nameValuePairs.add(new BasicNameValuePair("id_usuario", da.getString("p_idUsuario", null)));
+            nameValuePairs.add(new BasicNameValuePair("id_dispositivo", da.getString("p_idmovil", null)));
             try {
                 HttpClient httpclient = new DefaultHttpClient();
                 HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/val_login");
@@ -614,8 +653,8 @@ public class MainActivity extends AppCompatActivity
                 HttpEntity entity = response.getEntity();
                 data = EntityUtils.toString(entity);
                 Log.e("CERRAR", data);
-                JSONObject obj= new JSONObject(data);
-                String  res=obj.getString("respuesta");
+                JSONObject obj = new JSONObject(data);
+                String res = obj.getString("respuesta");
                 resfull = res;
             } catch (Exception e) {
                 Log.e("log_tag", "Error in http connection " + e.toString());
@@ -627,7 +666,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(String s) {
 
-            if(s.equals("cerrada")) {
+            if (s.equals("cerrada")) {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
                 alertDialogBuilder.setTitle("PortoAguas");
                 alertDialogBuilder.setIcon(getDrawable(R.drawable.ic_portoaguas_2));
@@ -652,7 +691,7 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public static boolean pruebaConexion(Context context){
+    public static boolean pruebaConexion(Context context) {
         boolean connected = false;
 
         ConnectivityManager connec = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -669,24 +708,25 @@ public class MainActivity extends AppCompatActivity
         return connected;
     }
 
-    protected Boolean estaConectado(){
-        if(conectadoWifi()){
+    protected Boolean estaConectado() {
+        if (conectadoWifi()) {
             /*showAlertDialog(MainActivity.this, "Conexion a Internet",
                     "Tu Dispositivo tiene Conexion a Wifi.", true);*/
             return true;
-        }else{
-            if(conectadoRedMovil()){
+        } else {
+            if (conectadoRedMovil()) {
                /* showAlertDialog(MainActivity.this, "Conexion a Internet",
                         "Tu Dispositivo tiene Conexion Movil.", true);*/
                 return true;
-            }else{
+            } else {
                 showAlertDialog(MainActivity.this, "Conexion a Internet",
                         "Tu Dispositivo no tiene Conexion a Internet. ", false);
                 return false;
             }
         }
     }
-    protected Boolean conectadoRedMovil(){
+
+    protected Boolean conectadoRedMovil() {
         ConnectivityManager connectivity = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivity != null) {
             NetworkInfo info = connectivity.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
@@ -698,7 +738,8 @@ public class MainActivity extends AppCompatActivity
         }
         return false;
     }
-    protected Boolean conectadoWifi(){
+
+    protected Boolean conectadoWifi() {
         ConnectivityManager connectivity = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivity != null) {
             NetworkInfo info = connectivity.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
@@ -710,6 +751,7 @@ public class MainActivity extends AppCompatActivity
         }
         return false;
     }
+
     public void showAlertDialog(Context context, String title, String message, Boolean status) {
         AlertDialog alertDialog = new AlertDialog.Builder(context).create();
 
@@ -719,15 +761,71 @@ public class MainActivity extends AppCompatActivity
 
         alertDialog.setIcon((status) ? R.drawable.success : R.drawable.cancel);
 
-        alertDialog.setButton(Dialog.BUTTON_POSITIVE,"OK",new DialogInterface.OnClickListener(){
+        alertDialog.setButton(Dialog.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
-               // finish();
+                // finish();
             }
         });
 
         alertDialog.show();
+    }
+
+    class Registrar_MovimientosDispositivo extends AsyncTask<String, Void, Boolean> {
+        String ID_ = "", dat;
+        SharedPreferences dato = getSharedPreferences("perfil", Context.MODE_PRIVATE);
+
+        @Override
+        protected Boolean doInBackground(String... strings) {
+            ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+            nameValuePairs.add(new BasicNameValuePair("id_dispositivo", strings[1]));
+            nameValuePairs.add(new BasicNameValuePair("latitud", strings[3]));
+            nameValuePairs.add(new BasicNameValuePair("longitud", strings[4]));
+            nameValuePairs.add(new BasicNameValuePair("fecha", strings[5]));
+            nameValuePairs.add(new BasicNameValuePair("hora", strings[6]));
+            nameValuePairs.add(new BasicNameValuePair("cedula", dato.getString("p_idUsuario", null)));
+            try {
+                HttpClient httpclient = new DefaultHttpClient();
+                HttpPost httppost = new HttpPost("http://" + JSON.ipserver + "/MovimientosDispositivos2");
+                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
+                HttpResponse response = httpclient.execute(httppost);
+                String status = String.valueOf(response.getStatusLine().getStatusCode());
+                if (status.equals("500")) {
+                    Log.e("ERROR 500 ", "ERROR INTERNO EN EL SERVIDOR ALMACENAR LOS TRAMITES GUARDADOS OFFLINE");
+                    resul = false;
+                } else {
+                    HttpEntity entity = response.getEntity();
+                    dat = EntityUtils.toString(entity);
+                    JSONObject obj = new JSONObject(dat);
+                    String codigojson = obj.getString("Actualizacion");
+                    dat = codigojson;
+                    ID_ = strings[0];
+                    resul = true;
+                }
+            } catch (Exception e) {
+                Log.e("log_tag", "Error in http connection " + e.toString());
+                resul = false;
+            }
+            return resul;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            if (aBoolean) {
+                SQLiteDatabase DB;
+                DB = objDB.getWritableDatabase();
+                String Selection = TramitesDB.Datos_tramites.ID + "=?";
+                String[] argsel = {ID_};
+                int valor = DB.delete(TramitesDB.Datos_tramites.TABLA_GEOLOCALIZACION, Selection, argsel);
+                if (valor != 1) {
+                    Log.e("DELETE MOVIMIENTO", "nO SE PUDO ELIMINAR ");
+                } else {
+                    DB.close();
+                    StyleableToast.makeText(MainActivity.this, "POSICION REGISTRADA DB!!", Toast.LENGTH_SHORT, R.style.StyledToast).show();
+                }
+            }
+        }
     }
 
 }
